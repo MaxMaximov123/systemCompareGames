@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const cleanUpDeeply = require('./clean-up-deeply');
 const merge = require('lodash/merge');
 const { Pool } = require('pg');
+require('dotenv').config();
 
 
 // Создаем пул соединений к базе данных
@@ -38,7 +39,7 @@ const SQL_QUERY=`INSERT INTO history (
 	second_,
 	drawOrSecond,
 	firstOrSecond,
-	now
+	now_
 	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
 		$12, $13, $14, $15, $16, $17, $18, $19)`
 

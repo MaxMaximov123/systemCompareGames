@@ -23,6 +23,7 @@ services:
       - 3201:80
   
   scanner:
+    restart: always
     build:
       context: .
       dockerfile: scannerHistory/Dockerfile

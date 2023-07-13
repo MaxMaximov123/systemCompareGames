@@ -2,9 +2,9 @@ FROM node:latest
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY scannerHistory/package.json scannerHistory/package-lock.json ./
 RUN npm install
 
-COPY . .
+COPY scannerHistory/ ./
 
 CMD ["node", "index.js"]
