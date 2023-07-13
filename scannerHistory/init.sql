@@ -1,23 +1,23 @@
 CREATE TABLE history (
   id BIGINT,
   globalGameId BIGINT,
-  bookieId INT,
   bookieKey VARCHAR(64),
-  sportId INT,
   sportKey VARCHAR(64),
   isLive BOOLEAN,
   startTime BIGINT,
   team1Id BIGINT,
   team2Id BIGINT,
   team1Name VARCHAR(64),
+  team2Name VARCHAR(64),
   score1 INT,
   score2 INT,
   first_ REAL,
   draw_ REAL,
-  firstOrDraw REAL,
   second_ REAL,
+  firstOrDraw REAL,
   drawOrSecond REAL,
-  firstOrSecond REAL
+  firstOrSecond REAL,
+  now_ BIGINT
 );
 
 CREATE TABLE results (

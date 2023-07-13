@@ -1,6 +1,17 @@
 const WebSocket = require('ws');
 const cleanUpDeeply = require('./clean-up-deeply');
 const merge = require('lodash/merge');
+const { Pool } = require('pg');
+
+
+// Создаем пул соединений к базе данных
+const pool = new Pool({
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  host: 'localhost',
+  database: process.env.POSTGRES_DB,
+  port: 3200,
+});
 
 // ---------------------------------------------------------------------- //
 
@@ -8,6 +19,28 @@ let globalGameList = null;
 let globalGames = {};
 let gameList = null;
 let games = {};
+const SQL_QUERY=`INSERT INTO history (
+	id,
+	globalGameId, 
+	bookieKey,
+	sportKey,
+	isLive,
+	startTime,
+	team1Id,
+	team2Id,
+	team1Name,
+	team2Name,
+	score1,
+	score2,
+	first_,
+	draw_,
+	firstOrDraw,
+	second_,
+	drawOrSecond,
+	firstOrSecond,
+	now
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
+		$12, $13, $14, $15, $16, $17, $18, $19)`
 
 // ---------------------------------------------------------------------- //
 
@@ -104,7 +137,31 @@ socket.on('message', (message) => {
 				game = games[gameId] = data;
 			}
 
-			console.log(game);
+			// console.log(game);
+			var dataForDB = [
+				game?.id,
+				game?.globalGameId,
+				game?.bookie?.key,
+				game?.sport?.key,
+				game?.isLive,
+				new Date(game.startTime).getTime(),
+				game?.team1?.id,
+				game?.team2?.id,
+				game?.team1?.name,
+				game?.team2?.name,
+				game?.scores?.result?.mainTime?.[0],
+				game?.scores?.result?.mainTime?.[1],
+				game?.outcomes?.result?.mainTime?.wins?.first?.odds,
+				game?.outcomes?.result?.mainTime?.wins?.draw?.odds,
+				game?.outcomes?.result?.mainTime?.wins?.second?.odds,
+				game?.outcomes?.result?.mainTime?.wins?.firstOrDraw?.odds,
+				game?.outcomes?.result?.mainTime?.wins?.drawOrSecond?.odds,
+				game?.outcomes?.result?.mainTime?.wins?.firstOrSecond?.odds,
+				new Date().getTime()
+			];
+
+			console.log(dataForDB);
+			sqlRequest(SQL_QUERY,  dataForDB);
 		}
 	}
 
@@ -185,4 +242,22 @@ function syncGameSubscriptions() {
 			});
 		}
 	}
+}
+
+
+async function sqlRequest(
+	sqlQuery=SQL_QUERY, values=[]){
+	const client = await pool.connect();
+
+  try {
+
+    // Выполнение запроса
+    const result = await client.query(sqlQuery, values);
+    console.log('Record added successfully!');
+  } catch (error) {
+    console.error('Error adding record:', error);
+  } finally {
+    // Всегда освобождаем соединение
+    client.release();
+  }
 }

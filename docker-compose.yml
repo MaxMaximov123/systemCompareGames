@@ -4,11 +4,12 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: Goyglhgo
-      POSTGRES_PASSWORD: lhvLHvlHvlkgLvv
-      POSTGRES_DB: DklydvPvlyhvI
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
     volumes:
       - ./scannerHistory/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data:/var/lib/postgresql/data
     ports:
       - 3200:5432
 
@@ -16,7 +17,18 @@ services:
     image: dpage/pgadmin4
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: youremail@example.com
-      PGADMIN_DEFAULT_PASSWORD: yourpassword
+      PGADMIN_DEFAULT_EMAIL: maxss.kzn@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: skskngsfcgrs
     ports:
       - 3201:80
+  
+  scanner:
+    build:
+      context: .
+      dockerfile: scannerHistory/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+    depends_on:
+      - db
