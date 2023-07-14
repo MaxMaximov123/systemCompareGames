@@ -215,7 +215,7 @@ async function main(SQL_QUERY) {
         password: process.env.POSTGRES_PASSWORD,
         host: 'db',
         database: process.env.POSTGRES_DB,
-        port: 3200,
+        port: 5432,
     });
     const client = await pool.connect();
 
