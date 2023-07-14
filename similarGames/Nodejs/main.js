@@ -26,7 +26,7 @@ function copy(obj){
 
 function compare_names(namesData){
     return new Promise((resolve, reject) => {
-        const url = 'http://195.201.58.179:3202/api/names';  // Replace with your API endpoint
+        const url = 'http://python-app:3202/api/names';  // Replace with your API endpoint
 
         // const data = {
         //     game1Name1: game1Name1,
@@ -44,9 +44,7 @@ function compare_names(namesData){
         })
         .then(response => response.json())
         .then(data => {
-          // Handle the response data
-          console.log(data.res);
-          const result = Number(data.res);
+          const result = Math.max(Number(data.n1), Number(data.n2));
           resolve(result);
         })
         .catch(error => {
@@ -161,14 +159,12 @@ function compare_games(game1, game2){
     result.outcomes = result.outcomes / count_outcomes;
     if (!result.outcomes) result.outcomes = 0;
     result.names = 0;
-    // console.log(new_game1[0]);
     const namesToSim = {
-            game1Name1: new_game1[0]?.team1name,
-            game2Name1: new_game2[0]?.team1name,
-            game1Name2: new_game1[0]?.team2name,
-            game2Name2: new_game2[0]?.team2name
+            game1Name1: game1[0]?.team1name,
+            game2Name1: game2[0]?.team1name,
+            game1Name2: game1[0]?.team2name,
+            game2Name2: game2[0]?.team2name
         };
-    console.log('WORK_TIME', (new Date() - START_TIME));
     compare_names(namesToSim).then((res) => {
         result.names = res;
         resolve([new_game1, new_game2, result]);
@@ -202,7 +198,7 @@ async function getDataSql(client, sqlQuery, values){
 }
 
 
-async function main() {
+async function main(SQL_QUERY) {
     const { Pool } = require('pg');
     require('dotenv').config();
 
@@ -217,7 +213,7 @@ async function main() {
     const pool = new Pool({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: '195.201.58.179',
+        host: 'db',
         database: process.env.POSTGRES_DB,
         port: 3200,
     });
@@ -228,10 +224,22 @@ async function main() {
         const game1Ids = await getDataSql(client, 'SELECT id FROM history', []);
         if (game1Ids){
             for (let game1Id of game1Ids){
+                const startTime1 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
+                if ((startTime1 - (new Date().getTime())) / 3600000 > 1){
+                    await getDataSql(client, `DELETE FROM history WHERE id = ${game1Id.id};`, []);
+                    console.log('DELETE game', game1Id.id);
+                    continue;
+                }
                 const timeDeltaGame1 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
                 if (timeDeltaGame1 >= TIMEDELTA){    
                     const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportKey = (SELECT sportKey FROM history WHERE id = ${game1Id.id} LIMIT 1))`, []);
                     for (let game2Id of game2Ids){
+                        const startTime2 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
+                        if ((startTime2 - (new Date().getTime())) / 3600000 > 1){
+                            await getDataSql(client, `DELETE FROM history WHERE id = ${game2Id.id};`, []);
+                            console.log('DELETE game', game2Id.id);
+                            continue;
+                        }
                         const pairExist = (await getDataSql(client, `SELECT EXISTS(SELECT 1 FROM results WHERE (id1 = ${game1Id.id} AND id2 = ${game2Id.id}))`, []))[0].exists;    
                         if (pairExist === false){  
                             const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
@@ -240,8 +248,27 @@ async function main() {
                                 const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id}`, []);
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id}`, []);
                                 compare_games(game1Data, game2Data).then(res => {
-                                    console.log(game1Data.at(-1).globalgameid, game2Data.at(-1).globalgameid, game1Data[0].sportkey, game2Data[0].sportkey, res[2]);
-                                    var similarRes = {}
+                                    var neadGroup = false;
+                                    if (res[2].scores >= 0.95 || res[2].outcomes >= 0.9 || res[2].names > 0.5){
+                                        neadGroup = true;
+                                    }
+                                    var similarRes = [
+                                        game1Data[0].id,
+                                        game2Data[0].id,
+                                        game1Data[0].team1name,
+                                        game1Data[0].team2name,
+                                        game2Data[0].team1name,
+                                        game1Data[0].team2name,
+                                        res[2].names,
+                                        res[2].outcomes,
+                                        res[2].scores,
+                                        res[2].scores * res[2].outcomes,
+                                        neadGroup,
+                                        game1Data.at(-1).globalgameid === game2Data.at(-1).globalgameid
+                                    ];
+                                    if (res[2].outcomes >= 0.5){
+                                        getDataSql(client, SQL_QUERY, similarRes);
+                                    }
                                 })
                             }
                         }
@@ -258,7 +285,21 @@ async function main() {
 
 
 if (require.main === module) {
-    main();
+    const SQL_QUERY=`INSERT INTO results (
+        id1,
+        id2,
+        game1Team1Name,
+        game2Team1Name,
+        game1Team2Name,
+        game2Team2Name,
+        similarityNames,
+        similarityOutcomes,
+        similarityScores,
+        totalSimilarity,
+        needGroup,
+        grouped
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+    main(SQL_QUERY);
 }
 
 module.exports = compare_games;

@@ -16,10 +16,10 @@ def get_news():
     if not request.json:
         return jsonify({'error': 'Empty request'})
     res = {
-        "n1": model2.forecast(request.json['game1Name1'], request.json['game2Name1'])[0],
-        "n2": model2.forecast(request.json['game1Name2'], request.json['game2Name2'])[0],
+        "n1": str(model2.forecast(request.json['game1Name1'], request.json['game2Name1'])[0]),
+        "n2": str(model2.forecast(request.json['game1Name2'], request.json['game2Name2'])[0]),
     }
-    return jsonify(str(res))
+    return jsonify(res)
 
 
 if __name__ == '__main__':

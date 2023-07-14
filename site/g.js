@@ -23,7 +23,7 @@ async function main(id1, id2, st){
   const pool = new Pool({
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
-      host: 'localhost',
+      host: '195.201.58.179',
       database: process.env.POSTGRES_DB,
       port: 3200,
   });
@@ -32,8 +32,6 @@ async function main(id1, id2, st){
   const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${id2}`, []);
   return new Promise((resolve, reject) => {
   compare_games(game1Data, game2Data).then(res => {
-    console.log(game1Data)
-    console.log(res)
     resolve(res)
   }).catch(err => {console.log('err')})
 })

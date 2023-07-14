@@ -39,19 +39,19 @@ services:
     networks:
       - mynetwork
   
-  # similarer:
-  #   restart: always
-  #   build:
-  #     context: .
-  #     dockerfile: similarGames/Nodejs/Dockerfile
-  #   environment:
-  #     POSTGRES_USER: max
-  #     POSTGRES_PASSWORD: jbfgslgsdlfkngd
-  #     POSTGRES_DB: history
-  #   depends_on:
-  #     - db
-  #   networks:
-  #     - mynetwork
+  similarer:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/Nodejs/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+    depends_on:
+      - db
+    networks:
+      - mynetwork
 
 networks:
   mynetwork:
