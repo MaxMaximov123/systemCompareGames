@@ -265,6 +265,7 @@ async function main(SQL_QUERY) {
                                         neadGroup,
                                         game1Data.at(-1).globalgameid === game2Data.at(-1).globalgameid
                                     ];
+                                    console.log(game1Data[0].id, game2Data[0].id, res[2])
                                     if (res[2].outcomes >= 0.5){
                                         getDataSql(client, SQL_QUERY, similarRes);
                                     }
