@@ -48,7 +48,7 @@ function compare_names(namesData){
           resolve(result);
         })
         .catch(error => {
-          reject(error);
+          resolve(null);
         });
     })
 }
