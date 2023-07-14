@@ -7,4 +7,4 @@ RUN npm install
 
 COPY scannerHistory/ ./
 
-CMD ["node", "index.js"]
+CMD ["node", "main.js"]

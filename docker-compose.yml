@@ -14,15 +14,6 @@ services:
       - 3200:5432
     networks:
       - mynetwork
-
-  webClient:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: maxss.kzn@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: skskngsfcgrs
-    ports:
-      - 3201:80
   
   scanner:
     restart: always
@@ -37,6 +28,20 @@ services:
       - db
     networks:
       - mynetwork
+  
+  # similarer:
+  #   restart: always
+  #   build:
+  #     context: .
+  #     dockerfile: similarGames/Nodejs/Dockerfile
+  #   environment:
+  #     POSTGRES_USER: max
+  #     POSTGRES_PASSWORD: jbfgslgsdlfkngd
+  #     POSTGRES_DB: history
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - mynetwork
 
 networks:
   mynetwork:
