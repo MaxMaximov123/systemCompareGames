@@ -24,6 +24,8 @@ services:
       - 3202:3202  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
     networks:
       - mynetwork
+    depends_on:
+      - similarer
   
   scanner:
     restart: always
