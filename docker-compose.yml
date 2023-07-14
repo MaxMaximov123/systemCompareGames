@@ -49,6 +49,7 @@ services:
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
       POSTGRES_DB: history
     depends_on:
+      - python-app
       - db
     networks:
       - mynetwork
