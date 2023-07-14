@@ -244,7 +244,6 @@ async function main(SQL_QUERY) {
                         if (pairExist === false){  
                             const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
                             if (timeDeltaGame2 >= TIMEDELTA){
-                                console.log(game1Id, game2Id);
                                 const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id}`, []);
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id}`, []);
                                 compare_games(game1Data, game2Data).then(res => {

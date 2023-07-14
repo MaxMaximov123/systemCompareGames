@@ -52,6 +52,8 @@ services:
       - db
     networks:
       - mynetwork
+    ports:
+      -3203:3203
 
 networks:
   mynetwork:
