@@ -12,8 +12,10 @@ services:
       - ./data:/var/lib/postgresql/data
     ports:
       - 3200:5432
+    networks:
+      - mynetwork
 
-  web:
+  webClient:
     image: dpage/pgadmin4
     restart: always
     environment:
@@ -33,3 +35,8 @@ services:
       POSTGRES_DB: history
     depends_on:
       - db
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:

@@ -9,9 +9,9 @@ require('dotenv').config();
 const pool = new Pool({
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
-  host: 'localhost',
+  host: 'db',
   database: process.env.POSTGRES_DB,
-  port: 3200,
+  port: 5432,
 });
 
 // ---------------------------------------------------------------------- //
@@ -50,7 +50,7 @@ const socket = new WebSocket('wss://api.livesport.tools/v2?clientKey=mn8W5KhnuwB
 socket.send = ((send) => {
 	return function ({ requestId = null, requestType, data = null }) {
 		let message = JSON.stringify([requestId, requestType, data]);
-		console.info(`>> ${message}`);
+		// console.info(`>> ${message}`);
 		return send.call(this, message);
 	};
 })(socket.send);
@@ -160,8 +160,6 @@ socket.on('message', (message) => {
 				game?.outcomes?.result?.mainTime?.wins?.firstOrSecond?.odds,
 				new Date().getTime()
 			];
-
-			console.log(dataForDB);
 			sqlRequest(SQL_QUERY,  dataForDB);
 		}
 	}
@@ -246,19 +244,6 @@ function syncGameSubscriptions() {
 }
 
 
-async function sqlRequest(
-	sqlQuery=SQL_QUERY, values=[]){
-	const client = await pool.connect();
-
-  try {
-
-    // Выполнение запроса
-    const result = await client.query(sqlQuery, values);
-    console.log('Record added successfully!');
-  } catch (error) {
-    console.error('Error adding record:', error);
-  } finally {
-    // Всегда освобождаем соединение
-    client.release();
-  }
+async function sqlRequest(sqlQuery=SQL_QUERY, values=[]){
+	pool.query(sqlQuery, values, (err, res) => {});
 }
