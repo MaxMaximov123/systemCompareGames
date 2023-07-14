@@ -15,7 +15,7 @@ services:
     networks:
       - mynetwork
   
-  python-app:
+  python:
     restart: always
     build:
       context: .
@@ -49,7 +49,7 @@ services:
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
       POSTGRES_DB: history
     depends_on:
-      - python-app
+      - python
       - db
     networks:
       - mynetwork

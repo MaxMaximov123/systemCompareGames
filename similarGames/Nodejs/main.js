@@ -26,7 +26,7 @@ function copy(obj){
 
 function compare_names(namesData){
     return new Promise((resolve, reject) => {
-        const url = 'http://python-app:3202/api/names';  // Replace with your API endpoint
+        const url = 'http://python:3202/api/names';  // Replace with your API endpoint
 
         // const data = {
         //     game1Name1: game1Name1,
