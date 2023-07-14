@@ -13,7 +13,7 @@
  *            "second": Float,
  *            "firstOrDraw": Float,
  *            "DrawOrSecond": Float,
- *            "now": Integer:,
+ *            "now_": Integer:,
  *            "bookie": String
  *          }
 
@@ -26,7 +26,7 @@ function copy(obj){
 
 function compare_names(namesData){
     return new Promise((resolve, reject) => {
-        const url = 'http://localhost:5000/api/names';  // Replace with your API endpoint
+        const url = 'http://195.201.58.179:3202/api/names';  // Replace with your API endpoint
 
         // const data = {
         //     game1Name1: game1Name1,
@@ -45,6 +45,7 @@ function compare_names(namesData){
         .then(response => response.json())
         .then(data => {
           // Handle the response data
+          console.log(data.res);
           const result = Number(data.res);
           resolve(result);
         })
@@ -58,9 +59,9 @@ function compare_names(namesData){
 function compare_games(game1, game2){
     return new Promise((resolve, reject) => {
     const TIK_STEP = 3;  // временной шаг(в секундах)
-    const LiST_OUTCOMES = ['first', 'draw', 'second', 'firstOrDraw', 'firstOrSecond','drawOrSecond']; // список ключей исходов 
-    const ALL_KEYS = ['id', 'globalGameId', 'team1Name', 'team2Name', 'score1', 'score2', 'first', 'draw', 'second', 'firstOrDraw', 'firstOrSecond', 'drawOrSecond']
-    const KEYS = ['score1', 'score2', 'first', 'draw', 'second', 'firstOrDraw', 'firstOrSecond', 'drawOrSecond'];
+    const LiST_OUTCOMES = ['first_', 'draw_', 'second_', 'firstordraw', 'firstorsecond','draworsecond']; // список ключей исходов 
+    const ALL_KEYS = ['id', 'globalgameid', 'team1name', 'team2name', 'score1', 'score2', 'first_', 'draw_', 'second_', 'firstordraw', 'firstorsecond', 'draworsecond']
+    const KEYS = ['score1', 'score2', 'first_', 'draw_', 'second_', 'firstordraw', 'firstorsecond', 'draworsecond'];
     const START_TIME = new Date();
 
     // границы сдвига
@@ -69,8 +70,10 @@ function compare_games(game1, game2){
 
     // ___________Выравнивание_данных_по_времени___________
 
-    var min_time = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
-    var max_time = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
+    if (game1.length === 0 || game2.length === 0) resolve([[], [], { scores: 0, outcomes: 0, names: 0 }])
+
+    var min_time = Math.floor(Math.max(game1[0].now_, game2[0].now_) / 1000);
+    var max_time = Math.floor(Math.max(game1.at(-1).now_, game2.at(-1).now_) / 1000);
 
     var new_game1 = [];
     var new_game2 = [];
@@ -80,24 +83,24 @@ function compare_games(game1, game2){
     var last_state_game2 = {'ind': 0, 'time': min_time};
     for (let time_step=min_time;time_step<max_time;time_step+=TIK_STEP){
         for (let ind_game1=last_state_game1.ind; ind_game1<game1.length-1; ind_game1++){
-            // console.log(last_state_game1, game1[ind_game1].now, time_step);
-            if (Math.floor(game1[ind_game1].now / 1000) <= time_step && Math.floor(game1[ind_game1 + 1].now / 1000) >= time_step){
+            // console.log(last_state_game1, game1[ind_game1].now_, time_step);
+            if (Math.floor(game1[ind_game1].now_ / 1000) <= time_step && Math.floor(game1[ind_game1 + 1].now_ / 1000) >= time_step){
                 last_state_game1.ind = ind_game1;
                 last_state_game1.time = time_step;
             }
         }
         let local_d1 = copy(game1[last_state_game1.ind]);
-        local_d1.now = time_step;
+        local_d1.now_ = time_step;
         new_game1.push(local_d1);
 
         for (let ind_game2=last_state_game2.ind; ind_game2<game2.length-1; ind_game2++){
-            if (Math.floor(game2[ind_game2].now / 1000) <= time_step && Math.floor(game2[ind_game2 + 1].now / 1000) >= time_step){
+            if (Math.floor(game2[ind_game2].now_ / 1000) <= time_step && Math.floor(game2[ind_game2 + 1].now_ / 1000) >= time_step){
                 last_state_game2.ind = ind_game2;
                 last_state_game2.time = time_step;
             }
         }
         let local_d2 = copy(game2[last_state_game2.ind]);
-        local_d2.now = time_step;
+        local_d2.now_ = time_step;
         new_game2.push(local_d2);
     }
 
@@ -129,8 +132,6 @@ function compare_games(game1, game2){
                 }
 
             }
-
-            console.log(similarity_outcomes_on_shift[key], key, COUNT_TIKS);
             if (COUNT_TIKS > FIN_SHIFT - START_SHIFT){
                 similarity_scores_on_shift = similarity_scores_on_shift / COUNT_TIKS;
                 similarity_outcomes_on_shift[key] = similarity_outcomes_on_shift[key] / COUNT_TIKS;
@@ -158,19 +159,21 @@ function compare_games(game1, game2){
         }
     }
     result.outcomes = result.outcomes / count_outcomes;
+    if (!result.outcomes) result.outcomes = 0;
     result.names = 0;
-    // resolve([new_game1, new_game2, result]);
+    // console.log(new_game1[0]);
     const namesToSim = {
-            game1Name1: new_game1[0].team1Name,
-            game2Name1: new_game2[0].team1Name,
-            game1Name2: new_game1[0].team2Name,
-            game2Name2: new_game2[0].team2Name
+            game1Name1: new_game1[0]?.team1name,
+            game2Name1: new_game2[0]?.team1name,
+            game1Name2: new_game1[0]?.team2name,
+            game2Name2: new_game2[0]?.team2name
         };
     console.log('WORK_TIME', (new Date() - START_TIME));
     compare_names(namesToSim).then((res) => {
         result.names = res;
         resolve([new_game1, new_game2, result]);
-    }).catch(error => {resolve([new_game1, new_game2, result])})
+    }).catch(error => {console.log(error);
+        resolve([new_game1, new_game2, result])})
     });
     
 
@@ -212,11 +215,11 @@ async function main() {
 
     // Создаем пул соединений к базе данных
     const pool = new Pool({
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    host: 'localhost',
-    database: process.env.POSTGRES_DB,
-    port: 3200,
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        host: '195.201.58.179',
+        database: process.env.POSTGRES_DB,
+        port: 3200,
     });
     const client = await pool.connect();
 
@@ -226,16 +229,23 @@ async function main() {
         if (game1Ids){
             for (let game1Id of game1Ids){
                 const timeDeltaGame1 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
-                console.log(timeDeltaGame1);
                 if (timeDeltaGame1 >= TIMEDELTA){    
                     const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportKey = (SELECT sportKey FROM history WHERE id = ${game1Id.id} LIMIT 1))`, []);
                     for (let game2Id of game2Ids){
-                        const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
-                        if (timeDeltaGame2 >= TIMEDELTA){
-                            console.log(game1Id, game2Id);
-                            // const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id}`, []);
-                            // console.log(game1Data);
+                        const pairExist = (await getDataSql(client, `SELECT EXISTS(SELECT 1 FROM results WHERE (id1 = ${game1Id.id} AND id2 = ${game2Id.id}))`, []))[0].exists;    
+                        if (pairExist === false){  
+                            const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
+                            if (timeDeltaGame2 >= TIMEDELTA){
+                                console.log(game1Id, game2Id);
+                                const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id}`, []);
+                                const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id}`, []);
+                                compare_games(game1Data, game2Data).then(res => {
+                                    console.log(game1Data.at(-1).globalgameid, game2Data.at(-1).globalgameid, game1Data[0].sportkey, game2Data[0].sportkey, res[2]);
+                                    var similarRes = {}
+                                })
+                            }
                         }
+                        
                     }
                 }
             }
@@ -250,3 +260,5 @@ async function main() {
 if (require.main === module) {
     main();
 }
+
+module.exports = compare_games;

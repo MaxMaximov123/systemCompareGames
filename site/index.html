@@ -43,11 +43,11 @@
 <body>
     <div id="search">
         <select id="outcomes" onchange="ComboBoxChange()">
-            <option value="first">first</option>
-            <option value="draw">draw</option>
-            <option value="second">second</option>
-            <option value="firstOrDraw">firstOrDraw</option>
-            <option value="drawOrSecond">drawOrSecond</option>
+            <option value="first_">first</option>
+            <option value="draw_">draw</option>
+            <option value="second_">second</option>
+            <option value="firstordraw">firstOrDraw</option>
+            <option value="draworsecond">drawOrSecond</option>
             <option value="score1">score1</option>
             <option value="score1">score2</option>
         </select>
@@ -120,7 +120,7 @@
             yaxis2: {range: [0, range]}
             };
           chartData1 = [{
-            x: data[0].map(obj => obj.now % 100000),
+            x: data[0].map(obj => obj.now_ % 100000),
             y: data[0].map(obj => obj[selectedValue]),
             type: 'bar',
             name: data[0].id,
@@ -128,7 +128,7 @@
             yaxis: 'y1'
           },
           {
-            x: data[1].map(obj => obj.now % 100000),
+            x: data[1].map(obj => obj.now_ % 100000),
             y: data[1].map(obj => obj[selectedValue]),
             type: 'bar',
             color: 'green',
@@ -168,7 +168,7 @@
 
 
                 // Создаем ячейки и заполняем данными
-                for (let col of ['id', 'globalGameId', 'team1Name', 'team2Name']){
+                for (let col of ['id', 'globalgameid', 'team1name', 'team2name']){
                     let cell = document.createElement("td");
                     cell.textContent = data[i].at(-1)[col];
                     row.appendChild(cell);

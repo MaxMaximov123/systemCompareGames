@@ -15,6 +15,16 @@ services:
     networks:
       - mynetwork
   
+  python-app:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/pythonApi/Dockerfile
+    ports:
+      - 3202:3202  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
+    networks:
+      - mynetwork
+  
   scanner:
     restart: always
     build:

@@ -45,7 +45,7 @@ model = siamese_network(input_dim=64)
 
 
 model.compile(optimizer='adam', loss='binary_crossentropy')
-model.load_weights('models/model7.h5')
+model.load_weights('./models/model8.h5')
 
 
 def forecast(n1, n2):
