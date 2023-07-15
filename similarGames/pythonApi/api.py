@@ -22,7 +22,9 @@ def get_news():
     return jsonify(res)
 
 
-
 if __name__ == '__main__':
     app.register_blueprint(blueprint)
-    app.run(port=3202)
+    from waitress import serve
+
+    serve(app, host="0.0.0.0", port=3202)
+    # app.run(port=3202)
