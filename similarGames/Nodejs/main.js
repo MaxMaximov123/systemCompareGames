@@ -256,6 +256,7 @@ async function main(SQL_QUERY) {
                                     var similarRes = [
                                         game1Data[0].id,
                                         game2Data[0].id,
+                                        game1Data[0].sportkey,
                                         game1Data[0].team1name,
                                         game1Data[0].team2name,
                                         game2Data[0].team1name,

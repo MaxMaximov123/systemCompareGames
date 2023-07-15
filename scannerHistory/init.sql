@@ -23,6 +23,7 @@ CREATE TABLE history (
 CREATE TABLE results (
   id1 BIGINT,
   id2 BIGINT,
+  sportkey VARCHAR(64),
   game1Team1Name VARCHAR(64),
   game1Team2Name VARCHAR(64),
   game2Team1Name VARCHAR(64),
