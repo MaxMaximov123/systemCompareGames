@@ -246,6 +246,12 @@ async function start(sportKey, SQL_QUERY) {
                         if (pairExist === false){  
                             const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
                             if (timeDeltaGame2 >= TIMEDELTA){
+                                const timeFrame1 = (await getDataSql(client, `SELECT MIN(now_) AS startTime, MAX(now_) AS finTime  FROM history WHERE (id = ${game1Id.id})`, []))[0];
+                                const timeFrame2 = (await getDataSql(client, `SELECT MIN(now_) AS startTime, MAX(now_) AS finTime  FROM history WHERE (id = ${game2Id.id})`, []))[0];
+                                if (timeFrame1.finTime < timeFrame2.startTime || timeFrame2.finTime < timeFrame1.startTime) {
+                                    console.log('SKIP', game1Id.id, game2Id.id)
+                                    continue;
+                                }
                                 const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id} ORDER BY now_`, []);
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id} ORDER BY now_`, []);
                                 compare_games(game1Data, game2Data).then(res => {
