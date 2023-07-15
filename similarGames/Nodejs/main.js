@@ -26,7 +26,7 @@ function copy(obj){
 
 function compare_names(namesData){
     return new Promise((resolve, reject) => {
-        const url = 'http://python:3202/api/names';  // Replace with your API endpoint
+        const url = process.env.PYTHON_API_URL;  // Replace with your API endpoint
 
         // const data = {
         //     game1Name1: game1Name1,
@@ -205,37 +205,39 @@ async function main(SQL_QUERY) {
 
     //_______________________________________//
 
-    TIMEDELTA = 10 // минимальное время игры для ее сравнения (мин)
+    const TIMEDELTA = 10 // минимальное время игры для ее сравнения (мин)
+    const TIMELIVEGAME = 1 // время (в часах) через которое игра удаляется
 
     //_______________________________________//
+
 
     // Создаем пул соединений к базе данных
     const pool = new Pool({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'db',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DB,
-        port: 5432,
+        port: process.env.POSTGRES_PORT,
     });
     const client = await pool.connect();
 
 
     while (true){
-        const game1Ids = await getDataSql(client, 'SELECT id FROM history', []);
+        const game1Ids = await getDataSql(client, 'SELECT id FROM history ORDER BY now_ DESC', []);
         if (game1Ids){
             for (let game1Id of game1Ids){
                 const startTime1 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
-                if ((startTime1 - (new Date().getTime())) / 3600000 > 1){
+                if (((new Date().getTime()) - startTime1) / 3600000 > TIMELIVEGAME){
                     await getDataSql(client, `DELETE FROM history WHERE id = ${game1Id.id};`, []);
                     console.log('DELETE game', game1Id.id);
                     continue;
                 }
                 const timeDeltaGame1 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
                 if (timeDeltaGame1 >= TIMEDELTA){    
-                    const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportKey = (SELECT sportKey FROM history WHERE id = ${game1Id.id} LIMIT 1))`, []);
+                    const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportKey = (SELECT sportKey FROM history WHERE id = ${game1Id.id} LIMIT 1)) ORDER BY now_ DESC`, []);
                     for (let game2Id of game2Ids){
                         const startTime2 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
-                        if ((startTime2 - (new Date().getTime())) / 3600000 > 1){
+                        if (((new Date().getTime()) - startTime2) / 3600000 > TIMELIVEGAME){
                             await getDataSql(client, `DELETE FROM history WHERE id = ${game2Id.id};`, []);
                             console.log('DELETE game', game2Id.id);
                             continue;
@@ -248,7 +250,7 @@ async function main(SQL_QUERY) {
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id}`, []);
                                 compare_games(game1Data, game2Data).then(res => {
                                     var neadGroup = false;
-                                    if (res[2].scores >= 0.95 || res[2].outcomes >= 0.9 || res[2].names > 0.5){
+                                    if (res[2].scores >= 0.95 && res[2].outcomes >= 0.9 && res[2].names > 0.1){
                                         neadGroup = true;
                                     }
                                     var similarRes = [
@@ -257,7 +259,7 @@ async function main(SQL_QUERY) {
                                         game1Data[0].team1name,
                                         game1Data[0].team2name,
                                         game2Data[0].team1name,
-                                        game1Data[0].team2name,
+                                        game2Data[0].team2name,
                                         res[2].names,
                                         res[2].outcomes,
                                         res[2].scores,

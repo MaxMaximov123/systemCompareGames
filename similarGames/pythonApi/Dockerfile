@@ -4,6 +4,8 @@ FROM python:3.9
 # Установка рабочей директории
 WORKDIR /app
 
+EXPOSE 3202
+
 # Копирование зависимостей и установка их через pip
 COPY similarGames/pythonApi/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
