@@ -44,7 +44,7 @@ function compare_names(namesData){
         })
         .then(response => response.json())
         .then(data => {
-          const result = Math.max(Number(data.n1), Number(data.n2));
+          const result = Math.min(Number(data.n1), Number(data.n2));
           resolve(result);
         })
         .catch(error => {
@@ -250,7 +250,7 @@ async function start(sportKey, SQL_QUERY) {
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id} ORDER BY now_`, []);
                                 compare_games(game1Data, game2Data).then(res => {
                                     var neadGroup = false;
-                                    if (res[2].scores >= 0.95 && res[2].outcomes >= 0.9 && res[2].names >= 0.7){
+                                    if (res[2].scores >= 0.95 && res[2].outcomes >= 0.9 && res[2].names >= 0.2){
                                         neadGroup = true;
                                     }
                                     var similarRes = [
