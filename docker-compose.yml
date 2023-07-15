@@ -50,7 +50,7 @@ services:
       POSTGRES_DB: history
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
-      PYTHON_API_URL: http://http://127.0.0.1:3202/api/names
+      PYTHON_API_URL: http://127.0.0.1:3202/api/names
     depends_on:
       - python
       - db
