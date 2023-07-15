@@ -22,6 +22,7 @@ def get_news():
     return jsonify(res)
 
 
+
 if __name__ == '__main__':
     app.register_blueprint(blueprint)
     app.run(port=3202)
