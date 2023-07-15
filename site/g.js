@@ -28,10 +28,11 @@ async function main(id1, id2, st){
       port: 3200,
   });
   const client = await pool.connect();
-  const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${id1}`, []);
-  const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${id2}`, []);
+  const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${id1} ORDER BY now_`, []);
+  const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${id2} ORDER BY now_`, []);
   return new Promise((resolve, reject) => {
   compare_games(game1Data, game2Data).then(res => {
+    console.log(res)
     resolve(res)
   }).catch(err => {console.log('err')})
 })

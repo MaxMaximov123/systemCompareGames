@@ -198,7 +198,7 @@ async function getDataSql(client, sqlQuery, values){
 }
 
 
-async function main(SQL_QUERY) {
+async function start(sportKey, SQL_QUERY) {
     const { Pool } = require('pg');
     require('dotenv').config();
 
@@ -223,7 +223,7 @@ async function main(SQL_QUERY) {
 
 
     while (true){
-        const game1Ids = await getDataSql(client, 'SELECT id FROM history ORDER BY now_ DESC', []);
+        const game1Ids = await getDataSql(client, `SELECT id FROM history WHERE (sportkey = '${sportKey}') ORDER BY now_ DESC`, []);
         if (game1Ids){
             for (let game1Id of game1Ids){
                 const startTime1 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
@@ -234,7 +234,7 @@ async function main(SQL_QUERY) {
                 }
                 const timeDeltaGame1 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
                 if (timeDeltaGame1 >= TIMEDELTA){    
-                    const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportKey = (SELECT sportKey FROM history WHERE id = ${game1Id.id} LIMIT 1)) ORDER BY now_ DESC`, []);
+                    const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportkey = '${sportKey}') ORDER BY now_ DESC`, []);
                     for (let game2Id of game2Ids){
                         const startTime2 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
                         if (((new Date().getTime()) - startTime2) / 3600000 > TIMELIVEGAME){
@@ -246,8 +246,8 @@ async function main(SQL_QUERY) {
                         if (pairExist === false){  
                             const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
                             if (timeDeltaGame2 >= TIMEDELTA){
-                                const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id}`, []);
-                                const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id}`, []);
+                                const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id} ORDER BY now_`, []);
+                                const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id} ORDER BY now_`, []);
                                 compare_games(game1Data, game2Data).then(res => {
                                     var neadGroup = false;
                                     if (res[2].scores >= 0.95 && res[2].outcomes >= 0.9 && res[2].names >= 0.3){
@@ -268,7 +268,7 @@ async function main(SQL_QUERY) {
                                         neadGroup,
                                         game1Data.at(-1).globalgameid === game2Data.at(-1).globalgameid
                                     ];
-                                    console.log(game1Data[0].id, game2Data[0].id, res[2])
+                                    console.log(game1Data[0].id, game2Data[0].id, sportKey, res[2])
                                     if (res[2].outcomes >= 0.8      ){
                                         getDataSql(client, SQL_QUERY, similarRes);
                                     }
@@ -286,6 +286,14 @@ async function main(SQL_QUERY) {
     }
 }
 
+
+async function main(SQL_QUERY){
+    const sportKeys = ['SOCCER', 'HOCKEY', 'TENNIS', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
+    for (sportKey of sportKeys){
+        console.log('START', sportKey);
+        start(sportKey, SQL_QUERY);
+    }
+}
 
 if (require.main === module) {
     const SQL_QUERY=`INSERT INTO results (
