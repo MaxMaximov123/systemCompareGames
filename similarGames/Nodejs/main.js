@@ -250,7 +250,7 @@ async function main(SQL_QUERY) {
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id}`, []);
                                 compare_games(game1Data, game2Data).then(res => {
                                     var neadGroup = false;
-                                    if (res[2].scores >= 0.95 && res[2].outcomes >= 0.9 && res[2].names > 0.1){
+                                    if (res[2].scores >= 0.95 && res[2].outcomes >= 0.9 && res[2].names >= 0.3){
                                         neadGroup = true;
                                     }
                                     var similarRes = [
