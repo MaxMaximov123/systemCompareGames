@@ -48,6 +48,7 @@ model.compile(optimizer='adam', loss='binary_crossentropy')
 model.load_weights('./models/model7.h5')
 
 
+
 def forecast(n1, n2):
 	return model.predict([np.array([convert_text_to_vector(n1)]), np.array([convert_text_to_vector(n2)])])[0]
 
