@@ -16,11 +16,6 @@ services:
     networks:
       - mynetwork
     command: echo "start DB"
-    healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:5432"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
   
   scanner:
     restart: always
@@ -37,7 +32,6 @@ services:
       - db
     networks:
       - mynetwork
-    command: sh -c "knex migrate:latest --esm"
     
   
   # similarer:
