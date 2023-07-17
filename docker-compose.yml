@@ -32,7 +32,7 @@ services:
     networks:
       - mynetwork
     
-    command: knex migrate:latest
+    command: knex migrate:status && knex migrate:latest
     
   
   # similarer:
