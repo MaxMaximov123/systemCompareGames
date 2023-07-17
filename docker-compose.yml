@@ -37,7 +37,7 @@ services:
       - db
     networks:
       - mynetwork
-    command: sh -c "./wait-for-it.sh database:5432 --timeout=60 -- knex migrate:latest --esm"
+    command: sh -c "knex migrate:latest --esm"
     
   
   # similarer:
