@@ -13,7 +13,7 @@ const config = require('./knexfile');
 const db = knex(config.development);
 
 
-function initDB(){
+async function initDB(){
 	const createGamesTable = async () => {
 		try {
 			await db.schema.createTable('games', function(table) {
@@ -63,13 +63,15 @@ function initDB(){
 
 }
 
+initDB();
+
 const addGame = async (data) => {
 	try {
 	  await db('games').insert(data);
 	  console.log('game added');
 	} catch (error) {
-		initDB();
 		console.error(error);
+		console.log(data);
 	}
   };
 
@@ -78,8 +80,8 @@ const addScore = async (data) => {
 		await db('scores').insert(data);
 		console.log('score added');
 	} catch (error) {
-		initDB();
 		console.error(error);
+		console.log(data);
 	}
 };
 
@@ -88,8 +90,8 @@ const addOucome = async (data) => {
 		await db('outcomes').insert(data);
 		console.log('outcome added');
 	} catch (error) {
-		initDB();
 		console.error(error);
+		console.log(data);
 	}
 };
 //_________________________________________________________________//
