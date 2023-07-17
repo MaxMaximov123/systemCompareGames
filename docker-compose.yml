@@ -15,6 +15,7 @@ services:
       - 3200:5432
     networks:
       - mynetwork
+    command: echo "start DB"
   
   scanner:
     restart: always
@@ -31,6 +32,8 @@ services:
       - db
     networks:
       - mynetwork
+    command: sh -c "./wait-for-it.sh database:5432 --timeout=60 -- echo "start DB""
+    
   
   # similarer:
   #   restart: always
