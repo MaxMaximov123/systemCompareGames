@@ -7,7 +7,6 @@ RUN npm install
 RUN npm i -g knex
 
 COPY scannerHistory/ ./
-RUN sleep 20 && knex migrate:latest --esm
 
 
 
