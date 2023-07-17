@@ -32,7 +32,7 @@ services:
     networks:
       - mynetwork
     
-    command: knex migrate:status && knex migrate:latest
+    command: sh ./start.sh
     
   
   # similarer:
