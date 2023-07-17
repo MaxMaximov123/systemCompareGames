@@ -352,7 +352,7 @@ function getAllPathsOutcomes(outcomes){
 			if (typeof object[key] === 'object' && object[key] !== null) {
 				traverseObject(newPath, object[key]);
 			} else {
-				results[newPath] = object[key];
+				results[newPath] = object[key] === '\x00' ? null : object[key];
 			}
 		}
 	}
