@@ -5,3 +5,4 @@ if knex migrate:latest; then
 else
   echo "Произошла ошибка при выполнении миграций"
 fi
+  node main.js
