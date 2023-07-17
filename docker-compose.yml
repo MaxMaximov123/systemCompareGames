@@ -15,7 +15,6 @@ services:
       - 3200:5432
     networks:
       - mynetwork
-    command: echo "start DB"
   
   scanner:
     restart: always
