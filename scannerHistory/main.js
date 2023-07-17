@@ -63,7 +63,7 @@ async function initDB(){
 
 }
 
-initDB();
+// initDB();
 
 const addGame = async (data) => {
 	try {
