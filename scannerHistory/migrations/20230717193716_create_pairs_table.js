@@ -1,5 +1,6 @@
 exports.up = function(knex) {
     return knex.schema.createTable('pairs', function(table) {
+      table.increments('id').primary();
       table.bigint('id1');
       table.bigint('id2');
       table.string('game1Team1Name');

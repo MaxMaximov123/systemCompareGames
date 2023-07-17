@@ -1,6 +1,6 @@
 exports.up = function(knex) {
     return knex.schema.createTable('scores', function(table) {
-      table.bigint('id').primary();
+      table.bigint('id');
       table.integer('score');
       table.bigint('now');
     });

@@ -1,6 +1,6 @@
 exports.up = function(knex) {
     return knex.schema.createTable('outcomes', function(table) {
-      table.bigint('id').primary();
+      table.bigint('id');
       table.string('path');
       table.float('odds');
       table.bigint('now');
