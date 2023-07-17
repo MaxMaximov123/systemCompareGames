@@ -10,8 +10,8 @@ exports.up = function(knex) {
       table.float('similarityOutcomes');
       table.float('similarityScores');
       table.float('totalSimilarity');
-      table.boolean.float('needGroup');
-      table.boolean.float('grouped')
+      table.boolean('needGroup');
+      table.boolean('grouped')
     });
   };
   
