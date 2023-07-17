@@ -12,59 +12,64 @@ const config = require('./knexfile');
 
 const db = knex(config.development);
 
-const createGamesTable = async () => {
-	try {
-		await db.schema.createTable('games', function(table) {
-		table.bigint('id').primary().unique();
-		table.bigint('globalGameId');
-		table.string('team1Id');
-		table.string('team2Id');
-		table.string('team1Name');
-		table.string('team2Name');
-		table.string('sportKey');
-		table.string('bookieKey');
-		table.bigint('startTime');
-		});
-		console.log('Games table created');
-	} catch (error) {}
-};
-	
-createGamesTable();
 
-const createOutcomesTable = async () => {
-	try {
-		await db.schema.createTable('outcomes', function(table) {
-		table.bigint('id');
-		table.string('path');
-		table.float('odds');
-		table.bigint('now');
-		});
-		console.log('Outcomes table created');
-	} catch (error) {}
+function initDB(){
+	const createGamesTable = async () => {
+		try {
+			await db.schema.createTable('games', function(table) {
+			table.bigint('id').primary().unique();
+			table.bigint('globalGameId');
+			table.string('team1Id');
+			table.string('team2Id');
+			table.string('team1Name');
+			table.string('team2Name');
+			table.string('sportKey');
+			table.string('bookieKey');
+			table.bigint('startTime');
+			});
+			console.log('Games table created');
+		} catch (error) {}
 	};
-	
-createOutcomesTable();
+		
+	createGamesTable();
 
-const createScoresTable = async () => {
-	try {
-		await db.schema.createTable('scores', function(table) {
-		table.bigint('id');
-		table.string('path');
-		table.integer('score');
-		table.bigint('now');
-		});
-		console.log('Outcomes table created');
-	} catch (error) {}
-	};
-	
-createScoresTable();
+	const createOutcomesTable = async () => {
+		try {
+			await db.schema.createTable('outcomes', function(table) {
+			table.bigint('id');
+			table.string('path');
+			table.float('odds');
+			table.bigint('now');
+			});
+			console.log('Outcomes table created');
+		} catch (error) {}
+		};
+		
+	createOutcomesTable();
+
+	const createScoresTable = async () => {
+		try {
+			await db.schema.createTable('scores', function(table) {
+			table.bigint('id');
+			table.string('path');
+			table.integer('score');
+			table.bigint('now');
+			});
+			console.log('Outcomes table created');
+		} catch (error) {}
+		};
+		
+	createScoresTable();
+
+}
 
 const addGame = async (data) => {
 	try {
 	  await db('games').insert(data);
 	  console.log('game added');
 	} catch (error) {
-	  console.error(error);
+		initDB();
+		console.error(error);
 	}
   };
 
@@ -73,6 +78,7 @@ const addScore = async (data) => {
 		await db('scores').insert(data);
 		console.log('score added');
 	} catch (error) {
+		initDB();
 		console.error(error);
 	}
 };
@@ -82,6 +88,7 @@ const addOucome = async (data) => {
 		await db('outcomes').insert(data);
 		console.log('outcome added');
 	} catch (error) {
+		initDB();
 		console.error(error);
 	}
 };
@@ -218,7 +225,7 @@ socket.on('message', (message) => {
 
 			if (data.scores?.result){
 				const paths = getAllPathsOutcomes(data.scores.result);
-				for (let path in paths){
+				for (let path in paths){	
 					addScore({
 						id: gameId,
 						path: path,
