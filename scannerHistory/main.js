@@ -1,18 +1,94 @@
 const WebSocket = require('ws');
 const cleanUpDeeply = require('./clean-up-deeply');
 const merge = require('lodash/merge');
-const { Pool } = require('pg');
 require('dotenv').config();
 
 
-// Создаем пул соединений к базе данных
-const pool = new Pool({
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  host: 'db',
-  database: process.env.POSTGRES_DB,
-  port: 5432,
-});
+
+//_______________________ инициализация и функции бд _______________________________//
+
+const knex = require('knex');
+const config = require('./knexfile');
+
+const db = knex(config.development);
+
+const createGamesTable = async () => {
+	try {
+		await db.schema.createTable('games', function(table) {
+		table.bigint('id').primary().unique();
+		table.bigint('globalGameId');
+		table.string('team1Id');
+		table.string('team2Id');
+		table.string('team1Name');
+		table.string('team2Name');
+		table.string('sportKey');
+		table.string('bookieKey');
+		table.bigint('startTime');
+		});
+		console.log('Games table created');
+	} catch (error) {}
+};
+	
+createGamesTable();
+
+const createOutcomesTable = async () => {
+	try {
+		await db.schema.createTable('outcomes', function(table) {
+		table.bigint('id');
+		table.string('path');
+		table.float('odds');
+		table.bigint('now');
+		});
+		console.log('Outcomes table created');
+	} catch (error) {}
+	};
+	
+createOutcomesTable();
+
+const createScoresTable = async () => {
+	try {
+		await db.schema.createTable('scores', function(table) {
+		table.bigint('id');
+		table.string('path');
+		table.integer('score');
+		table.bigint('now');
+		});
+		console.log('Outcomes table created');
+	} catch (error) {}
+	};
+	
+createScoresTable();
+
+const addGame = async (data) => {
+	try {
+	  await db('games').insert(data);
+	  console.log('game added');
+	} catch (error) {
+	  console.error(error);
+	}
+  };
+
+const addScore = async (data) => {
+	try {
+		await db('scores').insert(data);
+		console.log('score added');
+	} catch (error) {
+		console.error(error);
+	}
+};
+
+const addOucome = async (data) => {
+	try {
+		await db('outcomes').insert(data);
+		console.log('outcome added');
+	} catch (error) {
+		console.error(error);
+	}
+};
+//_________________________________________________________________//
+
+
+
 
 // ---------------------------------------------------------------------- //
 
@@ -20,29 +96,6 @@ let globalGameList = null;
 let globalGames = {};
 let gameList = null;
 let games = {};
-const SQL_QUERY=`INSERT INTO history (
-	id,
-	globalGameId, 
-	bookieKey,
-	sportKey,
-	isLive,
-	startTime,
-	team1Id,
-	team2Id,
-	team1Name,
-	team2Name,
-	score1,
-	score2,
-	first_,
-	draw_,
-	firstOrDraw,
-	second_,
-	drawOrSecond,
-	firstOrSecond,
-	now_
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
-		$12, $13, $14, $15, $16, $17, $18, $19)`
-
 // ---------------------------------------------------------------------- //
 
 const socket = new WebSocket('wss://api.livesport.tools/v2?clientKey=mn8W5KhnuwBHdgSJNdUkZbXRC8EFPAfm');
@@ -126,6 +179,8 @@ socket.on('message', (message) => {
 	if (responseTypeMatch = responseType.match(/^game:([0-9]+)\/(created|updated|deleted)/)) {
 		let gameId = Number(responseTypeMatch[1]);
 
+		
+
 		if (data === '\x00') {
 			delete games[gameId];
 		} else {
@@ -136,31 +191,66 @@ socket.on('message', (message) => {
 				cleanUpDeeply(game);
 			} else {
 				game = games[gameId] = data;
+				addGame({
+					id: game?.id,
+					globalGameId: game?.globalGameId,
+					team1Id: game?.team1?.id,
+					team2Id: game?.team2?.id,
+					team1Name: game?.team1?.name,
+					team2Name: game?.team2?.name,
+					sportKey: game?.sport?.key,
+					bookieKey: game?.bookie?.key,
+					startTime: new Date(game.startTime).getTime()
+				})
+			}
+			
+			if (data.outcomes?.result){
+				const paths = getAllPathsOutcomes(data.outcomes.result);
+				for (let path in paths){
+					addOucome({
+						id: gameId,
+						path: path,
+						odds: typeof paths[path] === 'boolean' ? Number(paths[path]) + 1 : paths[path],
+						now: new Date().getTime()
+					})
+				}
+			}
+
+			if (data.scores?.result){
+				const paths = getAllPathsOutcomes(data.scores.result);
+				for (let path in paths){
+					addScore({
+						id: gameId,
+						path: path,
+						score: paths[path],
+						now: new Date().getTime()
+					})
+				}
 			}
 
 			// console.log(game);
-			var dataForDB = [
-				game?.id,
-				game?.globalGameId,
-				game?.bookie?.key,
-				game?.sport?.key,
-				game?.isLive,
-				new Date(game.startTime).getTime(),
-				game?.team1?.id,
-				game?.team2?.id,
-				game?.team1?.name,
-				game?.team2?.name,
-				game?.scores?.result?.mainTime?.[0],
-				game?.scores?.result?.mainTime?.[1],
-				game?.outcomes?.result?.mainTime?.wins?.first?.odds,
-				game?.outcomes?.result?.mainTime?.wins?.draw?.odds,
-				game?.outcomes?.result?.mainTime?.wins?.second?.odds,
-				game?.outcomes?.result?.mainTime?.wins?.firstOrDraw?.odds,
-				game?.outcomes?.result?.mainTime?.wins?.drawOrSecond?.odds,
-				game?.outcomes?.result?.mainTime?.wins?.firstOrSecond?.odds,
-				new Date().getTime()
-			];
-			sqlRequest(SQL_QUERY,  dataForDB);
+
+			// var dataForDB = [
+			// 	game?.id,
+			// 	game?.globalGameId,
+			// 	game?.bookie?.key,
+			// 	game?.sport?.key,
+			// 	game?.isLive,
+			// 	new Date(game.startTime).getTime(),
+			// 	game?.team1?.id,
+			// 	game?.team2?.id,
+			// 	game?.team1?.name,
+			// 	game?.team2?.name,
+			// 	game?.scores?.result?.mainTime?.[0],
+			// 	game?.scores?.result?.mainTime?.[1],
+			// 	game?.outcomes?.result?.mainTime?.wins?.first?.odds,
+			// 	game?.outcomes?.result?.mainTime?.wins?.draw?.odds,
+			// 	game?.outcomes?.result?.mainTime?.wins?.second?.odds,
+			// 	game?.outcomes?.result?.mainTime?.wins?.firstOrDraw?.odds,
+			// 	game?.outcomes?.result?.mainTime?.wins?.drawOrSecond?.odds,
+			// 	game?.outcomes?.result?.mainTime?.wins?.firstOrSecond?.odds,
+			// 	new Date().getTime()
+			// ];
 		}
 	}
 
@@ -244,6 +334,21 @@ function syncGameSubscriptions() {
 }
 
 
-async function sqlRequest(sqlQuery=SQL_QUERY, values=[]){
-	pool.query(sqlQuery, values, (err, res) => {});
+function getAllPathsOutcomes(outcomes){
+	const results = {}
+
+	function traverseObject(currentPath, object) {
+		for (const key in object) {
+			const newPath = currentPath ? `${currentPath}.${key}` : key;
+			if (typeof object[key] === 'object' && object[key] !== null) {
+				traverseObject(newPath, object[key]);
+			} else {
+				results[newPath] = object[key];
+			}
+		}
+	}
+
+	traverseObject('', outcomes);
+	return results;
+
 }

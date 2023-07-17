@@ -275,7 +275,7 @@ async function start(sportKey, SQL_QUERY) {
                                         game1Data.at(-1).globalgameid === game2Data.at(-1).globalgameid
                                     ];
                                     console.log(game1Data[0].id, game2Data[0].id, sportKey, res[2])
-                                    if (res[2].outcomes >= 0.8      ){
+                                    if (res[2].outcomes >= 0.8){
                                         getDataSql(client, SQL_QUERY, similarRes);
                                     }
                                 })

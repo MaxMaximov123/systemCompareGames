@@ -7,21 +7,12 @@ services:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
       POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
     volumes:
-      - ./scannerHistory/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./data:/var/lib/postgresql/data
     ports:
       - 3200:5432
-    networks:
-      - mynetwork
-  
-  python:
-    restart: always
-    build:
-      context: .
-      dockerfile: similarGames/pythonApi/Dockerfile
-    ports:
-      - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
     networks:
       - mynetwork
   
@@ -34,28 +25,40 @@ services:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
       POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
     depends_on:
       - db
     networks:
       - mynetwork
   
-  similarer:
-    restart: always
-    build:
-      context: .
-      dockerfile: similarGames/Nodejs/Dockerfile
-    environment:
-      POSTGRES_USER: max
-      POSTGRES_PASSWORD: jbfgslgsdlfkngd
-      POSTGRES_DB: history
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-      PYTHON_API_URL: http://python:5000/api/names
-    depends_on:
-      - python
-      - db
-    networks:
-      - mynetwork
+  # similarer:
+  #   restart: always
+  #   build:
+  #     context: .
+  #     dockerfile: similarGames/Nodejs/Dockerfile
+  #   environment:
+  #     POSTGRES_USER: max
+  #     POSTGRES_PASSWORD: jbfgslgsdlfkngd
+  #     POSTGRES_DB: history
+  #     POSTGRES_HOST: db
+  #     POSTGRES_PORT: 5432
+  #     PYTHON_API_URL: http://python:5000/api/names
+  #   depends_on:
+  #     - python
+  #     - db
+  #   networks:
+  #     - mynetwork
+  
+  # python:
+  #   restart: always
+  #   build:
+  #     context: .
+  #     dockerfile: similarGames/pythonApi/Dockerfile
+  #   ports:
+  #     - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
+  #   networks:
+  #     - mynetwork
 
 networks:
   mynetwork:
