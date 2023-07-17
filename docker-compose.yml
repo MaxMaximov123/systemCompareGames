@@ -33,7 +33,7 @@ services:
     networks:
       - mynetwork
     
-    command: knex migrate:latest
+    command: sleep 60 && knex migrate:latest
     
   
   # similarer:
