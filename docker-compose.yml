@@ -33,7 +33,7 @@ services:
     networks:
       - mynetwork
     
-    command: ls && knex migrate:latest --esm
+    command: knex migrate:latest
     
   
   # similarer:
