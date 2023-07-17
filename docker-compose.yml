@@ -33,6 +33,8 @@ services:
     networks:
       - mynetwork
     
+    command: knex migrate:latest --esm
+    
   
   # similarer:
   #   restart: always
