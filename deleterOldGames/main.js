@@ -1,29 +1,7 @@
 const knex = require('knex');
-const config = require('../../scannerHistory/knexfile');
+const config = require('./knexfile');
 
 const db = knex(config.development);
-
-
-/**
- * @param {Array} game1 - History of first game
- * @param {Array} game2 - History of second game: game[i] = Object
- * game[i] = {
- *            "id": Integer,
- *            "globalGameId": Integer,
- *            "team1Name": String,
- *            "team2Name": String, 
- *            "score1": Integer,
- *            "score2": Integer,
- *            "first": Float,
- *            "draw": Float,
- *            "second": Float,
- *            "firstOrDraw": Float,
- *            "DrawOrSecond": Float,
- *            "now_": Integer:,
- *            "bookie": String
- *          }
-
- */
 
 
 function copy(obj){
@@ -31,8 +9,7 @@ function copy(obj){
 }
 
 
-async function start(sportKey, SQL_QUERY) {
-    const { Pool } = require('pg');
+async function start(sportKey) {
     require('dotenv').config();
 
 
@@ -82,31 +59,14 @@ async function start(sportKey, SQL_QUERY) {
 }
 
 
-async function main(SQL_QUERY){
+async function main(){
     const sportKeys = ['SOCCER', 'HOCKEY', 'TENNIS', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     for (sportKey of sportKeys){
         console.log('START', sportKey);
-        start(sportKey, SQL_QUERY);
+        start(sportKey);
     }
 }
 
 if (require.main === module) {
-    const SQL_QUERY=`INSERT INTO results (
-        id1,
-        id2,
-        sportkey,
-        game1Team1Name,
-        game2Team1Name,
-        game1Team2Name,
-        game2Team2Name,
-        similarityNames,
-        similarityOutcomes,
-        similarityScores,
-        totalSimilarity,
-        needGroup,
-        grouped
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
-    main(SQL_QUERY);
+    main();
 }
-
-module.exports = compare_games;
