@@ -202,20 +202,10 @@ async function start(sportKey, SQL_QUERY) {
     //_______________________________________//
 
     const TIMEDELTA = 10 // минимальное время игры для ее сравнения (мин)
-    const TIMELIVEGAME = 12 // время (в часах) через которое игра удаляется
+    const TIMELIVEGAME = 24 // время (в часах) через которое игра удаляется
 
     //_______________________________________//
 
-
-    // Создаем пул соединений к базе данных
-    const pool = new Pool({
-        user: process.env.POSTGRES_USER,
-        password: process.env.POSTGRES_PASSWORD,
-        host: process.env.POSTGRES_HOST,
-        database: process.env.POSTGRES_DB,
-        port: process.env.POSTGRES_PORT,
-    });
-    const client = await pool.connect();
 
 
     while (true){
@@ -223,38 +213,41 @@ async function start(sportKey, SQL_QUERY) {
 
         if (game1Ids){
             for (let game1Id of game1Ids){
-                const timeFrame1 = await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id);
+                const timeFrame1 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id))[0];
                 if (timeFrame1.startTime == null || timeFrame1.finTime == null || (new Date().getTime() - timeFrame1.startTime) / 3600000 > TIMELIVEGAME){
                     db('games').where('id', game1Id.id).del();
                     db('outcomes').where('id', game1Id.id).del();
                     db('scores').where('id', game1Id.id).del();
-                    console.log('DELETE game', game1Id.id);
+                    console.log('DELETE game1', game1Id.id);
+                    console.log(timeFrame1, (new Date().getTime() - timeFrame1.startTime) / 3600000);
                     continue;
                 }
                 if ((timeFrame1.finTime - timeFrame1.startTime) / 60000 >= TIMEDELTA){    
                     const game2Ids = await db('games').select('id').where('sportKey', sportKey).whereNot('id', game1Id.id) // получение списка id2
                     for (let game2Id of game2Ids){
-                        const timeFrame2 = await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id);
+                        const timeFrame2 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id))[0];
                         if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
                             db('games').where('id', game2Id.id).del();
                             db('outcomes').where('id', game2Id.id).del();
                             db('scores').where('id', game2Id.id).del();
-                            console.log('DELETE game', game2Id.id);
+                            console.log('DELETE game2', game2Id.id);
+                            console.log(timeFrame2, (new Date().getTime() - timeFrame2.startTime) / 3600000);   
                             continue;
                         }
 
-                        console.log(game1Id.id, game2Id.id);
-                        const pairExist = (await getDataSql(client, `SELECT EXISTS(SELECT 1 FROM results WHERE (id1 = ${game1Id.id} AND id2 = ${game2Id.id}))`, []))[0].exists;    
-                        if (pairExist === false){  
-                            const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
-                            if (timeDeltaGame2 >= TIMEDELTA){
-                                const timeFrame1 = (await getDataSql(client, `SELECT MIN(now_) AS startTime, MAX(now_) AS finTime  FROM history WHERE (id = ${game1Id.id})`, []))[0];
-                                const timeFrame2 = (await getDataSql(client, `SELECT MIN(now_) AS startTime, MAX(now_) AS finTime  FROM history WHERE (id = ${game2Id.id})`, []))[0];
+                        const pairExist = await db('pairs').where(function () {
+                            this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
+                        }).orWhere(function (){
+                            this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
+                        });
+                        if (!pairExist){
+                            if ((timeFrame2.finTime - timeFrame2.startTime) / 60000 >= TIMEDELTA){
                                 if (timeFrame1.finTime < timeFrame2.startTime || timeFrame2.finTime < timeFrame1.startTime) {
                                     console.log('SKIP', game1Id.id, game2Id.id)
                                     continue;
                                 }
-                                const game1Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game1Id.id} ORDER BY now_`, []);
+                                const game1Data = await db('games').join('outcomes', 'games.id', 'outcomes.id').select('*');
+                                console.log(game1Data);
                                 const game2Data = await getDataSql(client, `SELECT * FROM history WHERE id = ${game2Id.id} ORDER BY now_`, []);
                                 compare_games(game1Data, game2Data).then(res => {
                                     var neadGroup = false;
