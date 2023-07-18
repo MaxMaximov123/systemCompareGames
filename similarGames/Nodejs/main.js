@@ -190,7 +190,7 @@ async function start(sportKey) {
 
 
     while (true){
-        const game1Ids = await db('games').select('id', 'bookieKey', 'team1Name', 'team2Name', 'isLive', 'globalGameId').where('sportKey', sportKey) // получение списка id1
+        const game1Ids = await db('games').select('id', 'bookieKey', 'team1Name', 'team2Name', 'isLive', 'globalGameId').where('sportKey', sportKey).orderBy('startTime', 'desc') // получение списка id1
         
         if (game1Ids){
             for (let game1Id of game1Ids){
@@ -202,7 +202,7 @@ async function start(sportKey) {
                     continue;
                 }
                 if ((timeFrame1.finTime - timeFrame1.startTime) / 60000 >= TIMEDELTA){    
-                    const game2Ids = await db('games').select('id', 'bookieKey', 'team1Name', 'team2Name', 'isLive', 'globalGameId').where('sportKey', sportKey).where('isLive', game1Id.isLive).whereNot('id', game1Id.id).whereNot('bookieKey', game1Id.bookieKey); // получение списка id2
+                    const game2Ids = await db('games').select('id', 'bookieKey', 'team1Name', 'team2Name', 'isLive', 'globalGameId').where('sportKey', sportKey).where('isLive', game1Id.isLive).whereNot('id', game1Id.id).whereNot('bookieKey', game1Id.bookieKey).orderBy('startTime', 'desc'); // получение списка id2
                     for (let game2Id of game2Ids){
                         const timeFrame2 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id))[0];
                         if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
