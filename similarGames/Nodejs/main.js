@@ -239,6 +239,13 @@ async function start(sportKey) {
                                     };
                                     totalNames = await compareNames(namesToSim);
                                     console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores);
+                                    const pairExist = await db('pairs').select('id').where(function () {
+                                        this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
+                                    }).orWhere(function (){
+                                        this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
+                                    });
+            
+                                    if (pairExist.length === 0){
                                     try {
                                         db('pairs').insert({
                                             'id1': game1Id.id,
@@ -259,6 +266,7 @@ async function start(sportKey) {
                                     } catch (error) {
                                         console.log(error);
                                     }
+                                }
 
                                 }
                             }
