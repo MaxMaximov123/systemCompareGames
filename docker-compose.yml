@@ -38,7 +38,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: deleter/Dockerfile
+      dockerfile: deleterOldGames/Dockerfile
     environment:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
@@ -54,7 +54,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: deleter/Dockerfile
+      dockerfile: deleterOldGames/Dockerfile
     environment:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
@@ -70,7 +70,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: deleter/Dockerfile
+      dockerfile: deleterOldGames/Dockerfile
     environment:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
