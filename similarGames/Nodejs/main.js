@@ -1,3 +1,9 @@
+const knex = require('knex');
+const config = require('../../scannerHistory/knexfile');
+
+const db = knex(config.development);
+
+
 /**
  * @param {Array} game1 - History of first game
  * @param {Array} game2 - History of second game: game[i] = Object
@@ -26,14 +32,7 @@ function copy(obj){
 
 function compare_names(namesData){
     return new Promise((resolve, reject) => {
-        const url = process.env.PYTHON_API_URL;  // Replace with your API endpoint
-
-        // const data = {
-        //     game1Name1: game1Name1,
-        //     game1Name2: game1Name2,
-        //     game2Name1: game2Name1,
-        //     game2Name2: game2Name2
-        // };
+        const url = process.env.PYTHON_API_URL;
 
         fetch(url, {
             method: 'POST',
@@ -56,10 +55,7 @@ function compare_names(namesData){
 
 function compare_games(game1, game2){
     return new Promise((resolve, reject) => {
-    const TIK_STEP = 3;  // временной шаг(в секундах)
-    const LiST_OUTCOMES = ['first_', 'draw_', 'second_', 'firstordraw', 'firstorsecond','draworsecond']; // список ключей исходов 
-    const ALL_KEYS = ['id', 'globalgameid', 'team1name', 'team2name', 'score1', 'score2', 'first_', 'draw_', 'second_', 'firstordraw', 'firstorsecond', 'draworsecond']
-    const KEYS = ['score1', 'score2', 'first_', 'draw_', 'second_', 'firstordraw', 'firstorsecond', 'draworsecond'];
+    const TIK_STEP = 3;
     const START_TIME = new Date();
 
     // границы сдвига
@@ -223,25 +219,31 @@ async function start(sportKey, SQL_QUERY) {
 
 
     while (true){
-        const game1Ids = await getDataSql(client, `SELECT id FROM history WHERE (sportkey = '${sportKey}') ORDER BY now_ DESC`, []);
+        const game1Ids = await db('games').select('id').where('sportKey', sportKey) // получение списка id1
+
         if (game1Ids){
             for (let game1Id of game1Ids){
-                const startTime1 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
-                if (((new Date().getTime()) - startTime1) / 3600000 > TIMELIVEGAME){
-                    await getDataSql(client, `DELETE FROM history WHERE id = ${game1Id.id};`, []);
+                const timeFrame1 = await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id);
+                if (timeFrame1.startTime == null || timeFrame1.finTime == null || (new Date().getTime() - timeFrame1.startTime) / 3600000 > TIMELIVEGAME){
+                    db('games').where('id', game1Id.id).del();
+                    db('outcomes').where('id', game1Id.id).del();
+                    db('scores').where('id', game1Id.id).del();
                     console.log('DELETE game', game1Id.id);
                     continue;
                 }
-                const timeDeltaGame1 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game1Id.id})`, []))[0].timedelta;
-                if (timeDeltaGame1 >= TIMEDELTA){    
-                    const game2Ids = await getDataSql(client,`SELECT id FROM history WHERE (id <> ${game1Id.id} AND sportkey = '${sportKey}') ORDER BY now_ DESC`, []);
+                if ((timeFrame1.finTime - timeFrame1.startTime) / 60000 >= TIMEDELTA){    
+                    const game2Ids = await db('games').select('id').where('sportKey', sportKey).whereNot('id', game1Id.id) // получение списка id2
                     for (let game2Id of game2Ids){
-                        const startTime2 = (await getDataSql(client, `SELECT MIN(now_) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
-                        if (((new Date().getTime()) - startTime2) / 3600000 > TIMELIVEGAME){
-                            await getDataSql(client, `DELETE FROM history WHERE id = ${game2Id.id};`, []);
+                        const timeFrame2 = await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id);
+                        if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
+                            db('games').where('id', game2Id.id).del();
+                            db('outcomes').where('id', game2Id.id).del();
+                            db('scores').where('id', game2Id.id).del();
                             console.log('DELETE game', game2Id.id);
                             continue;
                         }
+
+                        console.log(game1Id.id, game2Id.id);
                         const pairExist = (await getDataSql(client, `SELECT EXISTS(SELECT 1 FROM results WHERE (id1 = ${game1Id.id} AND id2 = ${game2Id.id}))`, []))[0].exists;    
                         if (pairExist === false){  
                             const timeDeltaGame2 = (await getDataSql(client, `SELECT FLOOR((MAX(now_) - MIN(now_)) / 60000) AS timeDelta FROM history WHERE (id = ${game2Id.id})`, []))[0].timedelta;
