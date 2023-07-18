@@ -23,7 +23,7 @@ async function start(sportKey) {
 
 
     while (true){
-        const game1Ids = await db('games').select('id', 'bookieKey', 'team1name', 'team2name', 'isLive').where('sportKey', sportKey) // получение списка id1
+        const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey) // получение списка id1
 
         if (game1Ids){
             for (let game1Id of game1Ids){
