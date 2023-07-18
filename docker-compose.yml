@@ -33,54 +33,6 @@ services:
       - mynetwork
     
     command: sh ./start.sh
-
-  deleter1:
-    restart: always
-    build:
-      context: .
-      dockerfile: deleterOldGames/Dockerfile
-    environment:
-      POSTGRES_USER: max
-      POSTGRES_PASSWORD: jbfgslgsdlfkngd
-      POSTGRES_DB: history
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-    depends_on:
-      - db
-    networks:
-      - mynetwork
-    
-  deleter2:
-    restart: always
-    build:
-      context: .
-      dockerfile: deleterOldGames/Dockerfile
-    environment:
-      POSTGRES_USER: max
-      POSTGRES_PASSWORD: jbfgslgsdlfkngd
-      POSTGRES_DB: history
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-    depends_on:
-      - db
-    networks:
-      - mynetwork
-
-  deleter3:
-    restart: always
-    build:
-      context: .
-      dockerfile: deleterOldGames/Dockerfile
-    environment:
-      POSTGRES_USER: max
-      POSTGRES_PASSWORD: jbfgslgsdlfkngd
-      POSTGRES_DB: history
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-    depends_on:
-      - db
-    networks:
-      - mynetwork
     
   
   similarer1:
@@ -95,6 +47,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: TENNIS
     depends_on:
       - python
       - db
@@ -113,6 +66,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: SOCCER
     depends_on:
       - python
       - db
@@ -131,6 +85,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: HOCKEY
     depends_on:
       - python
       - db
@@ -149,6 +104,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: HOCKEY
     depends_on:
       - python
       - db
@@ -167,11 +123,70 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: HOCKEY
     depends_on:
       - python
       - db
     networks:
       - mynetwork
+
+  similarer6:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/Nodejs/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: HOCKEY
+    depends_on:
+      - python
+      - db
+    networks:
+      - mynetwork
+
+  similarer7:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/Nodejs/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: HOCKEY
+    depends_on:
+      - python
+      - db
+    networks:
+      - mynetwork
+
+  similarer8:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/Nodejs/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEY: HOCKEY
+    depends_on:
+      - python
+      - db
+    networks:
+      - mynetwork
+  
   
   python:
     restart: always

@@ -196,7 +196,6 @@ async function start(sportKey) {
             for (let game1Id of game1Ids){
                 const timeFrame1 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id))[0];
                 if (timeFrame1.startTime == null || timeFrame1.finTime == null || (new Date().getTime() - timeFrame1.startTime) / 3600000 > TIMELIVEGAME){
-                    db('games').where('id', game1Id.id).del();
                     db('outcomes').where('id', game1Id.id).del();
                     db('scores').where('id', game1Id.id).del();
                     console.log('DELETE game1', game1Id.id);
@@ -207,14 +206,13 @@ async function start(sportKey) {
                     for (let game2Id of game2Ids){
                         const timeFrame2 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id))[0];
                         if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
-                            db('games').where('id', game2Id.id).del();
                             db('outcomes').where('id', game2Id.id).del();
                             db('scores').where('id', game2Id.id).del();
                             console.log('DELETE game2', game2Id.id);  
                             continue;
                         }
 
-                        const pairExist = await db('pairs').where(function () {
+                        const pairExist = await db('pairs').select('id').where(function () {
                             this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
                         }).orWhere(function (){
                             this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
@@ -242,7 +240,7 @@ async function start(sportKey) {
                                     totalNames = await compareNames(namesToSim);
                                     console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores);
                                     try {
-                                        await db('pairs').insert({
+                                        db('pairs').insert({
                                             'id1': game1Id.id,
                                             'id2': game2Id.id,
                                             'isLive': game1Id.isLive,
