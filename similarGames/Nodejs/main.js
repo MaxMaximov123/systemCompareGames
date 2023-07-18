@@ -1,5 +1,5 @@
 const knex = require('knex');
-const config = require('../../scannerHistory/knexfile');
+const config = require('./knexfile');
 const fs = require('fs')
 
 const db = knex(config.development);
