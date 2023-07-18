@@ -132,7 +132,7 @@ async function compareOutcomes(game1, game2){
         totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
     }
     const result = Object.values(totalSimOutc);
-    return [sum(result) / result.length, result.length >= 2 && sum(result) / result.length >= 0.92];
+    return [sum(result) / result.length, result.length >= 2 && sum(result) / result.length >= 0.9];
 
 
 
