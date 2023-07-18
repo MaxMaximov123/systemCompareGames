@@ -5,3 +5,5 @@ scannerHistory/node_modules/
 similarGames/Nodejs/node_modules
 scannerHistory/.env
 similarGames/Nodejs/.env
+deleterOldGames/.env
+deleterOldGames/node_modules

@@ -203,6 +203,7 @@ socket.on('message', (message) => {
 				addGame({
 					id: game?.id,
 					globalGameId: game?.globalGameId,
+					isLive: game?.isLive,
 					team1Id: game?.team1?.id,
 					team2Id: game?.team2?.id,
 					team1Name: game?.team1?.name,
@@ -226,7 +227,7 @@ socket.on('message', (message) => {
 			}
 
 			if (data.scores?.result){
-				const paths = getAllPathsOutcomes(data.scores.result);
+				const paths = getAllPathsOutcomes(data.scores.result, false);
 				for (let path in paths){	
 					addScore({
 						id: gameId,
@@ -236,30 +237,6 @@ socket.on('message', (message) => {
 					})
 				}
 			}
-
-			// console.log(game);
-
-			// var dataForDB = [
-			// 	game?.id,
-			// 	game?.globalGameId,
-			// 	game?.bookie?.key,
-			// 	game?.sport?.key,
-			// 	game?.isLive,
-			// 	new Date(game.startTime).getTime(),
-			// 	game?.team1?.id,
-			// 	game?.team2?.id,
-			// 	game?.team1?.name,
-			// 	game?.team2?.name,
-			// 	game?.scores?.result?.mainTime?.[0],
-			// 	game?.scores?.result?.mainTime?.[1],
-			// 	game?.outcomes?.result?.mainTime?.wins?.first?.odds,
-			// 	game?.outcomes?.result?.mainTime?.wins?.draw?.odds,
-			// 	game?.outcomes?.result?.mainTime?.wins?.second?.odds,
-			// 	game?.outcomes?.result?.mainTime?.wins?.firstOrDraw?.odds,
-			// 	game?.outcomes?.result?.mainTime?.wins?.drawOrSecond?.odds,
-			// 	game?.outcomes?.result?.mainTime?.wins?.firstOrSecond?.odds,
-			// 	new Date().getTime()
-			// ];
 		}
 	}
 
@@ -343,16 +320,21 @@ function syncGameSubscriptions() {
 }
 
 
-function getAllPathsOutcomes(outcomes){
+function getAllPathsOutcomes(outcomes, type=true){
 	const results = {}
 
 	function traverseObject(currentPath, object) {
 		for (const key in object) {
-			const newPath = currentPath ? `${currentPath}.${key}` : key;
-			if (typeof object[key] === 'object' && object[key] !== null) {
+			const newPath = currentPath ? `${currentPath};${key}` : key;
+			if (typeof object[key] === 'object' && key !== 'odds') {
 				traverseObject(newPath, object[key]);
 			} else {
-				results[newPath] = object[key] === '\x00' ? null : object[key];
+				if (type){
+					if (newPath.includes('odds') && object[key] !== '\x00') results[newPath.slice(0, newPath.length - 5)] = object[key];
+				} else {
+					results[newPath] = object[key] === '\x00' ? null : object[key];
+				}
+				
 			}
 		}
 	}

@@ -3,6 +3,7 @@ exports.up = function(knex) {
       table.increments('id').primary();
       table.bigint('id1');
       table.bigint('id2');
+      table.boolean('isLive');
       table.string('game1Team1Name');
       table.string('game2Team1Name');
       table.string('game1Team2Name');
@@ -12,7 +13,7 @@ exports.up = function(knex) {
       table.float('similarityScores');
       table.float('totalSimilarity');
       table.boolean('needGroup');
-      table.boolean('grouped')
+      table.boolean('grouped');
     });
   };
   
