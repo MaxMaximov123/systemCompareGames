@@ -46,7 +46,7 @@ export default {
 
     methods: {
         async getPairs(){
-            const res = await this.postRequest('http://127.0.0.1:3000/api/pairs', {page: this.currentPage, oneGrouped: this.oneGrouped});
+            const res = await this.postRequest('http://127.0.0.1:8005/api/pairs', {page: this.currentPage, oneGrouped: this.oneGrouped});
             this.pageCount = Math.floor(Number(res.pageCount[0].count) / 10);
             this.pairs = res.pairs;
         },

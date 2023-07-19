@@ -52,7 +52,7 @@ app.get('*', (req, res) => {
 });
 
 // Запустите сервер на указанном порту
-const port = 3000;
+const port = 8005;
 app.listen(port, () => {
   console.log(`Сервер запущен на порту ${port}`);
 });
