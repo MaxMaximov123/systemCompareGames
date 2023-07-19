@@ -107,7 +107,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: similarGames/Nodejs/Dockerfile
+      dockerfile: site/live.sport/server/Dockerfile
     environment:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
