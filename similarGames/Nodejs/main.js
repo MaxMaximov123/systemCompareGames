@@ -204,71 +204,101 @@ async function start(sportKey) {
                 if ((timeFrame1.finTime - timeFrame1.startTime) / 60000 >= TIMEDELTA){    
                     const game2Ids = await db('games').select('id', 'bookieKey', 'team1Name', 'team2Name', 'isLive', 'globalGameId').where('sportKey', sportKey).where('isLive', game1Id.isLive).whereNot('id', game1Id.id).whereNot('bookieKey', game1Id.bookieKey).orderBy('startTime', 'desc'); // получение списка id2
                     for (let game2Id of game2Ids){
-                        const timeFrame2 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id))[0];
-                        if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
-                            db('outcomes').where('id', game2Id.id).del();
-                            db('scores').where('id', game2Id.id).del();
-                            console.log('DELETE game2', game2Id.id);  
-                            continue;
-                        }
-
                         const pairExist = await db('pairs').select('id').where(function () {
                             this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
                         }).orWhere(function (){
                             this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
                         });
+                        if (pairExist.length > 0) continue;
+                        const timeFrame2 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id))[0];
+                        if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
+                            db('outcomes').where('id', game2Id.id).del();
+                            db('scores').where('id', game2Id.id).del();
+                            console.log('DELETE game2', game2Id.id);
+                            try {
+                                await db('pairs').insert({
+                                    'id1': game1Id.id,
+                                    'id2': game2Id.id,
+                                    'isLive': game1Id.isLive,
+                                    'game1Team1Name': game1Id?.team1Name,
+                                    'game2Team1Name': game2Id?.team1Name,
+                                    'game1Team2Name': game1Id?.team2Name,
+                                    'game2Team2Name': game2Id?.team2Name,
+                                    'similarityNames': null,
+                                    'similarityOutcomes': null,
+                                    'similarityScores': null,
+                                    'totalSimilarity': null,
+                                    'needGroup': null,
+                                    'grouped': game1Id.globalGameId === game2Id.globalGameId
+                                });
+                                console.log('NULL pair added');
+                            } catch (error) {
+                                console.log(error);
+                            }
+                            continue;
+                        }
 
-                        if (pairExist.length === 0){
-                            if ((timeFrame2.finTime - timeFrame2.startTime) / 60000 >= TIMEDELTA){
-                                if (timeFrame1.finTime < timeFrame2.startTime || timeFrame2.finTime < timeFrame1.startTime) {
-                                    console.log('SKIP', game1Id.id, game2Id.id)
-                                    continue;
-                                }
-                                const game1DataOutcomes = await db('outcomes').select('*').where('id', game1Id.id).orderBy('now', 'asc');
-                                const game2DataOutcomes = await db('outcomes').select('*').where('id', game2Id.id).orderBy('now', 'asc');
-                                const game1DataScores = await db('scores').select('*').where('id', game1Id.id).orderBy('now', 'asc');
-                                const game2DataScores = await db('scores').select('*').where('id', game2Id.id).orderBy('now', 'asc');
-                                if (game1DataOutcomes.length > 1 && game1DataOutcomes.length > 1 && game1DataScores.length > 1 && game2DataScores.length){
-                                    const totalOutcomes = await compareOutcomes(game1DataOutcomes, game2DataOutcomes);
-                                    const totalScores = await compareScores(game1DataScores, game2DataScores);
-                                    const namesToSim = {
-                                        game1Name1: game1Id?.team1name,
-                                        game2Name1: game2Id?.team1name,
-                                        game1Name2: game1Id?.team2name,
-                                        game2Name2: game2Id?.team2name
-                                    };
-                                    totalNames = await compareNames(namesToSim);
-                                    console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores);
-                                    const pairExist = await db('pairs').select('id').where(function () {
-                                        this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
-                                    }).orWhere(function (){
-                                        this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
+                        if ((timeFrame2.finTime - timeFrame2.startTime) / 60000 >= TIMEDELTA){
+                            if (timeFrame1.finTime < timeFrame2.startTime || timeFrame2.finTime < timeFrame1.startTime) {
+                                console.log('SKIP', game1Id.id, game2Id.id)
+                                try {
+                                    await db('pairs').insert({
+                                        'id1': game1Id.id,
+                                        'id2': game2Id.id,
+                                        'isLive': game1Id.isLive,
+                                        'game1Team1Name': game1Id?.team1Name,
+                                        'game2Team1Name': game2Id?.team1Name,
+                                        'game1Team2Name': game1Id?.team2Name,
+                                        'game2Team2Name': game2Id?.team2Name,
+                                        'similarityNames': null,
+                                        'similarityOutcomes': null,
+                                        'similarityScores': null,
+                                        'totalSimilarity': null,
+                                        'needGroup': null,
+                                        'grouped': game1Id.globalGameId === game2Id.globalGameId
                                     });
-            
-                                    if (pairExist.length === 0){
-                                    try {
-                                        await db('pairs').insert({
-                                            'id1': game1Id.id,
-                                            'id2': game2Id.id,
-                                            'isLive': game1Id.isLive,
-                                            'game1Team1Name': game1Id?.team1Name,
-                                            'game2Team1Name': game2Id?.team1Name,
-                                            'game1Team2Name': game1Id?.team2Name,
-                                            'game2Team2Name': game2Id?.team2Name,
-                                            'similarityNames': totalNames,
-                                            'similarityOutcomes': totalOutcomes[0],
-                                            'similarityScores': totalScores[0],
-                                            'totalSimilarity': (totalOutcomes[0] + totalScores[0]) / 2,
-                                            'needGroup': totalOutcomes[1] && totalScores[1],
-                                            'grouped': game1Id.globalGameId === game2Id.globalGameId
-                                        });
-                                        console.log('pair added');
-                                    } catch (error) {
-                                        console.log(error);
-                                    }
+                                    console.log('NULL pair added');
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                                continue;
+                            }
+                            const game1DataOutcomes = await db('outcomes').select('*').where('id', game1Id.id).orderBy('now', 'asc');
+                            const game2DataOutcomes = await db('outcomes').select('*').where('id', game2Id.id).orderBy('now', 'asc');
+                            const game1DataScores = await db('scores').select('*').where('id', game1Id.id).orderBy('now', 'asc');
+                            const game2DataScores = await db('scores').select('*').where('id', game2Id.id).orderBy('now', 'asc');
+                            if (game1DataOutcomes.length > 1 && game1DataOutcomes.length > 1 && game1DataScores.length > 1 && game2DataScores.length){
+                                const totalOutcomes = await compareOutcomes(game1DataOutcomes, game2DataOutcomes);
+                                const totalScores = await compareScores(game1DataScores, game2DataScores);
+                                const namesToSim = {
+                                    game1Name1: game1Id?.team1name,
+                                    game2Name1: game2Id?.team1name,
+                                    game1Name2: game1Id?.team2name,
+                                    game2Name2: game2Id?.team2name
+                                };
+                                totalNames = await compareNames(namesToSim);
+                                console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores);
+                                try {
+                                    await db('pairs').insert({
+                                        'id1': game1Id.id,
+                                        'id2': game2Id.id,
+                                        'isLive': game1Id.isLive,
+                                        'game1Team1Name': game1Id?.team1Name,
+                                        'game2Team1Name': game2Id?.team1Name,
+                                        'game1Team2Name': game1Id?.team2Name,
+                                        'game2Team2Name': game2Id?.team2Name,
+                                        'similarityNames': totalNames,
+                                        'similarityOutcomes': totalOutcomes[0],
+                                        'similarityScores': totalScores[0],
+                                        'totalSimilarity': (totalOutcomes[0] + totalScores[0]) / 2,
+                                        'needGroup': totalOutcomes[1] && totalScores[1],
+                                        'grouped': game1Id.globalGameId === game2Id.globalGameId
+                                    });
+                                    console.log('pair added');
+                                } catch (error) {
+                                    console.log(error);
                                 }
 
-                                }
                             }
                         }
                         
