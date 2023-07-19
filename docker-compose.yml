@@ -118,6 +118,8 @@ services:
       SPORTKEYS: FUTSAL;TABLE_TENNIS;WATER_POLO;CYBERSPORT;SNOOKER;AMERICAN_FOOTBALL
     depends_on:
       - db
+    ports:
+      - 3000:3000
     networks:
       - mynetwork
 
