@@ -7,3 +7,6 @@ scannerHistory/.env
 similarGames/Nodejs/.env
 deleterOldGames/.env
 deleterOldGames/node_modules
+site/live.sport/server/node_modules
+site/live.sport/node_modules
+site/live.sport/server/.env

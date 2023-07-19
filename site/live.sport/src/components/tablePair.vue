@@ -1,0 +1,138 @@
+<template>
+    <div>
+        <table class="table">
+            <thead>
+                <th></th>
+                <th>Команда 1</th>
+                <th>Команда 2</th>
+                <th>Сходство названий</th>
+                <th>Сходство коэффициентов</th>
+                <th>Сходство счета</th>
+                <th>Среднее сходство</th>
+                <th>Объединины новой системой?</th>
+                <th>Объединины старой системой?</th>
+            </thead>
+            <tr class="none-tr"></tr>
+            <tbody v-for="item in items" class="data">
+                <tr>
+                    <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
+                        Пара {{ item.id }}
+                    </td>
+                    <td>
+                        {{ item.game1Team1Name }}
+                    </td>
+                    <td>
+                        {{ item.game1Team2Name }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.similarityNames ? item.similarityNames : 'Неизвестно' }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.similarityOutcomes ? item.similarityOutcomes : 'Неизвестно' }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.similarityScores ? item.similarityScores : 'Неизвестно'}}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.totalSimilarity }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.needGroup ? 'Да' : 'Нет'}}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.grouped ? 'Да' : 'Нет'}}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ item.game2Team1Name }}
+                    </td>
+                    <td>
+                        {{ item.game2Team2Name }}
+                    </td>
+                </tr>
+                <tr class="none-tr"></tr>
+            </tbody>
+        </table>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    props: {
+        items: {
+            type: Object,
+            required: true
+        }
+    },
+
+    data() {
+      return {
+
+      };
+    },
+
+    mounted(){
+    },
+    
+    methods: {
+        getBackgroundColor(row){
+            if (row.needGroup === true && row.grouped === true){
+                return '#92de7f';
+            } else if (row.needGroup === false && row.grouped === false){
+                return '#e18484';
+            } else {
+                return '#e3df81';
+            }
+        }
+    }
+  };
+  </script>
+  
+  <style>
+    table {
+      margin-bottom: 20px;
+      border-collapse: collapse;
+      width: 90%;
+      margin: 0 auto
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border: 2px solid grey;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+    
+    .none-tr {
+        height: 15px;
+    }
+
+    .data {
+        margin-bottom: 10px; /* Расстояние между каждыми двумя строками (можно настроить по своему усмотрению) */
+    }
+
+    .num-pair {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        text-align: left;
+        max-height: 150px;
+    }
+
+
+    .table td {
+        /* background-color: #ffffff; Цвет фона ячеек данных */
+        box-shadow: 0 2px 4px rgba(51, 51, 51, 0.1); /* Тень между ячейками */
+    }
+
+    .table th:first-child {
+        visibility: hidden;
+        opacity: 0;
+        border: none;
+    }
+
+  </style>
+  

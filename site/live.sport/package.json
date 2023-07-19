@@ -9,10 +9,14 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "v-page": "^3.0.0-beta.2",
     "vue": "^3.3.4",
+    "vue-awesome-paginate": "^1.1.46",
     "vue-plain-pagination": "^0.3.0",
     "vue-router": "^4.2.2",
-    "vuejs-paginate-next": "^1.0.2"
+    "vuejs-paginate": "^2.1.0",
+    "vuejs-paginate-next": "^1.0.2",
+    "vuetify": "^3.3.9"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
