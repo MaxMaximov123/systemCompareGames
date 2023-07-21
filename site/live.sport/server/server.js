@@ -29,13 +29,28 @@ app.post('/api/pairs', async (req, res) => {
     try{
       var pairs = {};
       const result = {};
-      if (requestData.oneGrouped === true){
-        pairs = await db('pairs').where('needGroup', true).orWhere('grouped', true).select('*').orderBy('id', 'asc');
-        pairs = pairs.slice((requestData.page - 1) * 10, requestData.page * 10);
-        
-      } else {
-        pairs = await db('pairs').offset((requestData.page - 1) * 10).limit(10).select('*').orderBy('id', 'asc').whereNot('needGroup', null);
-      }
+      pairs = await db('pairs').join('games as games1', 'pairs.id1', 'games1.id').join('games as games2', 'pairs.id2', 'games2.id').offset((requestData.page - 1) * 10).limit(10).select(
+        'pairs.id as id',
+        'pairs.isLive as isLive',
+        'pairs.game1Team1Name as game1Team1Name',
+        'pairs.game2Team1Name as game2Team1Name',
+        'pairs.game1Team2Name as game1Team2Name',
+        'pairs.game2Team2Name as game2Team2Name',
+        'pairs.similarityNames as similarityNames',
+        'pairs.similarityOutcomes as similarityOutcomes',
+        'pairs.similarityScores as similarityScores',
+        'pairs.totalSimilarity as totalSimilarity',
+        'pairs.needGroup as needGroup',
+        'pairs.grouped as grouped',
+        'games1.bookieKey as bookieKey1',
+        'games1.startTime as startTime1',
+        'games1.sportKey as sportKey',
+        'games2.bookieKey as bookieKey2',
+        'games2.startTime as startTime2',
+
+        ).orderBy('pairs.needGroup', 'desc')
+        .orderBy('pairs.grouped', 'desc')
+        .orderBy('pairs.id', 'asc').whereNot('needGroup', null);
       result.pairs = pairs;
       result.pageCount = await db('pairs').whereNot('needGroup', null).count('id');
       res.send(JSON.stringify(result));
@@ -45,6 +60,54 @@ app.post('/api/pairs', async (req, res) => {
     }
   });
 
+
+app.post('/api/graphic', async (req, res) => {
+  const requestData = req.body;
+
+  console.log(requestData);
+  
+  try{
+    const result = {};
+    if (requestData.type){
+      result.game1 = await db('pairs')
+      .join('scores', 'pairs.id1', 'scores.id')
+      .select(
+        'scores.path as path',
+        'scores.score as score',
+        'scores.now as now',
+        ).where('pairs.id', requestData.id);
+      
+      result.game2 = await db('pairs')
+      .join('scores', 'pairs.id2', 'scores.id')
+      .select(
+        'scores.path as path',
+        'scores.score as score',
+        'scores.now as now'
+        ).where('pairs.id', requestData.id);
+
+    } else {
+      result.game1 = await db('pairs')
+      .join('outcomes', 'pairs.id1', 'outcomes.id')
+      .select(
+        'outcomes.path as path',
+        'outcomes.odds as odds',
+        'outcomes.now as now',
+        ).where('pairs.id', requestData.id);
+      
+      result.game2 = await db('pairs')
+      .join('outcomes', 'pairs.id2', 'outcomes.id')
+      .select(
+        'outcomes.path as path',
+        'outcomes.odds as odds',
+        'outcomes.now as now'
+        ).where('pairs.id', requestData.id);
+    }
+    res.send(JSON.stringify(result));
+  } catch(e){
+    console.log(e);
+    res.send(JSON.stringify([]));
+  }
+});
 
 
 app.get('*', (req, res) => {

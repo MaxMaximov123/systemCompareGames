@@ -5,6 +5,10 @@
                 <th></th>
                 <th>Команда 1</th>
                 <th>Команда 2</th>
+                <th>Спорт</th>
+                <th>Лайв?</th>
+                <th>Букмекер</th>
+                <th>Время начала</th>
                 <th>Сходство названий</th>
                 <th>Сходство коэффициентов</th>
                 <th>Сходство счета</th>
@@ -16,13 +20,25 @@
             <tbody v-for="item in items" class="data">
                 <tr>
                     <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
-                        Пара {{ item.id }}
+                        <a :href="`../graphic/${item.id}`" class="invisible-link">Пара {{ item.id }}</a>
                     </td>
                     <td>
                         {{ item.game1Team1Name }}
                     </td>
                     <td>
                         {{ item.game1Team2Name }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.sportKey }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.isLive ? 'Да' : 'Нет' }}
+                    </td>
+                    <td>
+                        {{ item.bookieKey1}}
+                    </td>
+                    <td>
+                        {{ formatDateFromUnixTimestamp(item.startTime1)}}
                     </td>
                     <td rowspan="2">
                         {{ item.similarityNames ? item.similarityNames : 'Неизвестно' }}
@@ -50,6 +66,12 @@
                     <td>
                         {{ item.game2Team2Name }}
                     </td>
+                    <td>
+                        {{ item.bookieKey2}}
+                    </td>
+                    <td>
+                        {{ formatDateFromUnixTimestamp(item.startTime2)}}
+                    </td>
                 </tr>
                 <tr class="none-tr"></tr>
             </tbody>
@@ -76,11 +98,17 @@
     },
     
     methods: {
+        formatDateFromUnixTimestamp(unixTimestamp) {
+            return new Date(Number(unixTimestamp)).toLocaleString();
+        },
+
         getBackgroundColor(row){
             if (row.needGroup === true && row.grouped === true){
-                return '#92de7f';
+                return '#50d92e';
             } else if (row.needGroup === false && row.grouped === false){
                 return '#e18484';
+            } else if (row.needGroup === true && row.grouped === false){
+                return '#92de7f';
             } else {
                 return '#e3df81';
             }
@@ -88,9 +116,9 @@
     }
   };
   </script>
-  
   <style>
     table {
+      font-size: 80%;
       margin-bottom: 20px;
       border-collapse: collapse;
       width: 90%;
@@ -132,6 +160,10 @@
         visibility: hidden;
         opacity: 0;
         border: none;
+    }
+
+    .invisible-link {
+        color: inherit;
     }
 
   </style>

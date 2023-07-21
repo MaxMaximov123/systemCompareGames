@@ -1,4 +1,5 @@
 <template>
+    <title>Pair Games</title>
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <h3 class="title">Результаты сравнения игр</h3>
     
@@ -22,6 +23,7 @@ import router from '@/router';
 import tablePair from '@/components/tablePair.vue'
 import Paginate from 'vuejs-paginate-next';
 
+
 export default {
     components: {
         tablePair,
@@ -35,18 +37,19 @@ export default {
             currentPage: 1,
             pageCount: 1000,
             oneGrouped: false,
+            ipAddress: null
 
         }
     },
 
-    mounted() {
+    async mounted() {
         this.currentPage = Number(this.$route.params.page);
         this.render();
     },
 
     methods: {
         async getPairs(){
-            const res = await this.postRequest('http://195.201.58.179:8005/api/pairs', {page: this.currentPage, oneGrouped: this.oneGrouped});
+            const res = await this.postRequest('http://localhost:8005/api/pairs', {page: this.currentPage, oneGrouped: this.oneGrouped});
             this.pageCount = Math.floor(Number(res.pageCount[0].count) / 10);
             this.pairs = res.pairs;
         },
@@ -85,7 +88,8 @@ export default {
                 reject(error);
             });
             })
-        }
+        },
+
     }
 }
 </script>
@@ -147,6 +151,5 @@ export default {
         background-color: #1976d2;
         cursor: pointer;
     }
-
     
 </style>
