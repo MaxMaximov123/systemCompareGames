@@ -196,8 +196,8 @@ async function start(sportKey) {
             for (let game1Id of game1Ids){
                 const timeFrame1 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id))[0];
                 if (timeFrame1.startTime == null || timeFrame1.finTime == null || (new Date().getTime() - timeFrame1.startTime) / 3600000 > TIMELIVEGAME){
-                    db('outcomes').where('id', game1Id.id).del();
-                    db('scores').where('id', game1Id.id).del();
+                    await db('outcomes').where('id', game1Id.id).del();
+                    await db('scores').where('id', game1Id.id).del();
                     console.log('DELETE game1', game1Id.id);
                     continue;
                 }
@@ -212,8 +212,8 @@ async function start(sportKey) {
                         if (pairExist.length > 0) continue;
                         const timeFrame2 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game2Id.id))[0];
                         if (timeFrame2.startTime == null || timeFrame2.finTime == null || (new Date().getTime() - timeFrame2.startTime) / 3600000 > TIMELIVEGAME){
-                            db('outcomes').where('id', game2Id.id).del();
-                            db('scores').where('id', game2Id.id).del();
+                            await db('outcomes').where('id', game2Id.id).del();
+                            await db('scores').where('id', game2Id.id).del();
                             console.log('DELETE game2', game2Id.id);
                             try {
                                 await db('pairs').insert({
