@@ -92,7 +92,9 @@ app.post('/api/graphic', async (req, res) => {
     } else {
       result.game1 = await db('pairs')
       .join('outcomes', 'pairs.id1', 'outcomes.id')
+      .join('games', 'pairs.id1', 'games.id')
       .select(
+        'games.bookieKey as bookieKey',
         'outcomes.path as path',
         'outcomes.odds as odds',
         'outcomes.now as now',
@@ -100,7 +102,9 @@ app.post('/api/graphic', async (req, res) => {
       
       result.game2 = await db('pairs')
       .join('outcomes', 'pairs.id2', 'outcomes.id')
+      .join('games', 'pairs.id2', 'games.id')
       .select(
+        'games.bookieKey as bookieKey',
         'outcomes.path as path',
         'outcomes.odds as odds',
         'outcomes.now as now'

@@ -104,15 +104,16 @@ export default {
         },
         async getData(type=0){
             console.log(type)
+            var res = null;
             if (type === 0 && this.game1.outcomes.length === 0) {
-                const res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
+                res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
                 this.pathsOutcomes = this.copy(this.paths);
             }
             if (type === 1 && this.game1.scores.length === 0) {
-                const res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
+                res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
                 this.game1.scores = res.game1;
                 this.game2.scores = res.game2;
                 this.formatData(this.game1.scores, this.game2.scores);
