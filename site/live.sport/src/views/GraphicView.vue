@@ -171,7 +171,7 @@ export default {
                 
                 for (let indGame1=minInd1; indGame1<game1.length-1; indGame1++){
                     if (Math.floor(game1[indGame1].now / 1000) <= timeStep){
-                        locPaths.push(game1[indGame1].path);
+                        if (!locPaths.includes(game1[indGame1].path)) locPaths.push(game1[indGame1].path);
                         lastStateGame1[game1[indGame1].path] = {
                             ind: indGame1,
                             time: timeStep,
