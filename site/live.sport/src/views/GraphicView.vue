@@ -80,7 +80,7 @@ export default {
                     yaxis: 'y2'
                 },
                 ];
-                this.paths = copy(this.pathsScores);
+                this.paths = this.copy(this.pathsScores);
             } else {
                 this.data = [{
                     x: Object.keys(this.game1.outcomes).map(now => now / 1000),
@@ -99,7 +99,7 @@ export default {
                     yaxis: 'y2'
                 },
                 ];
-                this.paths = copy(this.pathsOutcomes);
+                this.paths = this.copy(this.pathsOutcomes);
             }
         },
         async getData(type=0){
@@ -109,14 +109,14 @@ export default {
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
-                this.pathsOutcomes = copy(this.paths);
+                this.pathsOutcomes = this.copy(this.paths);
             }
             if (type === 1 && this.game1.scores.length === 0) {
                 const res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
                 this.game1.scores = res.game1;
                 this.game2.scores = res.game2;
                 this.formatData(this.game1.scores, this.game2.scores);
-                this.pathsScores = copy(this.paths);
+                this.pathsScores = this.copy(this.paths);
             }
             this.bookieKey1 = res.game1[0].bookieKey;
             this.bookieKey2 = res.game2[0].bookieKey;

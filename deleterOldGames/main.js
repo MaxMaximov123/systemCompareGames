@@ -23,8 +23,19 @@ async function start(sportKey) {
 
 
     while (true){
-        const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey).orderBy('startTime', 'asc') // получение списка id1
-
+        // const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey).orderBy('startTime', 'asc') // получение списка id1
+        const game1Ids = await db('games').leftJoin('pairs', function () {
+            this.on('games.id', '=', 'pairs.id1')
+              .orOn('games.id', '=', 'pairs.id2');
+          })
+        //   .whereNull('pairs.id1')
+        //   .whereNull('pairs.id2')
+          .where('pairs.needGroup', false)
+          .where('pairs.grouped', false)
+          .orderBy('games.startTime', 'asc')
+          .select('games.id as id');
+          
+        console.log(game1Ids);
         if (game1Ids){
             for (let game1Id of game1Ids){
                 const timeFrame1 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id))[0];
