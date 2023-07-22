@@ -30,6 +30,10 @@ export default {
             TIK_STEP: 5,
             selectedPath: null,
             paths: [],
+            pathsOutcomes: [],
+            pathsScores: [],
+            bookieKey1: '',
+            bookieKey2: '',
             game1: {
                 outcomes: [],
                 scores: [],
@@ -63,7 +67,7 @@ export default {
                     x: Object.keys(this.game1.scores).map(now => now / 1000),
                     y: Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPath]?.val),
                     type: 'bar',
-                    name: 'b1',
+                    name: this.bookieKey1,
                     xaxis: 'x1',
                     yaxis: 'y1'
                 },
@@ -71,17 +75,18 @@ export default {
                     x: Object.keys(this.game2.scores).map(now => now / 1000),
                     y: Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPath]?.val),
                     type: 'bar',
-                    name: 'b1',
+                    name: this.bookieKey2,
                     xaxis: 'x2',
                     yaxis: 'y2'
                 },
                 ];
+                this.paths = copy(this.pathsScores);
             } else {
                 this.data = [{
                     x: Object.keys(this.game1.outcomes).map(now => now / 1000),
                     y: Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPath]?.val),
                     type: 'bar',
-                    name: 'b1',
+                    name: this.bookieKey1,
                     xaxis: 'x1',
                     yaxis: 'y1'
                 },
@@ -89,11 +94,12 @@ export default {
                     x: Object.keys(this.game2.outcomes).map(now => now / 1000),
                     y: Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPath]?.val),
                     type: 'bar',
-                    name: 'b1',
+                    name: this.bookieKey2,
                     xaxis: 'x2',
                     yaxis: 'y2'
                 },
                 ];
+                this.paths = copy(this.pathsOutcomes);
             }
         },
         async getData(type=0){
@@ -103,13 +109,17 @@ export default {
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
+                this.pathsOutcomes = copy(this.paths);
             }
             if (type === 1 && this.game1.scores.length === 0) {
                 const res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
                 this.game1.scores = res.game1;
                 this.game2.scores = res.game2;
                 this.formatData(this.game1.scores, this.game2.scores);
+                this.pathsScores = copy(this.paths);
             }
+            this.bookieKey1 = res.game1[0].bookieKey;
+            this.bookieKey2 = res.game2[0].bookieKey;
             this.selectedPath = this.paths[0];
             this.updatePlot();
         },
