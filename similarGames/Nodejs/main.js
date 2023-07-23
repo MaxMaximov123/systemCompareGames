@@ -197,7 +197,8 @@ async function start(sportKey) {
         .max('outcomes.now as finTime')
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
-        .orderBy('startTime', 'desc') // получение списка id1
+        .orderBy('startTime', 'desc')
+        .limit(100) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
