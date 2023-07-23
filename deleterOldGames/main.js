@@ -32,10 +32,10 @@ async function start(sportKey) {
         //   .whereNull('pairs.id2')
           .where('pairs.needGroup', false)
           .where('pairs.grouped', false)
+          .where('games.sportKey', sportKey)
           .orderBy('games.startTime', 'asc')
           .select('games.id as id');
           
-        console.log(game1Ids);
         if (game1Ids){
             for (let game1Id of game1Ids){
                 const timeFrame1 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id))[0];

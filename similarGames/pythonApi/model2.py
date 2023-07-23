@@ -54,4 +54,5 @@ def forecast(n1, n2):
 
 
 if __name__ == '__main__':
-	print(forecast('formis', 'formis'))
+	while True:
+		print(forecast(*input('Названия (ч. зап.): ').split(', ')))
