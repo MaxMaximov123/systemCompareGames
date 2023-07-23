@@ -8,6 +8,10 @@ function copy(obj){
     return JSON.parse(JSON.stringify(obj));
 }
 
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 
 async function start(sportKey) {
     require('dotenv').config();
@@ -24,7 +28,9 @@ async function start(sportKey) {
 
     while (true){
         // const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey).orderBy('startTime', 'asc') // получение списка id1
-        const game1Ids = await db('games').leftJoin('pairs', function () {
+        const game1Ids = await db('games')
+        .join('outcomes', 'outcomes.id', 'games.id')
+        .join('pairs', function () {
             this.on('games.id', '=', 'pairs.id1')
               .orOn('games.id', '=', 'pairs.id2');
           })
@@ -33,23 +39,16 @@ async function start(sportKey) {
           .where('pairs.needGroup', false)
           .where('pairs.grouped', false)
           .where('games.sportKey', sportKey)
-          .orderBy('games.startTime', 'asc')
-          .select('games.id as id');
-          
-        if (game1Ids){
-            for (let game1Id of game1Ids){
-                const timeFrame1 = (await db('outcomes').min('now as startTime').max('now as finTime').where('id', game1Id.id))[0];
-                if (timeFrame1.startTime == null || timeFrame1.finTime == null || (new Date().getTime() - timeFrame1.startTime) / 3600000 > TIMELIVEGAME){
-                    await db('outcomes').where('id', game1Id.id).del();
-                    await db('scores').where('id', game1Id.id).del();
-                    console.log('DELETE game1', game1Id.id);
-                    continue;
-                }
-            }
-        }
-        else {
-            console.log('error');
-        }
+        //   .orderBy('games.startTime', 'asc')
+          .select('games.id as id')
+          .groupBy('games.id')
+          .havingRaw('(? - MIN(outcomes.now)) / 3600000  > ?', [new Date().getTime(), TIMELIVEGAME]);
+        
+        console.log(game1Ids);
+        await db('outcomes').whereIn('id', game1Ids.map(obj => obj.id)).del();
+        await db('scores').whereIn('id', game1Ids.map(obj => obj.id)).del();
+        console.log('DELETE', sportKey, game1Ids.length);
+        await delay(60000 * 10);
     }
 }
 
