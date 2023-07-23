@@ -195,7 +195,7 @@ async function start(sportKey) {
         .select('games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.isLive', 'games.globalGameId')
         .min('outcomes.now as startTime')
         .max('outcomes.now as finTime')
-        .where('sportKey', sportKey)
+        .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startTime', 'desc') // получение списка id1
         
