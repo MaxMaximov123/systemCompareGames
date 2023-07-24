@@ -41,7 +41,7 @@
                         {{ formatDateFromUnixTimestamp(item.startTime1)}}
                     </td>
                     <td rowspan="2">
-                        {{ item.similarityNames ? item.similarityNames : 'Неизвестно' }}
+                        {{ item.similarityNames }}
                     </td>
                     <td rowspan="2">
                         {{ item.similarityOutcomes ? item.similarityOutcomes : 'Неизвестно' }}

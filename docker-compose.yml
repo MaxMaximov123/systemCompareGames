@@ -33,6 +33,16 @@ services:
       - mynetwork
     
     command: sh ./start.sh
+
+  python:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/pythonApi/Dockerfile
+    ports:
+      - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
+    networks:
+      - mynetwork
     
   
   similarer1:
@@ -89,17 +99,6 @@ services:
     depends_on:
       - python
       - db
-    networks:
-      - mynetwork
-  
-  
-  python:
-    restart: always
-    build:
-      context: .
-      dockerfile: similarGames/pythonApi/Dockerfile
-    ports:
-      - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
     networks:
       - mynetwork
 

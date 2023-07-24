@@ -47,8 +47,8 @@ export default {
             layout: {
                 grid: {rows: 2, columns: 1},
                 title: 'История',
-                // yaxis1: {range: [0, range]},
-                // yaxis2: {range: [0, range]}
+                yaxis1: {range: [0, 10]},
+                yaxis2: {range: [0, 10]}
             },
     
 

@@ -26,5 +26,6 @@ if __name__ == '__main__':
     app.register_blueprint(blueprint)
     from waitress import serve
 
+    print('RUN SERVER')
     serve(app, host="0.0.0.0", port=5000)
     # app.run(port=3202)
