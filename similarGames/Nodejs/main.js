@@ -98,7 +98,7 @@ function compareNames(namesData){
         })
         .then(response => response.json())
         .then(data => {
-          const result = Math.min(Number(data.n1), Number(data.n2));
+          const result = Math.max(Number(data.n1), Number(data.n2));
           resolve(result);
         })
         .catch(error => {
@@ -198,7 +198,7 @@ async function start(sportKey) {
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startTime', 'desc')
-        .limit(300) // получение списка id1
+        .limit(100) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -209,7 +209,7 @@ async function start(sportKey) {
                 if ((game1Id.finTime - game1Id.startTime) / 60000 >= TIMEDELTA){    
                     for (let numId2=numId1;numId2<game1Ids.length;numId2++){
                         const game2Id = game1Ids[numId2];
-                        if (game2Id.id === game1Id.id) continue;
+                        if (game2Id.id === game1Id.id || game2Id.bookieKey === game1Id.bookieKey) continue;
                         const pairExist = await db('pairs').select('id').where(function () {
                             this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
                         }).orWhere(function (){
