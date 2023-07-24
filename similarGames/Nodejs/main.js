@@ -1,6 +1,7 @@
 const knex = require('knex');
 const config = require('./knexfile');
 const fs = require('fs')
+const getRes = require('./names')
 
 const db = knex(config.development);
 
@@ -281,7 +282,8 @@ async function start(sportKey) {
                                     game1Name2: game1Id?.team2Name,
                                     game2Name2: game2Id?.team2Name
                                 };
-                                const totalNames = await compareNames(namesToSim);
+                                // const totalNames = await compareNames(namesToSim);
+                                const totalNames = Number(await getRes(...Object.values(namesToSim)));
                                 console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores, totalNames);
                                 try {
                                     await db('pairs').insert({

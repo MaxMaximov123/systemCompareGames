@@ -11,7 +11,10 @@
   "dependencies": {
     "dotenv": "^16.3.1",
     "fs": "^0.0.1-security",
+    "google-translate": "^3.0.0",
+    "google-translate-api": "^2.3.0",
     "knex": "^2.5.1",
-    "pg": "^8.11.1"
+    "pg": "^8.11.1",
+    "translate": "^2.0.2"
   }
 }
