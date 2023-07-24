@@ -74,9 +74,23 @@ async function compareNames(n1, n2) {
     return false;
 }
 
-// const knex = require('knex');
-// const config = require('./knexfile');
-// const db = knex(config.development);
+const knex = require('knex');
+const config = require('./knexfile');
+const db = knex(config.development);
+
+async function main(){
+    const names = await db('pairs')
+    .select('game1Team1Name as n1', 'game2Team1Name as n2', 'game1Team2Name as n3', 'game2Team2Name as n4', 'id')
+    .where('needGroup', false).where('grouped', false)
+    .orderBy('id', 'asc');
+    const ct = names.length;
+    let p = 0;
+    for (let i of names){
+        await db('pairs').where('id', i.id).update({ similarityNames: Number(await getRes(i.n1, i.n2, i.n3, i.n4))});
+        console.log(i.id, p, '/', ct);
+        p++;
+    }
+}
 
 
 async function getRes(n1, n2, n3, n4){
