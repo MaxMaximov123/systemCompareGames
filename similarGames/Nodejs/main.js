@@ -88,6 +88,7 @@ async function formatDataGames(game1, game2, outcomes=true){
 function compareNames(namesData){
     return new Promise((resolve, reject) => {
         const url = process.env.PYTHON_API_URL;
+        // const url = 'http://127.0.0.1:5000/api/names';
 
         fetch(url, {
             method: 'POST',
@@ -102,6 +103,7 @@ function compareNames(namesData){
           resolve(result);
         })
         .catch(error => {
+          console.log(error)
           resolve(null);
         });
     })
@@ -274,13 +276,13 @@ async function start(sportKey) {
                                 const totalOutcomes = await compareOutcomes(game1DataOutcomes, game2DataOutcomes);
                                 const totalScores = await compareScores(game1DataScores, game2DataScores);
                                 const namesToSim = {
-                                    game1Name1: game1Id?.team1name,
-                                    game2Name1: game2Id?.team1name,
-                                    game1Name2: game1Id?.team2name,
-                                    game2Name2: game2Id?.team2name
+                                    game1Name1: game1Id?.team1Name,
+                                    game2Name1: game2Id?.team1Name,
+                                    game1Name2: game1Id?.team2Name,
+                                    game2Name2: game2Id?.team2Name
                                 };
-                                totalNames = await compareNames(namesToSim);
-                                console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores);
+                                const totalNames = await compareNames(namesToSim);
+                                console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores, totalNames);
                                 try {
                                     await db('pairs').insert({
                                         'id1': game1Id.id,
