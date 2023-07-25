@@ -60,6 +60,57 @@ app.post('/api/pairs', async (req, res) => {
     }
   });
 
+app.post('/api/paths', async (req, res) => {
+  const requestData = req.body;
+  console.log(requestData);
+  
+  try{
+    var pathsList1 = [];
+    var pathsList2 = [];
+    var pathsList = [];
+    if (requestData.type === 'outcomes'){
+      pathsList1 = await db('pairs')
+      .join('outcomes as outcomes1', 'pairs.id1', 'outcomes1.id')
+      .where('pairs.id', requestData.id)
+      .distinct('outcomes1.path as path1');
+
+      pathsList2 = await db('pairs')
+      .join('outcomes as outcomes2', 'pairs.id2', 'outcomes2.id')
+      .where('pairs.id', requestData.id)
+      .distinct('outcomes2.path as path2');
+
+      pathsList1 = pathsList1.map(obj => obj.path1);
+      pathsList2 = pathsList2.map(obj => obj.path2);
+
+      for (let path of pathsList1){
+        if (pathsList2.includes(path)) pathsList.push(path);
+      }
+
+    } else if (requestData.type === 'scores'){
+      pathsList1 = await db('pairs')
+      .join('scores as scores1', 'pairs.id1', 'scores1.id')
+      .where('pairs.id', requestData.id)
+      .distinct('scores1.path as path1');
+
+      pathsList2 = await db('pairs')
+      .join('scores as scores2', 'pairs.id2', 'scores2.id')
+      .where('pairs.id', requestData.id)
+      .distinct('scores2.path as path2');
+
+      pathsList1 = pathsList1.map(obj => obj.path1);
+      pathsList2 = pathsList2.map(obj => obj.path2);
+
+      for (let path of pathsList1){
+        if (pathsList2.includes(path)) pathsList.push(path);
+      }
+    }
+    res.send(JSON.stringify(pathsList));
+  } catch(e){
+    console.log(e);
+    res.send(JSON.stringify([]));
+  }
+});
+
 
 app.post('/api/graphic', async (req, res) => {
   const requestData = req.body;
@@ -76,8 +127,9 @@ app.post('/api/graphic', async (req, res) => {
         'games.bookieKey as bookieKey',
         'scores.path as path',
         'scores.score as score',
-        'scores.now as now',
-        ).where('pairs.id', requestData.id);
+        'scores.now as now',)
+      .where('pairs.id', requestData.id)
+      .where('scores.path', requestData.path);
       
       result.game2 = await db('pairs')
       .join('scores', 'pairs.id2', 'scores.id')
@@ -86,8 +138,9 @@ app.post('/api/graphic', async (req, res) => {
         'games.bookieKey as bookieKey',
         'scores.path as path',
         'scores.score as score',
-        'scores.now as now'
-        ).where('pairs.id', requestData.id);
+        'scores.now as now')
+      .where('pairs.id', requestData.id)
+      .where('scores.path', requestData.path);
 
     } else {
       result.game1 = await db('pairs')
@@ -97,8 +150,9 @@ app.post('/api/graphic', async (req, res) => {
         'games.bookieKey as bookieKey',
         'outcomes.path as path',
         'outcomes.odds as odds',
-        'outcomes.now as now',
-        ).where('pairs.id', requestData.id);
+        'outcomes.now as now')
+      .where('pairs.id', requestData.id)
+      .where('outcomes.path', requestData.path);
       
       result.game2 = await db('pairs')
       .join('outcomes', 'pairs.id2', 'outcomes.id')
@@ -107,8 +161,9 @@ app.post('/api/graphic', async (req, res) => {
         'games.bookieKey as bookieKey',
         'outcomes.path as path',
         'outcomes.odds as odds',
-        'outcomes.now as now'
-        ).where('pairs.id', requestData.id);
+        'outcomes.now as now')
+      .where('pairs.id', requestData.id)
+      .where('outcomes.path', requestData.path);
     }
     res.send(JSON.stringify(result));
   } catch(e){

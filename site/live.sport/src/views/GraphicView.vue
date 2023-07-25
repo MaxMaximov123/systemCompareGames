@@ -5,12 +5,36 @@
         <v-tab @click="getData(0)">Коэффициенты</v-tab>
         <v-tab @click="getData(1)">Счет</v-tab>
     </v-tabs>
-    <v-combobox
-        v-model="selectedPath"
-        :items="paths"
-        @update:menu="updatePlot"
-        class="combobox"></v-combobox>
-    <plotly-chart :data="data" :layout="layout" />
+    <v-window v-model="activeTab">
+        <v-window-item value="0">
+            <h3 style="text-align: center;">{{ infoLabel1 }}</h3>
+            <v-combobox
+                v-model="selectedPathOutcomes"
+                :items="pathsOutcomes"
+                @update:modelValue="getData(activeTab)"
+                class="combobox">
+            </v-combobox>
+            <plotly-chart :data="dataOutcomes" :layout="layout" />
+        </v-window-item>
+
+        <v-window-item value="1">
+            <h3 style="text-align: center;">{{ infoLabel2 }}</h3>
+            <v-combobox
+                v-model="selectedPathScores"
+                :items="pathsScores"
+                @update:modelValue="getData(activeTab)"
+                class="combobox">
+            </v-combobox>
+            <plotly-chart :data="dataScores" :layout="layout" />
+        </v-window-item>
+    </v-window>
+    <div v-if="isLoading" class="progress-overlay">
+      <v-progress-circular
+        indeterminate
+        color="primary"
+        size="64"
+      ></v-progress-circular>
+    </div>
     
 </template>
 <script >
@@ -25,11 +49,16 @@ export default {
     },
     data(){
         return {
+            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             id: 1,
             activeTab: 0,
-            TIK_STEP: 5,
-            selectedPath: null,
+            TIK_STEP: 10,
+            selectedPathOutcomes: null,
+            selectedPathScores: null,
             paths: [],
+            infoLabel1: '',
+            infoLabel2: '',
+            isLoading: true,
             pathsOutcomes: [],
             pathsScores: [],
             bookieKey1: '',
@@ -42,13 +71,13 @@ export default {
                 outcomes: [],
                 scores: [],
             },
-            data: [
-            ],
+            dataOutcomes: [],
+            dataScores: [],
             layout: {
                 grid: {rows: 2, columns: 1},
                 title: 'История',
-                yaxis1: {range: [0, 10]},
-                yaxis2: {range: [0, 10]}
+                // yaxis1: {range: [0, 10]},
+                // yaxis2: {range: [0, 10]}
             },
     
 
@@ -57,15 +86,30 @@ export default {
 
     async mounted() {
         this.id = Number(this.$route.params.id);
-        this.render();
+        this.pathsOutcomes = await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'outcomes'});
+        this.pathsScores = await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'scores'});
+        if (this.pathsOutcomes.length === 0 || this.pathsScores.length === 0) {
+            if (this.pathsOutcomes.length === 0) this.infoLabel1 = 'Данные по игре отсутствуют!';
+            if (this.pathsScores.length === 0) this.infoLabel2 = 'Данные по игре отсутствуют!';
+            this.isLoading = false;
+        } else {
+            this.infoLabel1 = '';
+            this.infoLabel2 = '';
+            this.selectedPathOutcomes = this.pathsOutcomes[0];
+            this.selectedPathScores = this.pathsScores[0];
+            await this.getData(this.activeTab);
+        }
+        
     },
 
     methods: {
         updatePlot(e=null){
-            if (this.activeTab){
-                this.data = [{
+            this.isLoading = true;
+            if (this.activeTab){ // scores
+
+                this.dataScores = [{
                     x: Object.keys(this.game1.scores).map(now => now / 1000),
-                    y: Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPath]?.val),
+                    y: Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val),
                     type: 'bar',
                     name: this.bookieKey1,
                     xaxis: 'x1',
@@ -73,7 +117,7 @@ export default {
                 },
                 {
                     x: Object.keys(this.game2.scores).map(now => now / 1000),
-                    y: Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPath]?.val),
+                    y: Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val),
                     type: 'bar',
                     name: this.bookieKey2,
                     xaxis: 'x2',
@@ -82,9 +126,9 @@ export default {
                 ];
                 this.paths = this.copy(this.pathsScores);
             } else {
-                this.data = [{
+                this.dataOutcomes = [{
                     x: Object.keys(this.game1.outcomes).map(now => now / 1000),
-                    y: Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPath]?.val),
+                    y: Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val),
                     type: 'bar',
                     name: this.bookieKey1,
                     xaxis: 'x1',
@@ -92,44 +136,40 @@ export default {
                 },
                 {
                     x: Object.keys(this.game2.outcomes).map(now => now / 1000),
-                    y: Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPath]?.val),
+                    y: Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val),
                     type: 'bar',
                     name: this.bookieKey2,
                     xaxis: 'x2',
                     yaxis: 'y2'
                 },
                 ];
-                this.paths = this.copy(this.pathsOutcomes);
+                this.isLoading = false;
             }
         },
         async getData(type=0){
+            this.isLoading = true;
             console.log(type)
             var res = null;
-            if (type === 0 && this.game1.outcomes.length === 0) {
-                res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
+            if (type === 0) {
+                res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathOutcomes});
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
-                this.pathsOutcomes = this.copy(this.paths);
             }
-            if (type === 1 && this.game1.scores.length === 0) {
-                res = await this.postRequest('http://195.201.58.179:8005/api/graphic', {id: this.id, type: type});
+            if (type === 1) {
+                res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathScores});
                 this.game1.scores = res.game1;
                 this.game2.scores = res.game2;
                 this.formatData(this.game1.scores, this.game2.scores);
-                this.pathsScores = this.copy(this.paths);
             }
             this.bookieKey1 = res.game1[0].bookieKey;
             this.bookieKey2 = res.game2[0].bookieKey;
-            this.selectedPath = this.paths[0];
             this.updatePlot();
-        },
-
-        async render(){
-            await this.getData(this.activeTab);
+            this.isLoading = false;
         },
 
         postRequest(url, data){
+            this.isLoading = true;
             return new Promise((resolve, reject) => {
             const options = {
                 method: 'POST',
@@ -142,13 +182,13 @@ export default {
             fetch(url, options)
             .then(response => response.json())
             .then(result => {
-                console.log(result);
                 resolve(result);
             })
             .catch(error => {
                 reject(error);
             });
             })
+            this.isLoading = false;
         },
 
         copy(obj){
@@ -158,9 +198,6 @@ export default {
         formatData(game1, game2){
             const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
             const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
-
-            this.paths = [];
-            const locPaths = [];
 
             const newGame1 = {};
             const newGame2 = {};
@@ -182,7 +219,6 @@ export default {
                 
                 for (let indGame1=minInd1; indGame1<game1.length-1; indGame1++){
                     if (Math.floor(game1[indGame1].now / 1000) <= timeStep){
-                        if (!locPaths.includes(game1[indGame1].path)) locPaths.push(game1[indGame1].path);
                         lastStateGame1[game1[indGame1].path] = {
                             ind: indGame1,
                             time: timeStep,
@@ -193,7 +229,6 @@ export default {
 
                 for (let indGame2=minInd2; indGame2<game2.length-1; indGame2++){
                     if (Math.floor(game2[indGame2].now / 1000) <= timeStep){
-                        if (locPaths.includes(game2[indGame2].path) && !this.paths.includes(game2[indGame2].path)) this.paths.push(game2[indGame2].path);
                         lastStateGame2[game2[indGame2].path] = {
                             ind: indGame2,
                             time: timeStep,
@@ -227,4 +262,17 @@ export default {
     .combobox {
         width: 30%;
     }
+
+    .progress-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.7); /* Цвет затемненного фона */
+        z-index: 9999; /* Значение z-index для поверхности */
+        }
 </style>
