@@ -33,6 +33,7 @@ export default {
     },
     data(){
         return {
+            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
             currentPage: 1,
             pageCount: 1000,
@@ -49,7 +50,7 @@ export default {
 
     methods: {
         async getPairs(){
-            const res = await this.postRequest('http://195.201.58.179:8005/api/pairs', {page: this.currentPage, oneGrouped: this.oneGrouped});
+            const res = await this.postRequest(`http://${this.apiHost}/api/pairs`, {page: this.currentPage, oneGrouped: this.oneGrouped});
             this.pageCount = Math.floor(Number(res.pageCount[0].count) / 10);
             this.pairs = res.pairs;
         },

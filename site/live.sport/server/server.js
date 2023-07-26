@@ -30,7 +30,13 @@ app.post('/api/pairs', async (req, res) => {
     try{
       var pairs = {};
       const result = {};
-      pairs = await db('pairs').join('games as games1', 'pairs.id1', 'games1.id').join('games as games2', 'pairs.id2', 'games2.id').offset((requestData.page - 1) * 10).limit(10).select(
+      pairs = await db('pairs')
+      .join('games as games1', 'pairs.id1', 'games1.id')
+      .join('games as games2', 'pairs.id2', 'games2.id')
+      .offset((requestData.page - 1) * 10).limit(10)
+      .select(
+        db.raw('(SELECT COUNT(*) > 0 FROM outcomes WHERE outcomes.id = pairs.id1) as hasHistory1', []),
+        db.raw('(SELECT COUNT(*) > 0 FROM outcomes WHERE outcomes.id = pairs.id2) as hasHistory2', []),
         'pairs.id as id',
         'pairs.isLive as isLive',
         'pairs.game1Team1Name as game1Team1Name',

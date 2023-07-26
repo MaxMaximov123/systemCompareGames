@@ -20,7 +20,8 @@
             <tbody v-for="item in items" class="data">
                 <tr>
                     <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
-                        <a :href="`../graphic/${item.id}`" class="invisible-link">Пара {{ item.id }}</a>
+                        Пара {{ item.id }}
+                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}`" class="invisible-link">График</a>
                     </td>
                     <td>
                         {{ item.game1Team1Name }}
