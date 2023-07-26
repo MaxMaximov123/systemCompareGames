@@ -35,8 +35,8 @@ app.post('/api/pairs', async (req, res) => {
       .join('games as games2', 'pairs.id2', 'games2.id')
       .offset((requestData.page - 1) * 10).limit(10)
       .select(
-        db.raw('(SELECT COUNT(*) > 0 FROM outcomes WHERE outcomes.id = pairs.id1) as hasHistory1', []),
-        db.raw('(SELECT COUNT(*) > 0 FROM outcomes WHERE outcomes.id = pairs.id2) as hasHistory2', []),
+        db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
+        db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
         'pairs.id as id',
         'pairs.isLive as isLive',
         'pairs.game1Team1Name as game1Team1Name',
