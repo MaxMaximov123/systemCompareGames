@@ -107,7 +107,7 @@ app.post('/api/paths', async (req, res) => {
         if (pathsList2.includes(path)) pathsList.push(path);
       }
     }
-    const result = {time: stTime - (new Date().getTime()), data: pathsList};
+    const result = {time: (new Date().getTime()) - stTime, data: pathsList};
     res.send(JSON.stringify(result));
   } catch(e){
     console.log(e);
