@@ -49,7 +49,7 @@ export default {
     },
     data(){
         return {
-            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
+            apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
             id: 1,
             activeTab: 0,
             TIK_STEP: 10,
@@ -86,8 +86,8 @@ export default {
 
     async mounted() {
         this.id = Number(this.$route.params.id);
-        this.pathsOutcomes = await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'outcomes'});
-        this.pathsScores = await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'scores'});
+        this.pathsOutcomes = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'outcomes'})).data;
+        this.pathsScores = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'scores'})).data;
         if (this.pathsOutcomes.length === 0 || this.pathsScores.length === 0) {
             if (this.pathsOutcomes.length === 0) this.infoLabel1 = 'Данные по игре отсутствуют!';
             if (this.pathsScores.length === 0) this.infoLabel2 = 'Данные по игре отсутствуют!';
@@ -152,12 +152,14 @@ export default {
             var res = null;
             if (type === 0) {
                 res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathOutcomes});
+                res = res.data;
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
             }
             if (type === 1) {
                 res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathScores});
+                res = res.data;
                 this.game1.scores = res.game1;
                 this.game2.scores = res.game2;
                 this.formatData(this.game1.scores, this.game2.scores);

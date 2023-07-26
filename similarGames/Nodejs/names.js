@@ -17,15 +17,10 @@ const googleTranslateURL = (from, to, txt) =>
 
 
 async function convertRuToEu(n, t){
-    n = n.replace('(', ' ');
-    n = n.replace(')', ' ');
-    n = n.replace('women', 'w')
-    n = n.replace('Women', 'w')
     if (russianAlphabet.includes(n[0].toLowerCase())) {
         n = n.replace(' ж ', 'w');
         n = n.replace(' м ', 'm');
         n = n.replace('до ', 'U');
-        n = n.replace('Унив.', 'University')
         var newN = ''
         if (t){
             for (let indChar = 0; indChar < n.length; indChar++) {
@@ -60,6 +55,14 @@ function globalIncludes(n1, n2){
 }
 
 async function compareNames(n1, n2) {
+    for (let w of [
+        '(', ')', '[', ']', 'City', 'city',
+        'Esports', 'esports', 'University',
+        'university', 'Унив.', 'унив.', 'Women',
+        'women', ' w ', ' ж ', ' m ', ' M ', ' W ']){
+        n1 = n1.replace(w, ' ');
+        n2 = n2.replace(w, ' ');
+    }
     if (globalIncludes(n1, n2)) return true;
 
     if (globalIncludes(await convertRuToEu(n1, true), await convertRuToEu(n2, true))) return true;

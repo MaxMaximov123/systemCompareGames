@@ -24,6 +24,7 @@ console.log(__dirname, staticFilesPath)
 app.use(express.static(staticFilesPath));
 
 app.post('/api/pairs', async (req, res) => {
+    const stTime = new Date().getTime();
     const requestData = req.body;
     
     try{
@@ -53,6 +54,7 @@ app.post('/api/pairs', async (req, res) => {
         .orderBy('pairs.id', 'asc').whereNot('needGroup', null);
       result.pairs = pairs;
       result.pageCount = await db('pairs').whereNot('needGroup', null).count('id');
+      result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));
     } catch(e){
       console.log(e);
@@ -61,6 +63,7 @@ app.post('/api/pairs', async (req, res) => {
   });
 
 app.post('/api/paths', async (req, res) => {
+  const stTime = new Date().getTime();
   const requestData = req.body;
   console.log(requestData);
   
@@ -104,15 +107,17 @@ app.post('/api/paths', async (req, res) => {
         if (pathsList2.includes(path)) pathsList.push(path);
       }
     }
-    res.send(JSON.stringify(pathsList));
+    const result = {time: stTime - (new Date().getTime()), data: pathsList};
+    res.send(JSON.stringify(result));
   } catch(e){
     console.log(e);
-    res.send(JSON.stringify([]));
+    res.send(JSON.stringify({time: (new Date().getTime()) - stTime, data: []}));
   }
 });
 
 
 app.post('/api/graphic', async (req, res) => {
+  const stTime = new Date().getTime();
   const requestData = req.body;
 
   console.log(requestData);
@@ -165,10 +170,10 @@ app.post('/api/graphic', async (req, res) => {
       .where('pairs.id', requestData.id)
       .where('outcomes.path', requestData.path);
     }
-    res.send(JSON.stringify(result));
+    res.send(JSON.stringify({data: result, time: (new Date().getTime()) - stTime}));
   } catch(e){
     console.log(e);
-    res.send(JSON.stringify([]));
+    res.send(JSON.stringify({data: [], time: (new Date().getTime()) - stTime}));
   }
 });
 
