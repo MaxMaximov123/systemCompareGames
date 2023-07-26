@@ -14,7 +14,7 @@
                 @update:modelValue="getData(activeTab)"
                 class="combobox">
             </v-combobox>
-            <plotly-chart :data="dataOutcomes" :layout="layout" />
+            <plotly-chart :data="dataOutcomes" :layout="layoutOtcomes" />
         </v-window-item>
 
         <v-window-item value="1">
@@ -25,7 +25,7 @@
                 @update:modelValue="getData(activeTab)"
                 class="combobox">
             </v-combobox>
-            <plotly-chart :data="dataScores" :layout="layout" />
+            <plotly-chart :data="dataScores" :layout="layoutScores" />
         </v-window-item>
     </v-window>
     <div v-if="isLoading" class="progress-overlay">
@@ -52,7 +52,7 @@ export default {
             apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             id: 1,
             activeTab: 0,
-            TIK_STEP: 10,
+            TIK_STEP: 3,
             selectedPathOutcomes: null,
             selectedPathScores: null,
             paths: [],
@@ -73,7 +73,13 @@ export default {
             },
             dataOutcomes: [],
             dataScores: [],
-            layout: {
+            layoutOtcomes: {
+                grid: {rows: 2, columns: 1},
+                title: 'История',
+                // yaxis1: {range: [0, 10]},
+                // yaxis2: {range: [0, 10]}
+            },
+            layoutScores: {
                 grid: {rows: 2, columns: 1},
                 title: 'История',
                 // yaxis1: {range: [0, 10]},
@@ -106,9 +112,17 @@ export default {
         updatePlot(e=null){
             this.isLoading = true;
             if (this.activeTab){ // scores
-
+                const range1 = Math.max(...Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val))
+                const range2 = Math.max(...Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val))
+                const range = Math.max(range1. range2);
+                this.layoutOtcomes = {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История',
+                    yaxis1: {range: [0, range]},
+                    yaxis2: {range: [0, range]}
+                }
                 this.dataScores = [{
-                    x: Object.keys(this.game1.scores).map(now => now / 1000),
+                    x: Object.keys(this.game1.scores).map(now => now % 10000),
                     y: Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val),
                     type: 'bar',
                     name: this.bookieKey1,
@@ -116,7 +130,7 @@ export default {
                     yaxis: 'y1'
                 },
                 {
-                    x: Object.keys(this.game2.scores).map(now => now / 1000),
+                    x: Object.keys(this.game2.scores).map(now => now % 10000),
                     y: Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val),
                     type: 'bar',
                     name: this.bookieKey2,
@@ -126,8 +140,17 @@ export default {
                 ];
                 this.paths = this.copy(this.pathsScores);
             } else {
+                const range1 = Math.max(...Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val))
+                const range2 = Math.max(...Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val))
+                const range = Math.max(range1. range2);
+                this.layoutOtcomes = {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История',
+                    yaxis1: {range: [0, range]},
+                    yaxis2: {range: [0, range]}
+                }
                 this.dataOutcomes = [{
-                    x: Object.keys(this.game1.outcomes).map(now => now / 1000),
+                    x: Object.keys(this.game1.outcomes).map(now => now % 10000),
                     y: Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val),
                     type: 'bar',
                     name: this.bookieKey1,
@@ -135,7 +158,7 @@ export default {
                     yaxis: 'y1'
                 },
                 {
-                    x: Object.keys(this.game2.outcomes).map(now => now / 1000),
+                    x: Object.keys(this.game2.outcomes).map(now => now % 10000),
                     y: Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val),
                     type: 'bar',
                     name: this.bookieKey2,
