@@ -1,5 +1,5 @@
 exports.up = function(knex) {
-    return knex.schema.table('pairs', function(table) {
+    return knex.schema.table('games', function(table) {
       table.index('id');
       table.index('sportKey');
       table.index('bookieKey');
@@ -8,7 +8,7 @@ exports.up = function(knex) {
     };
     
   exports.down = function(knex) {
-    return knex.schema.table('pairs', function(table) {
+    return knex.schema.table('games', function(table) {
       table.dropIndex('id');
       table.dropIndex('sportKey');
       table.dropIndex('bookieKey');
