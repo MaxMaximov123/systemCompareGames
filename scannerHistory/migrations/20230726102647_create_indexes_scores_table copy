@@ -1,5 +1,5 @@
 exports.up = function(knex) {
-  return knex.schema.table('outcomes', function(table) {
+  return knex.schema.table('scores', function(table) {
     table.index('path');
   });
   };
