@@ -26,6 +26,16 @@ app.use(express.static(staticFilesPath));
 app.post('/api/pairs', async (req, res) => {
     const stTime = new Date().getTime();
     const requestData = req.body;
+
+    var groupedNewSystem = [];
+    var groupedOldSystem = [];
+    if (requestData.filters.groupedNewSystem === 'Все') groupedNewSystem = [true, false];
+    if (requestData.filters.groupedNewSystem === 'Да') groupedNewSystem = [true,];
+    if (requestData.filters.groupedNewSystem === 'Нет') groupedNewSystem = [false,];
+
+    if (requestData.filters.groupedOldSystem === 'Все') groupedOldSystem = [true, false];
+    if (requestData.filters.groupedOldSystem === 'Да') groupedOldSystem = [true,];
+    if (requestData.filters.groupedOldSystem === 'Нет') groupedOldSystem = [false,];
     
     try{
       var pairs = {};
@@ -56,9 +66,25 @@ app.post('/api/pairs', async (req, res) => {
         'games2.bookieKey as bookieKey2',
         'games2.startTime as startTime2',)
         .orderBy('pairs.id', 'asc')
-        .whereNot('needGroup', null);
+        .where('similarityNames', '>=', requestData.filters.simNames.min)
+        .where('similarityNames', '<=', requestData.filters.simNames.max)
+        .where('similarityOutcomes', '>=', requestData.filters.simOutcomes.min)
+        .where('similarityOutcomes', '<=', requestData.filters.simOutcomes.max)
+        .where('similarityScores', '>=', requestData.filters.simScores.min)
+        .where('similarityScores', '<=', requestData.filters.simScores.max)
+        .whereIn('needGroup', groupedNewSystem)
+        .whereIn('grouped', groupedOldSystem)
       result.pairs = pairs;
-      result.pageCount = await db('pairs').whereNot('needGroup', null).count('id');
+      result.pageCount = await db('pairs')
+      .where('similarityNames', '>=', requestData.filters.simNames.min)
+      .where('similarityNames', '<=', requestData.filters.simNames.max)
+      .where('similarityOutcomes', '>=', requestData.filters.simOutcomes.min)
+      .where('similarityOutcomes', '<=', requestData.filters.simOutcomes.max)
+      .where('similarityScores', '>=', requestData.filters.simScores.min)
+      .where('similarityScores', '<=', requestData.filters.simScores.max)
+      .whereIn('needGroup', groupedNewSystem)
+      .whereIn('grouped', groupedOldSystem)
+      .count('id');
       result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));
     } catch(e){

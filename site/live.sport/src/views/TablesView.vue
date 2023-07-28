@@ -3,43 +3,74 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <h3 class="title">Результаты сравнения игр</h3>
     
-    <!-- <v-container class="filter">
-      <v-row>
-        <v-col cols="12">
-          <v-btn @click="showMenu = !showMenu">Фильтры</v-btn>
-        </v-col>
-      </v-row>
-      <v-row v-if="showMenu" style="width: 30%;">
-        <v-col cols="6">
-            <label>Сходство названий</label>
-            <div style="display: flex;">
-                <v-text-field style="margin-right: 10px;" v-model="value1" label="От" type="number"></v-text-field>
-                <v-text-field v-model="value1" label="До" type="number"></v-text-field>
-            </div>
-            
-        </v-col>
-        <v-col cols="6">
-          <v-combobox
-            label="Filter 2"
-            v-model="filter2Value"
-            :items="filter2Options"
-            hide-selected
-            multiple
-            outlined
-          ></v-combobox>
-        </v-col>
-        <v-col cols="6">
-          <v-checkbox v-model="filter3Value" label="Filter 3"></v-checkbox>
-        </v-col>
-        <v-col cols="6">
-          <v-checkbox v-model="filter4Value" label="Filter 4"></v-checkbox>
-        </v-col>
-      </v-row>
-    </v-container> -->
+    <table class="filters">
+        <tr>
+            <th>
+                Сходство названий:
+            </th>
 
+            <th>
+                Сходство коэффициентов:
+            </th>
+
+            <th>
+                Сходство счета:
+            </th>
+
+            <th>
+                Объединены новой системоой?
+            </th>
+
+            <th>
+                Объединены старой системоой?
+            </th>
+
+            <th rowspan="2">
+                <v-btn @click="applyFilters">Применить</v-btn>
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <div class="data-frame">
+                    <v-text-field v-model="filters.simNames.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.simNames.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                </div>
+            </td>
+
+            <td>
+                <div class="data-frame">
+                    <v-text-field v-model="filters.simOutcomes.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.simOutcomes.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                </div>
+            </td>
+
+            <td>
+                <div class="data-frame">
+                    <v-text-field v-model="filters.simScores.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.simScores.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                </div>
+            </td>
+
+            <td>
+                <v-combobox
+                    v-model="filters.groupedNewSystem"
+                    :items="['Все', 'Да', 'Нет']">
+                </v-combobox>
+            </td>
+
+            <td>
+                <v-combobox
+                    v-model="filters.groupedOldSystem"
+                    :items="['Все', 'Да', 'Нет']">
+                </v-combobox>
+            </td>
+
+        </tr>
+    </table>
     <div id="tables">
         <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
     </div>
+    
     <div>
     <v-pagination
       v-model="currentPage"
@@ -67,13 +98,23 @@ export default {
     },
     data(){
         return {
-            showMenu: false,
-            filter1Value: [],
-            filter1Options: ["Option 1", "Option 2", "Option 3"],
-            filter2Value: [],
-            filter2Options: ["Option A", "Option B", "Option C"],
-            filter3Value: false,
-            filter4Value: false,
+            filters: {
+                simNames: {
+                    min: 0,
+                    max: 1,
+                },
+
+                simOutcomes: {
+                    min: 0,
+                    max: 1,
+                },
+                simScores: {
+                    min: 0,
+                    max: 1,
+                },
+                groupedNewSystem: 'Все',
+                groupedOldSystem: 'Все',
+            },
 
             apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
@@ -91,17 +132,14 @@ export default {
     },
 
     methods: {
-        applyFilters() {
-            // Здесь можно выполнить действия при применении фильтров
-            console.log('Фильтры применены');
-            console.log('Число 1:', this.value1);
-            console.log('Число 2:', this.value2);
-            console.log('Чекбокс 1:', this.checkbox1);
-            console.log('Чекбокс 2:', this.checkbox2);
-            this.menuOpen = false; // Закрытие меню после применения фильтров
-            },
+        async applyFilters(){
+            router.push(`/pairs/1`);
+            this.currentPage = 1;
+            await this.render();
+        },
+
         async getPairs(){
-            const res = await this.postRequest(`http://${this.apiHost}/api/pairs`, {page: this.currentPage, oneGrouped: this.oneGrouped});
+            const res = await this.postRequest(`http://${this.apiHost}/api/pairs`, {page: this.currentPage, oneGrouped: this.oneGrouped, filters: this.filters});
             this.pageCount = Math.floor(Number(res.pageCount[0].count) / 10);
             this.pairs = res.pairs;
         },
@@ -115,7 +153,6 @@ export default {
         },
 
         async updatePage(e){
-            console.log(e)
             router.push(`/pairs/${this.currentPage}`);
             await this.render();
         },
@@ -147,13 +184,6 @@ export default {
 </script>
 <style>
     /* @import "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"; */
-    .tableHead {
-
-    }
-    .grouped {
-        font-size: 24px;
-        text-align: center;
-    }
 
     .title {
         width: 300px; /* Задайте желаемую ширину элемента */
@@ -163,45 +193,25 @@ export default {
         margin-bottom: 15px;
     }
 
-    .pagination {
+
+    
+    .input-val {
+        height: 5%;
+        width: 70%;
+    }
+
+    .filters {
+        font-size: 90%;
+        margin: auto;
+        width: 80%;
+    }
+
+    .filters td {
+        /* display: flex; */
+        border: 2px solid rgb(255, 255, 255);
+    }
+
+    .data-frame {
         display: flex;
-        font-size: 18px;
-        justify-content: center;
-        align-items: center;
     }
-
-    .pagination .v-pagination__item{
-    color: #fff;
-    background-color: #2196f3;
-    border-radius: 10%;
-    margin: 0 10px;
-    height: 20px;
-    width: 40px;
-    padding: 10px;
-    text-align: center;
-    transition: background-color 0.3s;
-    }
-    
-    .page-item {
-        color: #fff;
-        background-color: #2196f3;
-        border-radius: 10%;
-        margin: 0 10px;
-        height: 30px;
-        width: 40px;
-        text-align: center;
-        padding: 5px;
-        transition: background-color 0.3s;
-    }
-
-    .pagination .v-pagination__item:hover {
-        background-color: #1976d2;
-        cursor: pointer;
-    }
-
-    .page-item:hover {
-        background-color: #1976d2;
-        cursor: pointer;
-    }
-    
 </style>

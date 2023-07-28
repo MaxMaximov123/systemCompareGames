@@ -1,7 +1,7 @@
 <template>
     <div>
         <table class="table">
-            <thead>
+            <thead class="headers">
                 <th></th>
                 <th>Команда 1</th>
                 <th>Команда 2</th>
@@ -122,21 +122,29 @@
   };
   </script>
   <style>
-    table {
+    .table {
       font-size: 80%;
       margin-bottom: 20px;
       border-collapse: collapse;
       width: 90%;
-      margin: 0 auto
+      margin: 0 auto;
+      margin-left: 3%;
+      margin-right: 3%;
     }
 
-    th, td {
+    .headers th, td {
       padding: 8px;
       text-align: left;
       border: 2px solid grey;
     }
 
-    th {
+    .headers td {
+      padding: 8px;
+      text-align: left;
+      border: 2px solid grey;
+    }
+
+    .headers th {
       background-color: #f2f2f2;
     }
     
