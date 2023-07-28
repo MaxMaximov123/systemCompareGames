@@ -53,11 +53,9 @@ app.post('/api/pairs', async (req, res) => {
         'games1.startTime as startTime1',
         'games1.sportKey as sportKey',
         'games2.bookieKey as bookieKey2',
-        'games2.startTime as startTime2',
-
-        ).orderBy('pairs.needGroup', 'desc')
-        .orderBy('pairs.grouped', 'desc')
-        .orderBy('pairs.id', 'asc').whereNot('needGroup', null);
+        'games2.startTime as startTime2',)
+        .orderBy('pairs.id', 'asc')
+        .whereNot('needGroup', null);
       result.pairs = pairs;
       result.pageCount = await db('pairs').whereNot('needGroup', null).count('id');
       result.time = (new Date().getTime() - stTime) / 1000;

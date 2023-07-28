@@ -235,7 +235,8 @@ async function start(sportKey) {
                                     'similarityScores': null,
                                     'totalSimilarity': null,
                                     'needGroup': null,
-                                    'grouped': game1Id.globalGameId === game2Id.globalGameId
+                                    'grouped': game1Id.globalGameId === game2Id.globalGameId,
+                                    'now': new Date().getTime(),
                                 });
                                 console.log('NULL pair added');
                             } catch (error) {
@@ -261,7 +262,8 @@ async function start(sportKey) {
                                         'similarityScores': null,
                                         'totalSimilarity': null,
                                         'needGroup': null,
-                                        'grouped': game1Id.globalGameId === game2Id.globalGameId
+                                        'grouped': game1Id.globalGameId === game2Id.globalGameId,
+                                        'now': new Date().getTime(),
                                     });
                                     console.log('NULL pair added');
                                 } catch (error) {
@@ -299,7 +301,8 @@ async function start(sportKey) {
                                         'similarityScores': totalScores[0],
                                         'totalSimilarity': (totalOutcomes[0] + totalScores[0]) / 2,
                                         'needGroup': totalOutcomes[1] && totalScores[1],
-                                        'grouped': game1Id.globalGameId === game2Id.globalGameId
+                                        'grouped': game1Id.globalGameId === game2Id.globalGameId,
+                                        'now': new Date().getTime(),
                                     });
                                     console.log('pair added');
                                 } catch (error) {

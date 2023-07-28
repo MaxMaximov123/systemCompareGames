@@ -3,6 +3,40 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <h3 class="title">Результаты сравнения игр</h3>
     
+    <!-- <v-container class="filter">
+      <v-row>
+        <v-col cols="12">
+          <v-btn @click="showMenu = !showMenu">Фильтры</v-btn>
+        </v-col>
+      </v-row>
+      <v-row v-if="showMenu" style="width: 30%;">
+        <v-col cols="6">
+            <label>Сходство названий</label>
+            <div style="display: flex;">
+                <v-text-field style="margin-right: 10px;" v-model="value1" label="От" type="number"></v-text-field>
+                <v-text-field v-model="value1" label="До" type="number"></v-text-field>
+            </div>
+            
+        </v-col>
+        <v-col cols="6">
+          <v-combobox
+            label="Filter 2"
+            v-model="filter2Value"
+            :items="filter2Options"
+            hide-selected
+            multiple
+            outlined
+          ></v-combobox>
+        </v-col>
+        <v-col cols="6">
+          <v-checkbox v-model="filter3Value" label="Filter 3"></v-checkbox>
+        </v-col>
+        <v-col cols="6">
+          <v-checkbox v-model="filter4Value" label="Filter 4"></v-checkbox>
+        </v-col>
+      </v-row>
+    </v-container> -->
+
     <div id="tables">
         <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
     </div>
@@ -33,6 +67,14 @@ export default {
     },
     data(){
         return {
+            showMenu: false,
+            filter1Value: [],
+            filter1Options: ["Option 1", "Option 2", "Option 3"],
+            filter2Value: [],
+            filter2Options: ["Option A", "Option B", "Option C"],
+            filter3Value: false,
+            filter4Value: false,
+
             apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
             currentPage: 1,
@@ -49,6 +91,15 @@ export default {
     },
 
     methods: {
+        applyFilters() {
+            // Здесь можно выполнить действия при применении фильтров
+            console.log('Фильтры применены');
+            console.log('Число 1:', this.value1);
+            console.log('Число 2:', this.value2);
+            console.log('Чекбокс 1:', this.checkbox1);
+            console.log('Чекбокс 2:', this.checkbox2);
+            this.menuOpen = false; // Закрытие меню после применения фильтров
+            },
         async getPairs(){
             const res = await this.postRequest(`http://${this.apiHost}/api/pairs`, {page: this.currentPage, oneGrouped: this.oneGrouped});
             this.pageCount = Math.floor(Number(res.pageCount[0].count) / 10);
