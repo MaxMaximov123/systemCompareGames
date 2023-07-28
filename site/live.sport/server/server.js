@@ -38,6 +38,7 @@ app.post('/api/pairs', async (req, res) => {
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
         'pairs.id as id',
+        'pairs.now as now',
         'pairs.isLive as isLive',
         'pairs.game1Team1Name as game1Team1Name',
         'pairs.game2Team1Name as game2Team1Name',
