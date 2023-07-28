@@ -15,6 +15,7 @@
                 <th>Среднее сходство</th>
                 <th>Объединены новой системой?</th>
                 <th>Объединены старой системой?</th>
+                <th>Время создания</th>
             </thead>
             <tr class="none-tr"></tr>
             <tbody v-for="item in items" class="data">
@@ -58,6 +59,9 @@
                     </td>
                     <td rowspan="2">
                         {{ item.grouped ? 'Да' : 'Нет'}}
+                    </td>
+                    <td rowspan="2">
+                        {{ formatDateFromUnixTimestamp(item.now)}}
                     </td>
                 </tr>
                 <tr>
