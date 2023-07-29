@@ -146,8 +146,6 @@ export default {
                 groupedNewSystem: this.queryParams.groupedNewSystem ? this.queryParams.groupedNewSystem : 'Все',
                 groupedOldSystem: this.queryParams.groupedOldSystem ? this.queryParams.groupedOldSystem : 'Все',
             },
-        
-        console.log(queryString.stringify(this.filters));
         this.currentPage = Number(this.$route.params.page);
         this.render();
     },
@@ -187,7 +185,7 @@ export default {
         },
 
         async updatePage(e){
-            router.push(`/pairs/${this.currentPage}`);
+            router.push({path: `/pairs/${this.currentPage}`, query: this.getURLParams()});
             await this.render();
         },
 
@@ -204,7 +202,6 @@ export default {
             fetch(url, options)
             .then(response => response.json())
             .then(result => {
-                console.log(result);
                 resolve(result);
             })
             .catch(error => {
