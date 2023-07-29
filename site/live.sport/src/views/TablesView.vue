@@ -87,6 +87,7 @@
 import router from '@/router';
 import tablePair from '@/components/tablePair.vue'
 import Paginate from 'vuejs-paginate-next';
+import queryString from 'query-string';
 
 
 export default {
@@ -127,15 +128,48 @@ export default {
     },
 
     async mounted() {
+        this.queryParams = this.$route.query;
+        this.filters = {
+                simNames: {
+                    min: this.queryParams.simNamesMin ? this.queryParams.simNamesMin : 0,
+                    max: this.queryParams.simNamesMax ? this.queryParams.simNamesMax : 1,
+                },
+
+                simOutcomes: {
+                    min: this.queryParams.simOutcomesMin ? this.queryParams.simOutcomesMin : 0,
+                    max: this.queryParams.simOutcomesMax ? this.queryParams.simOutcomesMax : 1,
+                },
+                simScores: {
+                    min: this.queryParams.simScoresMin ? this.queryParams.simScoresMin : 0,
+                    max: this.queryParams.simScoresMax ? this.queryParams.simScoresMax : 1,
+                },
+                groupedNewSystem: this.queryParams.groupedNewSystem ? this.queryParams.groupedNewSystem : 'Все',
+                groupedOldSystem: this.queryParams.groupedOldSystem ? this.queryParams.groupedOldSystem : 'Все',
+            },
+        
+        console.log(queryString.stringify(this.filters));
         this.currentPage = Number(this.$route.params.page);
         this.render();
     },
 
     methods: {
         async applyFilters(){
-            router.push(`/pairs/1`);
+            router.push({path: `/pairs/1`, query: this.getURLParams()});
             this.currentPage = 1;
             await this.render();
+        },
+
+        getURLParams(){
+            return {
+                groupedNewSystem: this.filters.groupedNewSystem,
+                groupedOldSystem: this.filters.groupedOldSystem,
+                simNamesMin: this.filters.simNames.min,
+                simNamesMax: this.filters.simNames.max,
+                simOutcomesMin: this.filters.simOutcomes.min,
+                simOutcomesMax: this.filters.simOutcomes.max,
+                simNamesMin: this.filters.simNames.min,
+                simNamesMax: this.filters.simNames.max,
+            };
         },
 
         async getPairs(){
