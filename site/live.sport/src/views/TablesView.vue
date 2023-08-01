@@ -172,7 +172,7 @@ export default {
 
         async getPairs(){
             const res = await this.postRequest(`http://${this.apiHost}/api/pairs`, {page: this.currentPage, oneGrouped: this.oneGrouped, filters: this.filters});
-            this.pageCount = Math.floor(Number(res.pageCount[0].count) / 10);
+            this.pageCount = Math.ceil(Number(res.pageCount[0].count) / 10);
             this.pairs = res.pairs;
         },
 

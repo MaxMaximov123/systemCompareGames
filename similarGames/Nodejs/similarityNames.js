@@ -2,7 +2,7 @@ const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщ�
 const slovar = {
     'а': ['a', 'o'], 
     'б': ['b'], 
-    'в': ['v', 'w', 'f', 'ph'], 
+    'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
     'е': ['e', 'ye', 'ie'], 
@@ -22,8 +22,8 @@ const slovar = {
     'т': ['t'], 
     'у': ['u'], 
     'ф': ['f', 'ph'], 
-    'х': ['h', 'ch'],
-    'ц': ['c'], 
+    'х': ['h', 'ch', 'kh'],
+    'ц': ['c', 'ts'], 
     'ч': ['ch', 'c'], 
     'ш': ['sh', 'sz'], 
     'щ': ['sch'], 
@@ -253,7 +253,7 @@ async function main(){
 // _____________________Example_______________
 
 
-const example = async () => console.log(await similarityNames('ropz (FaZe)', 'FaZe.ropz'));
+const example = async () => console.log(await similarityNames('Huk M', 'Сурин А.'));
 example();
 
 module.exports = similarityNames;
