@@ -27,6 +27,8 @@ async function start(sportKey) {
 
 
     while (true){
+        try{
+
         // const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey).orderBy('startTime', 'asc') // получение списка id1
         const game1Ids = await db('games')
         .join('outcomes', 'outcomes.id', 'games.id')
@@ -34,21 +36,24 @@ async function start(sportKey) {
         //     this.on('games.id', '=', 'pairs.id1')
         //       .orOn('games.id', '=', 'pairs.id2');
         //   })
-        //   .whereNull('pairs.id1')
-        //   .whereNull('pairs.id2')
         //   .where('pairs.needGroup', false)
         //   .where('pairs.grouped', false)
+
           .where('games.sportKey', sportKey)
         //   .orderBy('games.startTime', 'asc')
           .select('games.id as id')
           .groupBy('games.id')
           .havingRaw('(? - MIN(outcomes.now)) / 3600000  > ?', [new Date().getTime(), TIMELIVEGAME]);
-        
+
         console.log(game1Ids);
         await db('outcomes').whereIn('id', game1Ids.map(obj => obj.id)).del();
         await db('scores').whereIn('id', game1Ids.map(obj => obj.id)).del();
+        
         console.log('DELETE', sportKey, game1Ids.length);
         await delay(60000 * 10);
+    } catch(e){
+
+    }
     }
 }
 
