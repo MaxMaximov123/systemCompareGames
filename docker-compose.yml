@@ -34,15 +34,15 @@ services:
     
     command: sh ./start.sh
 
-  python:
-    restart: always
-    build:
-      context: .
-      dockerfile: similarGames/pythonApi/Dockerfile
-    ports:
-      - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
-    networks:
-      - mynetwork
+  # python:
+  #   restart: always
+  #   build:
+  #     context: .
+  #     dockerfile: similarGames/pythonApi/Dockerfile
+  #   ports:
+  #     - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
+  #   networks:
+  #     - mynetwork
     
   
   similarer1:
@@ -59,7 +59,7 @@ services:
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: TENNIS;SOCCER;HOCKEY;BASEBALL
     depends_on:
-      - python
+      # - python
       - db
     networks:
       - mynetwork
@@ -78,7 +78,7 @@ services:
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: CRICKET;BASKETBALL;VOLLEYBALL;HANDBALL;AMERICAN_FOOTBALL
     depends_on:
-      - python
+      # - python
       - db
     networks:
       - mynetwork
@@ -97,7 +97,7 @@ services:
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: FUTSAL;TABLE_TENNIS;WATER_POLO;CYBERSPORT;SNOOKER
     depends_on:
-      - python
+      # - python
       - db
     networks:
       - mynetwork

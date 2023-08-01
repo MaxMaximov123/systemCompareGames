@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 
+
 const knex = require('knex');
 const config = require('./knexfile');
 

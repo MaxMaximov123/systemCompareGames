@@ -30,14 +30,14 @@ async function start(sportKey) {
         // const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey).orderBy('startTime', 'asc') // получение списка id1
         const game1Ids = await db('games')
         .join('outcomes', 'outcomes.id', 'games.id')
-        .join('pairs', function () {
-            this.on('games.id', '=', 'pairs.id1')
-              .orOn('games.id', '=', 'pairs.id2');
-          })
+        // .join('pairs', function () {
+        //     this.on('games.id', '=', 'pairs.id1')
+        //       .orOn('games.id', '=', 'pairs.id2');
+        //   })
         //   .whereNull('pairs.id1')
         //   .whereNull('pairs.id2')
-          .where('pairs.needGroup', false)
-          .where('pairs.grouped', false)
+        //   .where('pairs.needGroup', false)
+        //   .where('pairs.grouped', false)
           .where('games.sportKey', sportKey)
         //   .orderBy('games.startTime', 'asc')
           .select('games.id as id')

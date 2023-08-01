@@ -1,7 +1,8 @@
 const knex = require('knex');
 const config = require('./knexfile');
 const fs = require('fs')
-const getRes = require('./names')
+// const getRes = require('./names')
+const similarityNames = require('./similarityNames.js');
 
 const db = knex(config.development);
 
@@ -285,7 +286,17 @@ async function start(sportKey) {
                                     game2Name2: game2Id?.team2Name
                                 };
                                 // const totalNames = await compareNames(namesToSim);
-                                const totalNames = Number(await getRes(...Object.values(namesToSim)));
+                                // const totalNames = Number(await getRes(...Object.values(namesToSim)));
+                                const forecastNames = {
+                                    'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1),
+                                    'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2),
+                                    'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2),
+                                    'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2),
+                                };
+
+                                const totalNames = Math.max(
+                                    (forecastNames['n1+n2'].sameWordsCount + forecastNames['n3+n4'].sameWordsCount) / 2, 
+                                    (forecastNames['n1+n4'].sameWordsCount + forecastNames['n2+n3'].sameWordsCount) / 2);
                                 console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores, totalNames);
                                 try {
                                     await db('pairs').insert({
