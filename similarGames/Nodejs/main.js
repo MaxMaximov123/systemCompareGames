@@ -301,7 +301,7 @@ async function start(sportKey) {
                                 var needGroup = false;
                                 if (totalNames === 1 && totalOutcomes[0] >= 0.8 && totalScores[0] >= 0.8) needGroup = true;
                                 if (totalNames >= 0.75 && totalOutcomes[0] >= 0.9 && totalScores[0] >= 0.85) needGroup = true;
-                                console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores, totalNames);
+                                console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes[0], totalScores[0], totalNames, needGroup);
                                 try {
                                     await db('pairs').insert({
                                         'id1': game1Id.id,
