@@ -1,7 +1,7 @@
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const slovar = {
     'а': ['a', 'o'], 
-    'б': ['b', 'p'], 
+    'б': ['b'], 
     'в': ['v', 'w', 'f', 'ph'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
@@ -18,7 +18,7 @@ const slovar = {
     'о': ['o'], 
     'п': ['p'], 
     'р': ['r'], 
-    'с': ['s', 'c', 'sz'], 
+    'с': ['s', 'c', 'sz', 'z'], 
     'т': ['t'], 
     'у': ['u'], 
     'ф': ['f', 'ph'], 
@@ -33,7 +33,7 @@ const slovar = {
     'э': ['e', 'ie', 'ye'],
     'ю': ['u', 'iu', 'yu'], 
     'я': ['ya', 'ia', 'j', 'ya'],
-    'y': ['y', 'i']
+    'y': ['y', 'i', 'oo']
 }
 
 const unimportantComponents = [
@@ -114,6 +114,7 @@ async function translate(name){
     try {
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0];
     } catch (e){
+        console.log(e);
         return name;
     }
 }
