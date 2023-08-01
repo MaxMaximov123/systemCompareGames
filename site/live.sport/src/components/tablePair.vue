@@ -12,7 +12,6 @@
                 <th>Сходство названий</th>
                 <th>Сходство коэффициентов</th>
                 <th>Сходство счета</th>
-                <th>Среднее сходство</th>
                 <th>Объединены новой системой?</th>
                 <th>Объединены старой системой?</th>
                 <th>Время создания</th>
@@ -50,9 +49,6 @@
                     </td>
                     <td rowspan="2">
                         {{ item.similarityScores ? item.similarityScores : 'Неизвестно'}}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.totalSimilarity }}
                     </td>
                     <td rowspan="2">
                         {{ item.needGroup ? 'Да' : 'Нет'}}
