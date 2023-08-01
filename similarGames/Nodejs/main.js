@@ -297,6 +297,10 @@ async function start(sportKey) {
                                 const totalNames = Math.max(
                                     (forecastNames['n1+n2'].sameWordsCount + forecastNames['n3+n4'].sameWordsCount) / 2, 
                                     (forecastNames['n1+n4'].sameWordsCount + forecastNames['n2+n3'].sameWordsCount) / 2);
+
+                                var needGroup = false;
+                                if (totalNames === 1 && totalOutcomes[0] >= 0.8 && totalScores[0] >= 0.8) needGroup = true;
+                                if (totalNames >= 0.75 && totalOutcomes[0] >= 0.9 && totalScores[0] >= 0.85) needGroup = true;
                                 console.log('Comparing...', game1Id.id, game2Id.id, totalOutcomes, totalScores, totalNames);
                                 try {
                                     await db('pairs').insert({

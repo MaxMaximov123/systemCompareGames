@@ -253,7 +253,7 @@ async function main(){
 // _____________________Example_______________
 
 
-// const example = async () => console.log(await similarityNames('Атлантик Греция Целтис (w)', 'Greece ATL Women'));
-// example();
+const example = async () => console.log(await similarityNames('ropz (FaZe)', 'FaZe.ropz'));
+example();
 
 module.exports = similarityNames;
