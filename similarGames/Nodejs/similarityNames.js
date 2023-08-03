@@ -36,6 +36,10 @@ const slovar = {
     'y': ['y', 'i', 'oo']
 }
 
+const modifiers = {
+    
+}
+
 const unimportantComponents = [
     '-', ',', ':', '*', '/', '|',
     '[', ']', '(', ')', ' жен ', ' w ', ' FC ', ' women ', ' esports ', ' м ', ' m ', ' до ', 
@@ -180,6 +184,7 @@ async function similarityNames(name1, name2){
     name1 = clearingName(name1);
     name2 = clearingName(name2);
 
+    console.log(name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [])
     const name1Words = name1.split(' ').filter(word => word.length > 0);
     const name2Words = name2.split(' ').filter(word => word.length > 0);
 
@@ -253,7 +258,7 @@ async function main(){
 // _____________________Example_______________
 
 
-const example = async () => console.log(await similarityNames('Huk M', 'Сурин А.'));
+const example = async () => console.log(await similarityNames('Даклак (мол) (жен) ', 'Dak Lak-youth (w)'));
 example();
 
 module.exports = similarityNames;

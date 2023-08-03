@@ -221,7 +221,7 @@ export default {
         },
 
         formatData(game1, game2){
-            const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
+            const minTime = Math.floor(Math.min(game1[0].now, game2[0].now) / 1000);
             const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
 
             const newGame1 = {};
@@ -249,6 +249,7 @@ export default {
                             time: timeStep,
                             val: this.activeTab ? game1[indGame1].score : game1[indGame1].odds
                         };
+                        if (lastStateGame1[game1[indGame1].path].val === 0) lastStateGame1[game1[indGame1].path].val = -1;
                     } else break;
                 }
 
@@ -259,6 +260,7 @@ export default {
                             time: timeStep,
                             val: this.activeTab ? game2[indGame2].score : game2[indGame2].odds
                         };
+                        if (lastStateGame2[game2[indGame2].path].val === 0) lastStateGame2[game2[indGame2].path].val = -1;
                     } else break;
                 }
                 newGame1[timeStep] = this.copy(lastStateGame1);

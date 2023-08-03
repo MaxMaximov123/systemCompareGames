@@ -125,10 +125,12 @@ async function compareOutcomes(game1, game2){
             if (outcomePath in newGame2[tik] && newGame2[tik][outcomePath].val && newGame1[tik][outcomePath].val){
                 const d1 = newGame1[tik][outcomePath].val;
                 const d2 = newGame2[tik][outcomePath].val;
-                const simTwoOutcome = Math.min(d1, d2) / Math.max(d1, d2);
-                if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
-                totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
-                totalSimOutcOnTik[outcomePath].count ++;
+                if (d1 !== null && d2 !== null && d1 > 0 && d2 > 0){
+                    const simTwoOutcome = Math.min(d1, d2) / Math.max(d1, d2);
+                    if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
+                    totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
+                    totalSimOutcOnTik[outcomePath].count ++;
+                }
             }
         }
     }
@@ -156,10 +158,13 @@ async function compareScores(game1, game2){
             if (outcomePath in newGame2[tik] && newGame2[tik][outcomePath].val && newGame1[tik][outcomePath].val){
                 const d1 = newGame1[tik][outcomePath].val;
                 const d2 = newGame2[tik][outcomePath].val;
-                const simTwoOutcome = Number(d1 === d2);
-                if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
-                totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
-                totalSimOutcOnTik[outcomePath].count ++;
+                if (d1 !== null && d2 !== null){
+                    const simTwoOutcome = Number(d1 === d2);
+                    if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
+                    totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
+                    totalSimOutcOnTik[outcomePath].count ++;
+                }
+                
             }
         }
     }

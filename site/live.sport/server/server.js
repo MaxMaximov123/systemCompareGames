@@ -166,7 +166,8 @@ app.post('/api/graphic', async (req, res) => {
         'scores.score as score',
         'scores.now as now',)
       .where('pairs.id', requestData.id)
-      .where('scores.path', requestData.path);
+      .where('scores.path', requestData.path)
+      .orderBy('scores.now', 'asc');
       
       result.game2 = await db('pairs')
       .join('scores', 'pairs.id2', 'scores.id')
@@ -177,7 +178,8 @@ app.post('/api/graphic', async (req, res) => {
         'scores.score as score',
         'scores.now as now')
       .where('pairs.id', requestData.id)
-      .where('scores.path', requestData.path);
+      .where('scores.path', requestData.path)
+      .orderBy('scores.now', 'asc');
 
     } else {
       result.game1 = await db('pairs')
@@ -189,7 +191,8 @@ app.post('/api/graphic', async (req, res) => {
         'outcomes.odds as odds',
         'outcomes.now as now')
       .where('pairs.id', requestData.id)
-      .where('outcomes.path', requestData.path);
+      .where('outcomes.path', requestData.path)
+      .orderBy('outcomes.now', 'asc');
       
       result.game2 = await db('pairs')
       .join('outcomes', 'pairs.id2', 'outcomes.id')
@@ -200,7 +203,8 @@ app.post('/api/graphic', async (req, res) => {
         'outcomes.odds as odds',
         'outcomes.now as now')
       .where('pairs.id', requestData.id)
-      .where('outcomes.path', requestData.path);
+      .where('outcomes.path', requestData.path)
+      .orderBy('outcomes.now', 'asc');
     }
     res.send(JSON.stringify({data: result, time: (new Date().getTime()) - stTime}));
   } catch(e){
