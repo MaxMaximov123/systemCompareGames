@@ -37,13 +37,70 @@ const slovar = {
 }
 
 const modifiers = {
-    
+    "BETRADAR": [
+        /\sbesports\s/gi,
+        /\sfc\s/gi,
+        /\ssc\s/gi,
+        /\s\(.+\)\s/gi
+
+    ],
+    "OLIMP": [
+        /\s\(до\s\d+\)\s/gi,
+        /\sesports\s/gi,
+        /\s\(жен\)\s/gi,
+        /\sунив\s/gi,
+        /\sуниверситет\s/gi,
+
+    ],
+    "VIRGINBET": [
+        /\s\[W\]\s/gi,
+        /\sU\d+\s/gi,
+        /\sesports\s/gi,
+        /\sfc\s/gi,
+
+    ],
+    "BET365": [
+        /\sU\d+\s/gi,
+        /\sfk\s/gi,
+        /\sesports\s/gi,
+        /\swomen\s/gi,
+        /\suniversity\s/gi,
+        /\s\(women\)\s/gi,
+
+    ],
+    "BETMGM": [
+        /\s\(.+\)\s/gi,
+        /\sfc\s/gi,
+        /\sfk\s/gi,
+        /\sc\s/gi,
+        /\suniversity\s/gi,
+
+
+    ],
+    "PINNACLE": [
+        /\sfc\s/gi,
+        /\sfk\s/gi,
+        /\sc\s/gi,
+        /\sU\d+\s/gi,
+        /\sesport\w*\s/gi,
+        /\syouth\s/gi,
+        /\suniversity\s/gi,
+
+
+    ],
+    "FONBET": [
+        /\suniversity\s/gi,
+        /\s\(w\)\s/gi,
+        /\sesport\w*\s/gi,
+        /\sU\d+\s/gi,
+
+    ],
 }
 
 const unimportantComponents = [
     '-', ',', ':', '*', '/', '|',
-    '[', ']', '(', ')', ' жен ', ' w ', ' FC ', ' women ', ' esports ', ' м ', ' m ', ' до ', 
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ECF ', ' SC ', ' university ', ' U ',
+    '[', ']', '(', ')', ' жен ', ' w ', ' FC ', ' women ', ' esports ', ' м ', ' m ', ' до '
+    , ' ECF ', ' SC ', ' university ', ' U ',
     ' univ ', ' университет ', ' унив ', ' FK ', ' team ', ' reserves ', ' CF ', '.'
 ]
 
@@ -55,7 +112,10 @@ const googleTranslateURL = (from, to, txt) =>
   `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${from}&tl=${to}&q=${txt}`;
 
 
-function clearingName(name){
+function clearingName(name, bookieKey){
+    for (let component of modifiers[bookieKey]){
+        name = name.replace(component, ' ');
+    }
     for (let component of unimportantComponents){
         name = name.replace(component, ' ');
         name = name.replace(capitalizeFirstLetter(component), ' ');
@@ -172,19 +232,17 @@ function pairWithTheBestSimilarity(arr){
     for (let obj of arr){
         if (obj.sameWordsCount >= pair.sameWordsCount){
             pair = JSON.parse(JSON.stringify(obj));
-
         }
     }
     return pair;
 }
 
-async function similarityNames(name1, name2){
+async function similarityNames(name1, name2, bookieKey1, bookieKey2){
     name1 = ' ' + name1 + ' ';
     name2 = ' ' + name2 + ' ';
-    name1 = clearingName(name1);
-    name2 = clearingName(name2);
+    name1 = clearingName(name1, bookieKey1);
+    name2 = clearingName(name2, bookieKey2);
 
-    console.log(name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [])
     const name1Words = name1.split(' ').filter(word => word.length > 0);
     const name2Words = name2.split(' ').filter(word => word.length > 0);
 
@@ -259,6 +317,6 @@ async function main(){
 
 
 const example = async () => console.log(await similarityNames('Даклак (мол) (жен) ', 'Dak Lak-youth (w)'));
-example();
+// example();
 
 module.exports = similarityNames;

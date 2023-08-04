@@ -207,7 +207,7 @@ async function start(sportKey) {
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startTime', 'desc')
-        .limit(100) // получение списка id1
+        .limit(300) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -293,10 +293,10 @@ async function start(sportKey) {
                                 // const totalNames = await compareNames(namesToSim);
                                 // const totalNames = Number(await getRes(...Object.values(namesToSim)));
                                 const forecastNames = {
-                                    'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1),
-                                    'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2),
-                                    'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2),
-                                    'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2),
+                                    'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
+                                    'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                    'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                    'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game1Id.bookieKey, game2Id.bookieKey),
                                 };
 
                                 const totalNames = Math.max(
