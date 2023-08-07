@@ -15,7 +15,7 @@ const slovar = {
     'л': ['l'], 
     'м': ['m'], 
     'н': ['n', 'm'],
-    'о': ['o'], 
+    'о': ['o', 'oe'], 
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
@@ -229,7 +229,7 @@ function getSameWordsCount(set1Words, set2Words){
             set2Words[numWord].toLowerCase().startsWith(set1Words[numWord].toLowerCase())) 
             {
                 sameWordsCount++;
-                if (set1Words[numWord].length > 1 && set2Words[numWord].length > 1){
+                if (set1Words[numWord] === set2Words[numWord] && set1Words[numWord].length >= 3 && set2Words[numWord].length >= 3){
                     wordsMatched = true;
                 }
             }

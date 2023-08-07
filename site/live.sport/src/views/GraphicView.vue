@@ -114,7 +114,7 @@ export default {
             if (this.activeTab){ // scores
                 const range1 = Math.max(...Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val))
                 const range2 = Math.max(...Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val))
-                const range = Math.max(range1. range2);
+                const range = Math.max(range1, range2);
                 this.layoutOtcomes = {
                     grid: {rows: 2, columns: 1},
                     title: 'История',
@@ -142,7 +142,7 @@ export default {
             } else {
                 const range1 = Math.max(...Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val))
                 const range2 = Math.max(...Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val))
-                const range = Math.max(range1. range2);
+                const range = Math.max(range1, range2);
                 this.layoutOtcomes = {
                     grid: {rows: 2, columns: 1},
                     title: 'История',
