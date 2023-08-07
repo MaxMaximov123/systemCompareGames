@@ -48,6 +48,7 @@ const modifiers = {
         /\s\(до\s\d+\)\s/gi,
         /\sesports\s/gi,
         /\s\(жен\)\s/gi,
+        /\s\(рез\)\s/gi,
         /\sунив\s/gi,
         /\sуниверситет\s/gi,
 
@@ -66,6 +67,7 @@ const modifiers = {
         /\swomen\s/gi,
         /\suniversity\s/gi,
         /\s\(women\)\s/gi,
+        /\sreserves\s/gi,
 
     ],
     "BETMGM": [
@@ -85,12 +87,14 @@ const modifiers = {
         /\sesport\w*\s/gi,
         /\syouth\s/gi,
         /\suniversity\s/gi,
+        /\sreserves\s/gi,
 
 
     ],
     "FONBET": [
         /\suniversity\s/gi,
         /\s\(w\)\s/gi,
+        /\s\(r\)\s/gi,
         /\sesport\w*\s/gi,
         /\sU\d+\s/gi,
 

@@ -207,7 +207,7 @@ async function start(sportKey) {
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startTime', 'desc')
-        .limit(300) // получение списка id1
+        .limit(150) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
