@@ -39,7 +39,7 @@
                         {{ item.bookieKey1}}
                     </td>
                     <td>
-                        {{ formatDateFromUnixTimestamp(item.startTime1)}}
+                        {{ Number(item.startTime1) ? formatDateFromUnixTimestamp(item.startTime1) : 'Неизвестно'}}
                     </td>
                     <td rowspan="2">
                         {{ item.similarityNames }}
@@ -71,7 +71,7 @@
                         {{ item.bookieKey2}}
                     </td>
                     <td>
-                        {{ formatDateFromUnixTimestamp(item.startTime2)}}
+                        {{ Number(item.startTime2) ? formatDateFromUnixTimestamp(item.startTime2) : 'Неизвестно'}}
                     </td>
                 </tr>
                 <tr class="none-tr"></tr>

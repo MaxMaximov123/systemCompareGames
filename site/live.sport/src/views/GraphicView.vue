@@ -110,64 +110,67 @@ export default {
 
     methods: {
         updatePlot(e=null){
-            this.isLoading = true;
             if (this.activeTab){ // scores
-                const range1 = Math.max(...Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val))
-                const range2 = Math.max(...Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val))
-                const range = Math.max(range1, range2);
-                this.layoutOtcomes = {
-                    grid: {rows: 2, columns: 1},
-                    title: 'История',
-                    yaxis1: {range: [0, range]},
-                    yaxis2: {range: [0, range]}
-                }
                 this.dataScores = [{
-                    x: Object.keys(this.game1.scores).map(now => now % 10000),
+                    x: Object.keys(this.game1.scores),
                     y: Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val),
                     type: 'bar',
                     name: this.bookieKey1,
                     xaxis: 'x1',
-                    yaxis: 'y1'
+                    yaxis: 'y1',
+                    text: Object.keys(this.game1.scores).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
+                    hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
+                    textposition: 'none'
                 },
                 {
-                    x: Object.keys(this.game2.scores).map(now => now % 10000),
+                    x: Object.keys(this.game2.scores),
                     y: Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val),
                     type: 'bar',
                     name: this.bookieKey2,
                     xaxis: 'x2',
-                    yaxis: 'y2'
+                    yaxis: 'y2',
+                    text: Object.keys(this.game2.scores).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
+                    hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
+                    textposition: 'none'
                 },
                 ];
                 this.paths = this.copy(this.pathsScores);
             } else {
-                const range1 = Math.max(...Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val))
-                const range2 = Math.max(...Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val))
-                const range = Math.max(range1, range2);
-                this.layoutOtcomes = {
-                    grid: {rows: 2, columns: 1},
-                    title: 'История',
-                    yaxis1: {range: [0, range]},
-                    yaxis2: {range: [0, range]}
-                }
                 this.dataOutcomes = [{
-                    x: Object.keys(this.game1.outcomes).map(now => now % 10000),
+                    x: Object.keys(this.game1.outcomes),
                     y: Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val),
                     type: 'bar',
                     name: this.bookieKey1,
                     xaxis: 'x1',
-                    yaxis: 'y1'
+                    yaxis: 'y1',
+                    text: Object.keys(this.game1.outcomes).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
+                    hovertemplate: '%{text} ' + 'Кэф.: %{y:.2f}',
+                    showlegend: false,
+                    textposition: 'none'
                 },
                 {
-                    x: Object.keys(this.game2.outcomes).map(now => now % 10000),
+                    x: Object.keys(this.game2.outcomes),
                     y: Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val),
                     type: 'bar',
                     name: this.bookieKey2,
                     xaxis: 'x2',
-                    yaxis: 'y2'
+                    yaxis: 'y2',
+                    text: Object.keys(this.game1.outcomes).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
+                    hovertemplate: '%{text} ' + 'Кэф.: %{y:.2f}',
+                    showlegend: false,
+                    textposition: 'none'
                 },
                 ];
-                this.isLoading = false;
             }
+        },
+
+        getTimeFromTimestamp(timestamp){
+            const date = new Date(Number(timestamp) * 1000);
+            const hours = date.getHours();
+            const minutes = "0" + date.getMinutes();
+            const seconds = "0" + date.getSeconds();
+            const formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+            return formattedTime;
         },
         async getData(type=0){
             this.isLoading = true;
@@ -179,6 +182,15 @@ export default {
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
+                const rangeOutcomes1 = Math.max(...res.game1.map(obj => obj.outcome));
+                const rangeOutcomes2 = Math.max(...res.game2.map(obj => obj.outcome));
+                const rangeOutcomes = Math.max(rangeOutcomes1, rangeOutcomes2);
+                this.layoutOtcomes = {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История коэффициентов',
+                    yaxis1: {range: [0, rangeOutcomes]},
+                    yaxis2: {range: [0, rangeOutcomes]}
+                }
             }
             if (type === 1) {
                 res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathScores});
@@ -186,7 +198,18 @@ export default {
                 this.game1.scores = res.game1;
                 this.game2.scores = res.game2;
                 this.formatData(this.game1.scores, this.game2.scores);
+                const rangeScores1 = Math.max(...res.game1.map(obj => obj.score));
+                const rangeScores2 = Math.max(...res.game2.map(obj => obj.score));
+                const rangeScores = Math.max(rangeScores1, rangeScores2);
+                this.layoutOtcomes = {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История счета',
+                    yaxis1: {range: [-1, rangeScores]},
+                    yaxis2: {range: [-1, rangeScores]}
+                }
             }
+
+
             this.bookieKey1 = res.game1[0].bookieKey;
             this.bookieKey2 = res.game2[0].bookieKey;
             this.updatePlot();
