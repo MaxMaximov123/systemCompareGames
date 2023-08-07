@@ -20,7 +20,7 @@ const slovar = {
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
     'т': ['t'], 
-    'у': ['u'], 
+    'у': ['u', 'oo'], 
     'ф': ['f', 'ph'], 
     'х': ['h', 'ch', 'kh'],
     'ц': ['c', 'ts'], 
@@ -33,7 +33,7 @@ const slovar = {
     'э': ['e', 'ie', 'ye'],
     'ю': ['u', 'iu', 'yu'], 
     'я': ['ya', 'ia', 'j', 'ya'],
-    'y': ['y', 'i', 'oo']
+    'y': ['y', 'i']
 }
 
 const modifiers = {
@@ -219,12 +219,20 @@ function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
 
 function getSameWordsCount(set1Words, set2Words){
     var sameWordsCount = 0;
+    var wordsMatched = false;
     for (let numWord=0;numWord<set1Words.length;numWord++){
         if (set1Words[numWord].toLowerCase() === set2Words[numWord].toLowerCase() || 
             set1Words[numWord].toLowerCase().startsWith(set2Words[numWord].toLowerCase()) || 
-            set2Words[numWord].toLowerCase().startsWith(set1Words[numWord].toLowerCase())) sameWordsCount++;
+            set2Words[numWord].toLowerCase().startsWith(set1Words[numWord].toLowerCase())) 
+            {
+                sameWordsCount++;
+                if (set1Words[numWord].length > 1 && set2Words[numWord].length > 1){
+                    wordsMatched = true;
+                }
+            }
     }
-    return sameWordsCount / set1Words.length;
+    if (wordsMatched) return sameWordsCount / set1Words.length;
+    return 0;
 }
 
 function pairWithTheBestSimilarity(arr){
@@ -316,7 +324,7 @@ async function main(){
 // _____________________Example_______________
 
 
-const example = async () => console.log(await similarityNames('Даклак (мол) (жен) ', 'Dak Lak-youth (w)'));
-// example();
+const example = async () => console.log(await similarityNames('Dmitry V. Alexandrov', 'Viktorov D. Alexandrov', 'VIRGINBET', 'FONBET'));
+example();
 
 module.exports = similarityNames;
