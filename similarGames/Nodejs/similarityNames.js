@@ -5,7 +5,7 @@ const slovar = {
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
-    'е': ['e', 'ye', 'ie'], 
+    'е': ['e', 'ye', 'ie', 'y'], 
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
     'з': ['z', 'th'], 
@@ -14,7 +14,7 @@ const slovar = {
     'к': ['k', 'c'], 
     'л': ['l'], 
     'м': ['m'], 
-    'н': ['n'],
+    'н': ['n', 'm'],
     'о': ['o'], 
     'п': ['p'], 
     'р': ['r'], 
@@ -26,7 +26,7 @@ const slovar = {
     'ц': ['c', 'ts'], 
     'ч': ['ch', 'c'], 
     'ш': ['sh', 'sz'], 
-    'щ': ['sch'], 
+    'щ': ['sch', 'shch', 'sh', 'ch'], 
     'ъ': [''], 
     'ы': ['y', 's'], 
     'ь': [''], 
@@ -103,9 +103,7 @@ const modifiers = {
 
 const unimportantComponents = [
     '-', ',', ':', '*', '/', '|',
-    '[', ']', '(', ')', ' жен ', ' w ', ' FC ', ' women ', ' esports ', ' м ', ' m ', ' до '
-    , ' ECF ', ' SC ', ' university ', ' U ',
-    ' univ ', ' университет ', ' унив ', ' FK ', ' team ', ' reserves ', ' CF ', '.'
+    '[', ']', '(', ')', '.'
 ]
 
 function capitalizeFirstLetter(string) {
@@ -193,9 +191,10 @@ async function wordToOptions(name){
     options.push([name]);
     for (let option of Transliteration(name)) options.push([option]);
     options.push([await translate(name)]);
-    // if (name.length <= 4){
-    //     options.push(name.split(''));
-    // }
+
+    if (name.length <= 3){
+        options.push(name.split(''));
+    }
 
     const setArray = new Set(options.map(x => JSON.stringify(x)))
     const uniqArray = [...setArray].map(x => JSON.parse(x))
@@ -328,7 +327,7 @@ async function main(){
 // _____________________Example_______________
 
 
-const example = async () => console.log(await similarityNames('Dmitry V. Alexandrov', 'Viktorov D. Alexandrov', 'VIRGINBET', 'FONBET'));
+const example = async () => console.log(await similarityNames('Афанасьев М.', 'Afanasev M A', 'OLIMP', 'FONBET'));
 example();
 
 module.exports = similarityNames;
