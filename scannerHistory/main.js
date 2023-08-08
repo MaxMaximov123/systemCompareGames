@@ -70,8 +70,7 @@ const addGame = async (data) => {
 	  await db('games').insert(data);
 	  console.log('game added');
 	} catch (error) {
-		console.error(error);
-		console.log(data);
+		// console.error(error);
 	}
   };
 
@@ -80,8 +79,7 @@ const addScore = async (data) => {
 		await db('scores').insert(data);
 		console.log('score added');
 	} catch (error) {
-		console.error(error);
-		console.log(data);
+		// console.error(error);
 	}
 };
 
@@ -90,8 +88,15 @@ const addOucome = async (data) => {
 		await db('outcomes').insert(data);
 		console.log('outcome added');
 	} catch (error) {
-		console.error(error);
-		console.log(data);
+		// console.error(error);
+	}
+};
+
+const updateGame = async (gameId, data) => {
+	try {
+		await db('games').where('id', gameId).update(data);
+		console.log('update game');
+	} catch (error) {
 	}
 };
 //_________________________________________________________________//
@@ -198,6 +203,14 @@ socket.on('message', (message) => {
 			if (game) {
 				merge(game, data);
 				cleanUpDeeply(game);
+				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill){
+					updateGame(gameId, {
+						globalGameId: game.globalGameId,
+						startTime: new Date(game.startTime).getTime(),
+						liveFrom: new Date(game.liveFrom).getTime(),
+						liveTill: new Date(game.liveTill).getTime()
+					});
+				}
 			} else {
 				game = games[gameId] = data;
 				addGame({
@@ -210,7 +223,9 @@ socket.on('message', (message) => {
 					team2Name: game?.team2?.name,
 					sportKey: game?.sport?.key,
 					bookieKey: game?.bookie?.key,
-					startTime: new Date(game.startTime).getTime()
+					startTime: new Date(game?.startTime).getTime(),
+					liveFrom: new Date(game?.liveFrom).getTime(),
+					liveTill: new Date(game?.liveTill).getTime()
 				})
 			}
 			
