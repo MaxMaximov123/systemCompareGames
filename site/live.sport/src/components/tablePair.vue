@@ -1,6 +1,6 @@
 <template>
     <div>
-        <table class="table">
+        <table class="table" ref="table">
             <thead class="headers">
                 <th></th>
                 <th>Команда 1</th>
@@ -8,25 +8,29 @@
                 <th>Спорт</th>
                 <th>Лайв?</th>
                 <th>Букмекер</th>
-                <th>Время начала</th>
+                <th>Начало</th>
                 <th>Сходство названий</th>
                 <th>Сходство коэффициентов</th>
                 <th>Сходство счета</th>
                 <th>Объединены новой системой?</th>
                 <th>Объединены старой системой?</th>
-                <th>Время создания</th>
+                <th>Создана</th>
+                <th>В лайве</th>
             </thead>
             <tr class="none-tr"></tr>
-            <tbody v-for="item in items" class="data">
+            <tbody v-for="item in items" :key="item.id" class="data" :id="item.id">
                 <tr>
                     <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
+                        <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
                         Пара {{ item.id }}
                         <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}`" class="invisible-link">График</a>
                     </td>
                     <td>
+                        <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game1Team1Name }}
                     </td>
                     <td>
+                        <v-icon :size="15" @click="copyToClipboard(item.game1Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game1Team2Name }}
                     </td>
                     <td rowspan="2">
@@ -59,12 +63,17 @@
                     <td rowspan="2">
                         {{ formatDateFromUnixTimestamp(item.now)}}
                     </td>
+                    <td>
+                        {{ formatDateFromUnixTimestamp(item.liveTill)}}
+                    </td>
                 </tr>
                 <tr>
                     <td>
+                        <v-icon :size="15" @click="copyToClipboard(item.game2Team1Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game2Team1Name }}
                     </td>
                     <td>
+                        <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game2Team2Name }}
                     </td>
                     <td>
@@ -81,6 +90,7 @@
   </template>
   
   <script>
+  import html2canvas from 'html2canvas';
   export default {
     props: {
         items: {
@@ -113,6 +123,25 @@
             } else {
                 return '#e3df81';
             }
+        },
+
+        async downloadImage(id) {
+            const tableRow = document.getElementById(id);
+            const canvas = await html2canvas(tableRow);
+            const dataURL = canvas.toDataURL();
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'table-image.png';
+            link.click();
+        },
+
+        copyToClipboard(value) {
+            const textArea = document.createElement('textarea');
+            textArea.value = value;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
         }
     }
   };
@@ -146,6 +175,30 @@
     
     .none-tr {
         height: 15px;
+    }
+
+    .download-link {
+        text-decoration: none;
+        color: rgb(23, 23, 23);
+        display: inline-flex;
+        align-items: center;
+        transform: rotate(180deg);
+    }
+
+    .download-link:hover {
+        opacity: 0.6;
+    }
+
+    .download-link:active {
+        opacity: 1;
+    }
+
+    .copy-name:hover {
+        opacity: 0.6;
+    }
+
+    .copy-name:active {
+        opacity: 0.3;
     }
 
     .data {
