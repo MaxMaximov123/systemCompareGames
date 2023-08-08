@@ -223,6 +223,7 @@ function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
 function getSameWordsCount(set1Words, set2Words){
     var sameWordsCount = 0;
     var wordsMatched = false;
+    var wordNotExist = true;
     for (let numWord=0;numWord<set1Words.length;numWord++){
         if (set1Words[numWord].toLowerCase() === set2Words[numWord].toLowerCase() || 
             set1Words[numWord].toLowerCase().startsWith(set2Words[numWord].toLowerCase()) || 
@@ -232,9 +233,12 @@ function getSameWordsCount(set1Words, set2Words){
                 if (set1Words[numWord] === set2Words[numWord] && set1Words[numWord].length >= 3 && set2Words[numWord].length >= 3){
                     wordsMatched = true;
                 }
+                if (set1Words[numWord].length >= 3 || set2Words[numWord].length >= 3){
+                    wordNotExist = false;
+                }
             }
     }
-    if (wordsMatched) return sameWordsCount / set1Words.length;
+    if (wordsMatched || wordNotExist) return sameWordsCount / set1Words.length;
     return 0;
 }
 
