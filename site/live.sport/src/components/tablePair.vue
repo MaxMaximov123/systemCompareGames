@@ -1,4 +1,5 @@
 <template>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <div>
         <table class="table" ref="table">
             <thead class="headers">
@@ -9,11 +10,11 @@
                 <th>Лайв?</th>
                 <th>Букмекер</th>
                 <th>Начало</th>
-                <th>Сходство названий</th>
-                <th>Сходство коэффициентов</th>
-                <th>Сходство счета</th>
-                <th>Объединены новой системой?</th>
-                <th>Объединены старой системой?</th>
+                <th>Названия</th>
+                <th>Коэффициенты</th>
+                <th>Счет</th>
+                <th>Новой системой?</th>
+                <th>Старой системой?</th>
                 <th>Создана</th>
                 <th>В лайве</th>
             </thead>
@@ -23,7 +24,7 @@
                     <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
                         <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
                         Пара {{ item.id }}
-                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}`" class="invisible-link">График</a>
+                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}`" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                     </td>
                     <td>
                         <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
@@ -64,7 +65,8 @@
                         {{ formatDateFromUnixTimestamp(item.now)}}
                     </td>
                     <td>
-                        {{ formatDateFromUnixTimestamp(item.liveTill)}}
+                        <p>{{item.liveFrom1 && item.liveTill1 ? formatDateFromUnixTimestamp(item.liveFrom1) : 'Неизвестно'}}</p>
+                        <p>{{item.liveTill1 ? formatDateFromUnixTimestamp(item.liveTill1) : ''}}</p>
                     </td>
                 </tr>
                 <tr>
@@ -82,6 +84,11 @@
                     <td>
                         {{ Number(item.startTime2) ? formatDateFromUnixTimestamp(item.startTime2) : 'Неизвестно'}}
                     </td>
+                    <td>
+                        <p>{{item.liveFrom2 && item.liveTill2 ? formatDateFromUnixTimestamp(item.liveFrom2) : 'Неизвестно'}}</p>
+                        <p>{{item.liveTill2 ? formatDateFromUnixTimestamp(item.liveTill2) : ''}}</p>
+                    </td>
+                    
                 </tr>
                 <tr class="none-tr"></tr>
             </tbody>
@@ -110,7 +117,8 @@
     
     methods: {
         formatDateFromUnixTimestamp(unixTimestamp) {
-            return new Date(Number(unixTimestamp)).toLocaleString();
+            const res = (new Date(Number(unixTimestamp)).toLocaleString()).replace(', ', ' ');
+            return res;
         },
 
         getBackgroundColor(row){
@@ -148,10 +156,10 @@
   </script>
   <style>
     .table {
-      font-size: 80%;
+      font-size: 70%;
       margin-bottom: 20px;
       border-collapse: collapse;
-      width: 90%;
+      width: 95%;
       margin: 0 auto;
       margin-left: 3%;
       margin-right: 3%;
@@ -206,7 +214,7 @@
     }
 
     .num-pair {
-        writing-mode: vertical-rl;
+        writing-mode: vertical-lr;
         transform: rotate(180deg);
         text-align: left;
         max-height: 150px;
@@ -226,6 +234,19 @@
 
     .invisible-link {
         color: inherit;
+        transform: rotate(180deg);
+    }
+
+    .fas {
+        transform: rotate(180deg);
+    }
+
+    .fas:hover {
+        opacity: 0.6;
+    }
+
+    .fas:active {
+        opacity: 0.3;
     }
 
   </style>

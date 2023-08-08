@@ -52,14 +52,14 @@
             </td>
 
             <td>
-                <v-combobox
+                <v-combobox class="data-frame"
                     v-model="filters.groupedNewSystem"
                     :items="['Все', 'Да', 'Нет']">
                 </v-combobox>
             </td>
 
             <td>
-                <v-combobox
+                <v-combobox class="data-frame"
                     v-model="filters.groupedOldSystem"
                     :items="['Все', 'Да', 'Нет']">
                 </v-combobox>
@@ -71,15 +71,16 @@
         <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
     </div>
     
-    <div>
+    <div style="font-size: 80%;">
     <v-pagination
       v-model="currentPage"
+      total-visible="11"
       :length="pageCount"
       :onClick="updatePage"
-      :next-icon="'mdi-chevron-right'"
-      :prev-icon="'mdi-chevron-left'"
-    >
-</v-pagination>
+      density="compact"
+      size="50"
+      class="custom-pagination"
+    ></v-pagination>
   </div>
 </template>
 <script>
@@ -227,12 +228,13 @@ export default {
 
     
     .input-val {
+        font-size: 50%;
         height: 5%;
         width: 70%;
     }
 
     .filters {
-        font-size: 90%;
+        font-size: 80%;
         margin: auto;
         width: 80%;
     }
