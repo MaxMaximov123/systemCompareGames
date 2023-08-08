@@ -94,13 +94,10 @@ const addOucome = async (data) => {
 
 const updateGame = async (gameId, data) => {
 	try {
-		console.log(data, gameId);
 		await db('games').where('id', gameId).update(data);
-		console.log('!!!!update game', data);
-		process.exit();
+		console.log('update game');
 	} catch (error) {
 		console.error(error);
-		process.exit();
 	}
 };
 //_________________________________________________________________//
