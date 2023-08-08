@@ -94,9 +94,13 @@ const addOucome = async (data) => {
 
 const updateGame = async (gameId, data) => {
 	try {
+		console.log(data, gameId);
 		await db('games').where('id', gameId).update(data);
-		console.log('update game');
+		console.log('!!!!update game', data);
+		process.exit();
 	} catch (error) {
+		console.error(error);
+		process.exit();
 	}
 };
 //_________________________________________________________________//
@@ -208,7 +212,8 @@ socket.on('message', (message) => {
 						globalGameId: game.globalGameId,
 						startTime: new Date(game.startTime).getTime(),
 						liveFrom: new Date(game.liveFrom).getTime(),
-						liveTill: new Date(game.liveTill).getTime()
+						liveTill: new Date(game.liveTill).getTime(),
+						lastUpdate: new Date().getTime(),
 					});
 				}
 			} else {
@@ -225,7 +230,8 @@ socket.on('message', (message) => {
 					bookieKey: game?.bookie?.key,
 					startTime: new Date(game?.startTime).getTime(),
 					liveFrom: new Date(game?.liveFrom).getTime(),
-					liveTill: new Date(game?.liveTill).getTime()
+					liveTill: new Date(game?.liveTill).getTime(),
+					lastUpdate: new Date().getTime(),
 				})
 			}
 			
