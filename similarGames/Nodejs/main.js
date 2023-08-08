@@ -296,7 +296,7 @@ async function start(sportKey) {
                                     'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
                                     'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
                                     'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                    'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                    'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
                                 };
 
                                 const totalNames = Math.max(
