@@ -61,6 +61,8 @@ app.post('/api/pairs', async (req, res) => {
         'pairs.totalSimilarity as totalSimilarity',
         'pairs.needGroup as needGroup',
         'pairs.grouped as grouped',
+        'games1.lastUpdate as lastUpdate1',
+        'games2.lastUpdate as lastUpdate2',
         'games1.bookieKey as bookieKey1',
         'games1.liveFrom as liveFrom1',
         'games2.liveFrom as liveFrom2',
