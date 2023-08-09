@@ -41,7 +41,8 @@ const modifiers = {
         /\sbesports\s/gi,
         /\sfc\s/gi,
         /\ssc\s/gi,
-        /\s\(.+\)\s/gi
+        /\s\(.+\)\s/gi,
+        /\spro\s/gi,
 
     ],
     "OLIMP": [
@@ -51,6 +52,7 @@ const modifiers = {
         /\s\(рез\)\s/gi,
         /\sунив\s/gi,
         /\sуниверситет\s/gi,
+        /\spro\s/gi,
 
     ],
     "VIRGINBET": [
@@ -58,6 +60,7 @@ const modifiers = {
         /\sU\d+\s/gi,
         /\sesports\s/gi,
         /\sfc\s/gi,
+        /\spro\s/gi,
 
     ],
     "BET365": [
@@ -68,6 +71,7 @@ const modifiers = {
         /\suniversity\s/gi,
         /\s\(women\)\s/gi,
         /\sreserves\s/gi,
+        /\sпро\s/gi,
 
     ],
     "BETMGM": [
@@ -76,6 +80,7 @@ const modifiers = {
         /\sfk\s/gi,
         /\sc\s/gi,
         /\suniversity\s/gi,
+        /\spro\s/gi,
 
 
     ],
@@ -88,6 +93,7 @@ const modifiers = {
         /\syouth\s/gi,
         /\suniversity\s/gi,
         /\sreserves\s/gi,
+        /\spro\s/gi,
 
 
     ],
@@ -97,6 +103,7 @@ const modifiers = {
         /\s\(r\)\s/gi,
         /\sesport\w*\s/gi,
         /\sU\d+\s/gi,
+        /\spro\s/gi,
 
     ],
 }

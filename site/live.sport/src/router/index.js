@@ -11,7 +11,7 @@ const router = createRouter({
       component: TablesView
     },
     {
-      path: '/graphic/:id',
+      path: '/graphic/:id/:type',
       name: 'graphic',
       component: GraphicView
     },

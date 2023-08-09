@@ -139,9 +139,6 @@ async function compareOutcomes(game1, game2){
     }
     const result = Object.values(totalSimOutc);
     return [sum(result) / result.length, result.length >= 2 && sum(result) / result.length >= 0.9];
-
-
-
 }
 
 async function compareScores(game1, game2){
@@ -173,9 +170,6 @@ async function compareScores(game1, game2){
     }
     const result = Object.values(totalSimOutc);
     return [sum(result) / result.length, result.length > 1 && sum(result) / result.length >= 0.95];
-
-
-
 }
 
 function sum(arr){

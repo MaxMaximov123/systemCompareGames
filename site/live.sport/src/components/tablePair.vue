@@ -13,9 +13,10 @@
                 <th>Названия</th>
                 <th>Кэфы</th>
                 <th>Счет</th>
-                <th>Новой системой?</th>
-                <th>Старой системой?</th>
+                <th style="width: 5%;">Новой системой?</th>
+                <th style="width: 5%;">Старой системой?</th>
                 <th>Создана</th>
+                <th>Обновлена</th>
             </thead>
             <tr class="none-tr"></tr>
             <tbody v-for="item in items" :key="item.id" class="data" :id="item.id">
@@ -23,7 +24,7 @@
                     <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
                         <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
                         Пара {{ item.id }}
-                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
+                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomes`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                     </td>
                     <td>
                         <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
@@ -65,6 +66,9 @@
                     <td rowspan="2">
                         <p v-for="time of formatDateFromUnixTimestamp(item.now).split(' ')">{{ time }}</p>
                     </td>
+                    <td class="align-center">
+                        <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate1).split(' ')">{{ time }}</p>
+                    </td>
                 </tr>
                 <tr>
                     <td>
@@ -100,6 +104,9 @@
                             <template v-else>не пересекаются</template>
                             </div>
                         </template>
+                    </td>
+                    <td class="align-center">
+                        <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate2).split(' ')">{{ time }}</p>
                     </td>
                     
                 </tr>

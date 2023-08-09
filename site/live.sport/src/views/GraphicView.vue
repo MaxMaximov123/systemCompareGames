@@ -14,7 +14,7 @@
                 @update:modelValue="getData(activeTab)"
                 class="combobox">
             </v-combobox>
-            <plotly-chart :data="dataOutcomes" :layout="layoutOtcomes" />
+            <plotly-chart :data="dataOutcomes" :layout="layoutOutcomes" />
         </v-window-item>
 
         <v-window-item value="1">
@@ -53,16 +53,25 @@ export default {
             id: 1,
             activeTab: 0,
             TIK_STEP: 3,
+
             selectedPathOutcomes: null,
             selectedPathScores: null,
             paths: [],
+
             infoLabel1: '',
-            infoLabel2: '',
+            infoLabel2: ''
+            ,
             isLoading: true,
+
             pathsOutcomes: [],
             pathsScores: [],
+
             bookieKey1: '',
             bookieKey2: '',
+
+            similarityOutcomes: 0,
+            similarityScores: 0,
+
             game1: {
                 outcomes: [],
                 scores: [],
@@ -73,7 +82,7 @@ export default {
             },
             dataOutcomes: [],
             dataScores: [],
-            layoutOtcomes: {
+            layoutOutcomes: {
                 grid: {rows: 2, columns: 1},
                 title: 'История',
                 // yaxis1: {range: [0, 10]},
@@ -92,6 +101,9 @@ export default {
 
     async mounted() {
         this.id = Number(this.$route.params.id);
+        this.typeGraph = this.$route.params.type;
+        if (this.typeGraph === 'outcomes') this.activeTab = 0;
+        if (this.typeGraph === 'scores') this.activeTab = 1;
         this.pathsOutcomes = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'outcomes'})).data;
         this.pathsScores = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'scores'})).data;
         if (this.pathsOutcomes.length === 0 || this.pathsScores.length === 0) {
@@ -103,13 +115,13 @@ export default {
             this.infoLabel2 = '';
             this.selectedPathOutcomes = this.pathsOutcomes[0];
             this.selectedPathScores = this.pathsScores[0];
-            await this.getData(this.activeTab);
+            this.getData(this.activeTab);
         }
         
     },
 
     methods: {
-        updatePlot(e=null){
+        async updatePlot(e=null){
             if (this.activeTab){ // scores
                 this.dataScores = [{
                     x: Object.keys(this.game1.scores),
@@ -120,7 +132,7 @@ export default {
                     yaxis: 'y1',
                     text: Object.keys(this.game1.scores).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
                     hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
-                    textposition: 'none'
+                    textposition: 'none',
                 },
                 {
                     x: Object.keys(this.game2.scores),
@@ -131,8 +143,8 @@ export default {
                     yaxis: 'y2',
                     text: Object.keys(this.game2.scores).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
                     hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
-                    textposition: 'none'
-                },
+                    textposition: 'none',
+                }
                 ];
                 this.paths = this.copy(this.pathsScores);
             } else {
@@ -174,7 +186,9 @@ export default {
         },
         async getData(type=0){
             this.isLoading = true;
-            console.log(type)
+            if (this.activeTab === 0) this.typeGraph = 'outcomes';
+            if (this.activeTab === 1) this.typeGraph = 'scores';
+            router.push({path: `/graphic/${this.id}/${this.typeGraph}`});
             var res = null;
             if (type === 0) {
                 res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathOutcomes});
@@ -182,15 +196,16 @@ export default {
                 this.game1.outcomes = res.game1;
                 this.game2.outcomes = res.game2;
                 this.formatData(this.game1.outcomes, this.game2.outcomes);
-                const rangeOutcomes1 = Math.max(...res.game1.map(obj => obj.outcome));
-                const rangeOutcomes2 = Math.max(...res.game2.map(obj => obj.outcome));
+                const rangeOutcomes1 = Math.max(...res.game1.map(obj => obj.odds));
+                const rangeOutcomes2 = Math.max(...res.game2.map(obj => obj.odds));
                 const rangeOutcomes = Math.max(rangeOutcomes1, rangeOutcomes2);
-                this.layoutOtcomes = {
+                this.layoutOutcomes = {
                     grid: {rows: 2, columns: 1},
                     title: 'История коэффициентов',
                     yaxis1: {range: [0, rangeOutcomes]},
                     yaxis2: {range: [0, rangeOutcomes]}
                 }
+                this.compareOutcomes();
             }
             if (type === 1) {
                 res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathScores});
@@ -201,12 +216,13 @@ export default {
                 const rangeScores1 = Math.max(...res.game1.map(obj => obj.score));
                 const rangeScores2 = Math.max(...res.game2.map(obj => obj.score));
                 const rangeScores = Math.max(rangeScores1, rangeScores2);
-                this.layoutOtcomes = {
+                this.layoutScores = {
                     grid: {rows: 2, columns: 1},
                     title: 'История счета',
                     yaxis1: {range: [-1, rangeScores]},
                     yaxis2: {range: [-1, rangeScores]}
                 }
+                this.compareScores();
             }
 
 
@@ -243,8 +259,15 @@ export default {
             return JSON.parse(JSON.stringify(obj));
         },
 
+        sum(arr){
+            let sum_ = 0;
+            arr.forEach((val) => sum_ += Number(val));
+            return sum_;
+        },
+
+
         formatData(game1, game2){
-            const minTime = Math.floor(Math.min(game1[0].now, game2[0].now) / 1000);
+            const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
             const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
 
             const newGame1 = {};
@@ -272,7 +295,7 @@ export default {
                             time: timeStep,
                             val: this.activeTab ? game1[indGame1].score : game1[indGame1].odds
                         };
-                        if (lastStateGame1[game1[indGame1].path].val === 0) lastStateGame1[game1[indGame1].path].val = -1;
+                        if (lastStateGame1[game1[indGame1].path].val === 0) lastStateGame1[game1[indGame1].path].val = 0.2;
                     } else break;
                 }
 
@@ -283,7 +306,7 @@ export default {
                             time: timeStep,
                             val: this.activeTab ? game2[indGame2].score : game2[indGame2].odds
                         };
-                        if (lastStateGame2[game2[indGame2].path].val === 0) lastStateGame2[game2[indGame2].path].val = -1;
+                        if (lastStateGame2[game2[indGame2].path].val === 0) lastStateGame2[game2[indGame2].path].val = 0.2;
                     } else break;
                 }
                 newGame1[timeStep] = this.copy(lastStateGame1);
@@ -298,7 +321,70 @@ export default {
                 this.game2.outcomes = newGame2;
             }
         },
+        
+        async compareOutcomes(){
+            const newGame1 = this.game1.outcomes;
+            const newGame2 = this.game2.outcomes;
 
+            const totalSimOutcOnTik = {};
+            const totalSimOutc = {};
+
+            // ___________Сравнение_данных______________
+            for (const tik in newGame1){
+                for (const outcomePath in newGame1[tik]){
+                    if (outcomePath in newGame2[tik] && newGame2[tik][outcomePath].val && newGame1[tik][outcomePath].val){
+                        const d1 = newGame1[tik][outcomePath].val;
+                        const d2 = newGame2[tik][outcomePath].val;
+                        if (d1 !== null && d2 !== null && d1 > 0 && d2 > 0){
+                            const simTwoOutcome = Math.min(d1, d2) / Math.max(d1, d2);
+                            if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
+                            totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
+                            totalSimOutcOnTik[outcomePath].count ++;
+                        }
+                    }
+                }
+            }
+            for (let key in totalSimOutcOnTik){
+                totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
+            }
+            const result = Object.values(totalSimOutc);
+            this.similarityOutcomes = this.sum(result) / result.length;
+            this.layoutOutcomes.title = 'История коэффициентов. Сходство: ' + 
+            (this.similarityOutcomes ? Math.floor(this.similarityOutcomes * 10000) / 100 + '%' : 'неизвестно');
+        },
+
+        async compareScores(){
+            const newGame1 = this.game1.scores;
+            const newGame2 = this.game2.scores;
+
+            const totalSimOutcOnTik = {};
+            const totalSimOutc = {};
+
+            // ___________Сравнение_данных______________
+            for (const tik in newGame1){
+                for (const outcomePath in newGame1[tik]){
+                    if (outcomePath in newGame2[tik] && newGame2[tik][outcomePath].val && newGame1[tik][outcomePath].val){
+                        const d1 = newGame1[tik][outcomePath].val;
+                        const d2 = newGame2[tik][outcomePath].val;
+                        if (d1 !== null && d2 !== null){
+                            const simTwoOutcome = Number(d1 === d2);
+                            if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
+                            totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
+                            totalSimOutcOnTik[outcomePath].count ++;
+                        }
+                        
+                    }
+                }
+            }
+            for (let key in totalSimOutcOnTik){
+                totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
+            }
+            const result = Object.values(totalSimOutc);
+            this.similarityScores = this.sum(result) / result.length;
+            this.layoutScores.title = 'История счета. Сходство: ' + 
+            (this.similarityScores ? Math.floor(this.similarityScores * 10000) / 100 + '%' : 'неизвестно');
+        
+        }
     }
 }
 </script>
