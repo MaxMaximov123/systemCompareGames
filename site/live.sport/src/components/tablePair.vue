@@ -67,7 +67,12 @@
                         <p v-for="time of formatDateFromUnixTimestamp(item.now).split(' ')">{{ time }}</p>
                     </td>
                     <td class="align-center">
-                        <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate1).split(' ')">{{ time }}</p>
+                        <template v-if="item.lastUpdate1">
+                            <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate1).split(' ')">{{ time }}</p>
+                        </template>
+                        <template v-else>
+                            <p>Неизвестно</p>
+                        </template>
                     </td>
                 </tr>
                 <tr>
@@ -106,7 +111,12 @@
                         </template>
                     </td>
                     <td class="align-center">
-                        <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate2).split(' ')">{{ time }}</p>
+                        <template v-if="item.lastUpdate1">
+                            <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate2).split(' ')">{{ time }}</p>
+                        </template>
+                        <template v-else>
+                            <p>Неизвестно</p>
+                        </template>
                     </td>
                     
                 </tr>

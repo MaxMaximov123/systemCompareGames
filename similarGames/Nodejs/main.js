@@ -149,6 +149,23 @@ async function compareScores(game1, game2){
     const totalSimOutcOnTik = {};
     const totalSimOutc = {};
 
+    const maxScore = {};
+
+    for (let tik in newGame1){
+        for (let path in newGame1[tik]){
+            if (!(path in maxScore)){
+                maxScore[path] = newGame1[tik][path].val;
+            } else if (newGame1[tik][path].val > maxScore[path]){
+                maxScore[path] = newGame1[tik][path].val;
+            }
+        }
+        for (let path in newGame2[tik]){
+            if (path in maxScore && newGame2[tik][path].val > maxScore[path]){
+                maxScore[path] = newGame2[tik][path].val;
+            }
+        }
+    }
+
     // ___________Сравнение_данных______________
     for (const tik in newGame1){
         for (const outcomePath in newGame1[tik]){
@@ -156,7 +173,7 @@ async function compareScores(game1, game2){
                 const d1 = newGame1[tik][outcomePath].val;
                 const d2 = newGame2[tik][outcomePath].val;
                 if (d1 !== null && d2 !== null){
-                    const simTwoOutcome = Number(d1 === d2);
+                    const simTwoOutcome = 1 - Math.abs(d1 - d2) / maxScore[outcomePath];
                     if (!(outcomePath in totalSimOutcOnTik)) totalSimOutcOnTik[outcomePath] = {sim: 0, count: 0};
                     totalSimOutcOnTik[outcomePath].sim += simTwoOutcome;
                     totalSimOutcOnTik[outcomePath].count ++;

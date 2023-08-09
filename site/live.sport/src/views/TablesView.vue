@@ -166,8 +166,8 @@ export default {
                 simNamesMax: this.filters.simNames.max,
                 simOutcomesMin: this.filters.simOutcomes.min,
                 simOutcomesMax: this.filters.simOutcomes.max,
-                simNamesMin: this.filters.simNames.min,
-                simNamesMax: this.filters.simNames.max,
+                simScoresMin: this.filters.simScores.min,
+                simScoresMax: this.filters.simScores.max,
             };
         },
 
