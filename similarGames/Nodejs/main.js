@@ -264,7 +264,6 @@ async function start(sportKey) {
                         }
 
                         if ((game2Id.finExist - game2Id.startExist) / 60000 >= TIMEDELTA){
-                            console.log(game1Id.id, game2Id.id);
                             const game1DataOutcomesPre = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', false).orderBy('now', 'asc');
                             const game2DataOutcomesPre = await db('outcomes').select('*').where('id', game2Id.id).where('isLive', false).orderBy('now', 'asc');
                             const game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', true).orderBy('now', 'asc');
@@ -276,12 +275,14 @@ async function start(sportKey) {
                             var totalOutcomesLive = 0;
                             var totalScores = 0;
                             
-                            const resultStartTime1 = game1Id.startTime || game1Id.liveFrom || null;
-                            const resultStartTime2 = game2Id.startTime || game2Id.liveFrom || null;
-                            const realStartTimeDistance = Math.abs(resultStartTime1 - resultStartTime2);
-
-                            const timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
-
+                            const resultStartTime1 = Number(game1Id.startTime) || Number(game1Id.liveFrom) || null;
+                            const resultStartTime2 = Number(game2Id.startTime) || Number(game2Id.liveFrom) || null;
+                            var timeDiscrepancy = 0;
+                            if (resultStartTime1 && resultStartTime2){
+                                const realStartTimeDistance = Math.abs(resultStartTime1 - resultStartTime2);
+                                timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
+                            }
+                            
                             if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                                 totalOutcomesPre = await compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
                                 if (totalOutcomesPre === null) totalOutcomesPre = 0;
