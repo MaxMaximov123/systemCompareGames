@@ -277,10 +277,10 @@ async function start(sportKey) {
                             var totalScores = 0;
                             
                             const resultStartTime1 = game1Id.startTime || game1Id.liveFrom || null;
-                            const resultStartTime2 = game2Id.startTime || game1Id.liveFrom || null;
+                            const resultStartTime2 = game2Id.startTime || game2Id.liveFrom || null;
                             const realStartTimeDistance = Math.abs(resultStartTime1 - resultStartTime2);
 
-                            const timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / maxSportStartTimeDistance[game1Id.sportKey]));
+                            const timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
 
                             if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                                 totalOutcomesPre = await compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
