@@ -230,11 +230,14 @@ async function start(sportKey) {
 
     while (true){
         const game1Ids = await db('games')
-        .select('games.gameId as id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
+        .join('outcomes', 'games.id', 'outcomes.id')
+        .select('games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
         'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom')
+        .min('outcomes.now as startExist')
+        .max('outcomes.now as finExist')
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
-        .orederBy('games.id', 'desc')
+        .orderBy('startExist', 'desc')
         .limit(150) // получение списка id1
         
         if (game1Ids){

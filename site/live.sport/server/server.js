@@ -47,8 +47,8 @@ app.post('/api/pairs', async (req, res) => {
       var pairs = {};
       const result = {};
       pairs = await db('pairs')
-      .join('games as games1', 'pairs.id1', 'games1.gameId')
-      .join('games as games2', 'pairs.id2', 'games2.gameId')
+      .join('games as games1', 'pairs.id1', 'games1.id')
+      .join('games as games2', 'pairs.id2', 'games2.id')
       .offset((requestData.page - 1) * 10).limit(10)
       .select(
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),

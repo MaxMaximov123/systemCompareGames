@@ -32,9 +32,16 @@ async function start(sportKey) {
         // const game1Ids = await db('games').select('id', 'bookieKey', 'isLive').where('sportKey', sportKey).orderBy('startTime', 'asc') // получение списка id1
         const game1Ids = await db('games')
         .join('outcomes', 'outcomes.id', 'games.id')
+        // .join('pairs', function () {
+        //     this.on('games.id', '=', 'pairs.id1')
+        //       .orOn('games.id', '=', 'pairs.id2');
+        //   })
+        //   .where('pairs.needGroup', false)
+        //   .where('pairs.grouped', false)
+
           .where('games.sportKey', sportKey)
         //   .orderBy('games.startTime', 'asc')
-          .select('games.gameId as id')
+          .select('games.id as id')
           .groupBy('games.id')
           .havingRaw('(? - MIN(outcomes.now)) / 3600000  > ?', [new Date().getTime(), TIMELIVEGAME]);
 
