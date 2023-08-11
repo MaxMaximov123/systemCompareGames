@@ -5,6 +5,11 @@ const path = require('path');
 const knex = require('knex');
 const config = require('./knexfile');
 
+const isLiveValOnType = {
+  outcomesPre: false,
+  outcomesLive: true,
+};
+
 const db = knex(config.development);
 
 const app = express();
@@ -56,7 +61,8 @@ app.post('/api/pairs', async (req, res) => {
         'pairs.game1Team2Name as game1Team2Name',
         'pairs.game2Team2Name as game2Team2Name',
         'pairs.similarityNames as similarityNames',
-        'pairs.similarityOutcomesPre as similarityOutcomes',
+        'pairs.similarityOutcomesPre as similarityOutcomesPre',
+        'pairs.similarityOutcomesLive as similarityOutcomesLive',
         'pairs.similarityScores as similarityScores',
         'pairs.totalSimilarity as totalSimilarity',
         'pairs.needGroup as needGroup',
@@ -75,8 +81,10 @@ app.post('/api/pairs', async (req, res) => {
         .orderBy('pairs.id', 'asc')
         .where('similarityNames', '>=', requestData.filters.simNames.min)
         .where('similarityNames', '<=', requestData.filters.simNames.max)
-        .where('similarityOutcomesPre', '>=', requestData.filters.simOutcomes.min)
-        .where('similarityOutcomesPre', '<=', requestData.filters.simOutcomes.max)
+        .where('similarityOutcomesPre', '>=', requestData.filters.simOutcomesPre.min)
+        .where('similarityOutcomesPre', '<=', requestData.filters.simOutcomesPre.max)
+        .where('similarityOutcomesLive', '>=', requestData.filters.simOutcomesLive.min)
+        .where('similarityOutcomesLive', '<=', requestData.filters.simOutcomesLive.max)
         .where('similarityScores', '>=', requestData.filters.simScores.min)
         .where('similarityScores', '<=', requestData.filters.simScores.max)
         .whereIn('needGroup', groupedNewSystem)
@@ -85,8 +93,10 @@ app.post('/api/pairs', async (req, res) => {
       result.pageCount = await db('pairs')
       .where('similarityNames', '>=', requestData.filters.simNames.min)
       .where('similarityNames', '<=', requestData.filters.simNames.max)
-      .where('similarityOutcomesPre', '>=', requestData.filters.simOutcomes.min)
-      .where('similarityOutcomesPre', '<=', requestData.filters.simOutcomes.max)
+      .where('similarityOutcomesPre', '>=', requestData.filters.simOutcomesPre.min)
+      .where('similarityOutcomesPre', '<=', requestData.filters.simOutcomesPre.max)
+      .where('similarityOutcomesLive', '>=', requestData.filters.simOutcomesLive.min)
+      .where('similarityOutcomesLive', '<=', requestData.filters.simOutcomesLive.max)
       .where('similarityScores', '>=', requestData.filters.simScores.min)
       .where('similarityScores', '<=', requestData.filters.simScores.max)
       .whereIn('needGroup', groupedNewSystem)
@@ -109,15 +119,17 @@ app.post('/api/paths', async (req, res) => {
     var pathsList1 = [];
     var pathsList2 = [];
     var pathsList = [];
-    if (requestData.type === 'outcomes'){
+    if (requestData.type === 'outcomesPre' || requestData.type === 'outcomesLive'){
       pathsList1 = await db('pairs')
       .join('outcomes as outcomes1', 'pairs.id1', 'outcomes1.id')
       .where('pairs.id', requestData.id)
+      .where('outcomes1.isLive', isLiveValOnType[requestData.type])
       .distinct('outcomes1.path as path1');
 
       pathsList2 = await db('pairs')
       .join('outcomes as outcomes2', 'pairs.id2', 'outcomes2.id')
       .where('pairs.id', requestData.id)
+      .where('outcomes2.isLive', isLiveValOnType[requestData.type])
       .distinct('outcomes2.path as path2');
 
       pathsList1 = pathsList1.map(obj => obj.path1);
@@ -125,8 +137,8 @@ app.post('/api/paths', async (req, res) => {
 
       for (let path of pathsList1){
         if (pathsList2.includes(path)) pathsList.push(path);
-      }
-
+      } 
+    
     } else if (requestData.type === 'scores'){
       pathsList1 = await db('pairs')
       .join('scores as scores1', 'pairs.id1', 'scores1.id')
@@ -162,7 +174,7 @@ app.post('/api/graphic', async (req, res) => {
   
   try{
     const result = {};
-    if (requestData.type){
+    if (requestData.type === 'scores'){
       result.game1 = await db('pairs')
       .join('scores', 'pairs.id1', 'scores.id')
       .join('games', 'pairs.id1', 'games.id')
@@ -187,7 +199,7 @@ app.post('/api/graphic', async (req, res) => {
       .where('scores.path', requestData.path)
       .orderBy('scores.now', 'asc');
 
-    } else {
+    } else if (requestData.type === 'outcomesPre' || requestData.type === 'outcomesLive') {
       result.game1 = await db('pairs')
       .join('outcomes', 'pairs.id1', 'outcomes.id')
       .join('games', 'pairs.id1', 'games.id')
@@ -198,6 +210,7 @@ app.post('/api/graphic', async (req, res) => {
         'outcomes.now as now')
       .where('pairs.id', requestData.id)
       .where('outcomes.path', requestData.path)
+      .where('outcomes.isLive', isLiveValOnType[requestData.type])
       .orderBy('outcomes.now', 'asc');
       
       result.game2 = await db('pairs')
@@ -210,6 +223,7 @@ app.post('/api/graphic', async (req, res) => {
         'outcomes.now as now')
       .where('pairs.id', requestData.id)
       .where('outcomes.path', requestData.path)
+      .where('outcomes.isLive', isLiveValOnType[requestData.type])
       .orderBy('outcomes.now', 'asc');
     }
     res.send(JSON.stringify({data: result, time: (new Date().getTime()) - stTime}));

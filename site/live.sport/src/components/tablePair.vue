@@ -11,7 +11,8 @@
                 <th>Начало</th>
                 <th>В лайве</th>
                 <th>Названия</th>
-                <th>Кэфы</th>
+                <th>Пре. кэфы.</th>
+                <th>Лайв кэфы.</th>
                 <th>Счет</th>
                 <th style="width: 5%;">Новой системой?</th>
                 <th style="width: 5%;">Старой системой?</th>
@@ -24,7 +25,7 @@
                     <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
                         <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
                         Пара {{ item.id }}
-                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomes`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
+                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                     </td>
                     <td>
                         <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
@@ -45,14 +46,17 @@
                     </td>
                     <td style="position: relative; width: 10%; border: 1px solid #000"
                     class="py-1 px-2 text-center text-no-wrap text-caption">
-                        <p>{{item.liveFrom1 ? formatDateFromUnixTimestamp(item.liveFrom1) : 'Неизвестно'}}</p>
-                        <p>{{item.liveFrom1 && item.liveTill1 ? formatDateFromUnixTimestamp(item.liveTill1) : '-'}}</p>
+                        <p>{{Number(item.liveFrom1) ? formatDateFromUnixTimestamp(item.liveFrom1) : 'Неизвестно'}}</p>
+                        <p>{{Number(item.liveFrom1) && Number(item.liveTill1) ? formatDateFromUnixTimestamp(item.liveTill1) : '-'}}</p>
                     </td>
                     <td rowspan="2">
                         {{ Math.floor(item.similarityNames * 100 * 100) / 100 + '%' }}
                     </td>
                     <td rowspan="2">
-                        {{ item.similarityOutcomes ? Math.floor(item.similarityOutcomes * 100 * 100) / 100 + '%' : 'Неизвестно' }}
+                        {{ item.similarityOutcomesPre ? Math.floor(item.similarityOutcomesPre * 100 * 100) / 100 + '%' : 'Неизвестно' }}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.similarityOutcomesLive ? Math.floor(item.similarityOutcomesLive * 100 * 100) / 100 + '%' : 'Неизвестно' }}
                     </td>
                     <td rowspan="2">
                         {{ item.similarityScores ? Math.floor(item.similarityScores * 100 * 100) / 100 + '%': 'Неизвестно'}}
@@ -67,7 +71,7 @@
                         <p v-for="time of formatDateFromUnixTimestamp(item.now).split(' ')">{{ time }}</p>
                     </td>
                     <td class="align-center">
-                        <template v-if="item.lastUpdate1">
+                        <template v-if="Number(item.lastUpdate1)">
                             <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate1).split(' ')">{{ time }}</p>
                         </template>
                         <template v-else>
@@ -92,8 +96,8 @@
                     </td>
                     <td style="position: relative; width: 10%; border: 1px solid #000"
                     class="py-1 px-2 text-center text-no-wrap text-caption">
-                        <p>{{item.liveFrom2 ? formatDateFromUnixTimestamp(item.liveFrom2) : 'Неизвестно'}}</p>
-                        <p>{{item.liveFrom2 && item.liveTill2 ? formatDateFromUnixTimestamp(item.liveTill2) : '-'}}</p>
+                        <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2) : 'Неизвестно'}}</p>
+                        <p>{{Number(item.liveFrom2) && Number(item.liveTill2) ? formatDateFromUnixTimestamp(item.liveTill2) : '-'}}</p>
                         <template
                             v-if="
                             item.liveFrom1 &&
@@ -111,7 +115,7 @@
                         </template>
                     </td>
                     <td class="align-center">
-                        <template v-if="item.lastUpdate1">
+                        <template v-if="Number(item.lastUpdate1)">
                             <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate2).split(' ')">{{ time }}</p>
                         </template>
                         <template v-else>

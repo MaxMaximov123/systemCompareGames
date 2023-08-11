@@ -10,7 +10,10 @@
             </th>
 
             <th>
-                Сходство коэффициентов:
+                Сходство пре. кэфов:
+            </th>
+            <th>
+                Сходство лайв кэфов:
             </th>
 
             <th>
@@ -39,8 +42,15 @@
 
             <td>
                 <div class="data-frame">
-                    <v-text-field v-model="filters.simOutcomes.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters.simOutcomes.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.simOutcomesPre.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.simOutcomesPre.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                </div>
+            </td>
+
+            <td>
+                <div class="data-frame">
+                    <v-text-field v-model="filters.simOutcomesLive.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.simOutcomesLive.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                 </div>
             </td>
 
@@ -106,7 +116,11 @@ export default {
                     max: 1,
                 },
 
-                simOutcomes: {
+                simOutcomesPre: {
+                    min: 0,
+                    max: 1,
+                },
+                simOutcomesLive: {
                     min: 0,
                     max: 1,
                 },
@@ -136,9 +150,13 @@ export default {
                     max: this.queryParams.simNamesMax ? this.queryParams.simNamesMax : 1,
                 },
 
-                simOutcomes: {
-                    min: this.queryParams.simOutcomesMin ? this.queryParams.simOutcomesMin : 0,
-                    max: this.queryParams.simOutcomesMax ? this.queryParams.simOutcomesMax : 1,
+                simOutcomesPre: {
+                    min: this.queryParams.simOutcomesPreMin ? this.queryParams.simOutcomesPreMin : 0,
+                    max: this.queryParams.simOutcomesPreMax ? this.queryParams.simOutcomesPreMax : 1,
+                },
+                simOutcomesLive: {
+                    min: this.queryParams.simOutcomesLiveMin ? this.queryParams.simOutcomesLiveMin : 0,
+                    max: this.queryParams.simOutcomesLiveMax ? this.queryParams.simOutcomesLiveMax : 1,
                 },
                 simScores: {
                     min: this.queryParams.simScoresMin ? this.queryParams.simScoresMin : 0,
@@ -164,8 +182,10 @@ export default {
                 groupedOldSystem: this.filters.groupedOldSystem,
                 simNamesMin: this.filters.simNames.min,
                 simNamesMax: this.filters.simNames.max,
-                simOutcomesMin: this.filters.simOutcomes.min,
-                simOutcomesMax: this.filters.simOutcomes.max,
+                simOutcomesPreMin: this.filters.simOutcomesPre.min,
+                simOutcomesPreMax: this.filters.simOutcomesPre.max,
+                simOutcomesLiveMin: this.filters.simOutcomesLive.min,
+                simOutcomesLiveMax: this.filters.simOutcomesLive.max,
                 simScoresMin: this.filters.simScores.min,
                 simScoresMax: this.filters.simScores.max,
             };

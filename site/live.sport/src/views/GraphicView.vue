@@ -1,32 +1,22 @@
 <template>
     <title>Graphic</title>
-    <!-- <Chart :chartData="chartData" :chartOptions="chartOptions" /> -->
     <v-tabs v-model="activeTab">
-        <v-tab @click="getData(0)">Коэффициенты</v-tab>
-        <v-tab @click="getData(1)">Счет</v-tab>
+        <v-tab @click="getData" value="outcomesPre">Пре. кэфы</v-tab>
+        <v-tab @click="getData" value="outcomesLive">Лайв кэфы</v-tab>
+        <v-tab @click="getData" value="scores">Счет</v-tab>
     </v-tabs>
     <v-window v-model="activeTab">
-        <v-window-item value="0">
-            <h3 style="text-align: center;">{{ infoLabel1 }}</h3>
+        <v-window-item :value="tab" v-for="tab in Object.keys(selectedPaths)" :key="tab">
             <v-combobox
-                v-model="selectedPathOutcomes"
-                :items="pathsOutcomes"
-                @update:modelValue="getData(activeTab)"
+                v-model="selectedPaths[tab]"
+                @update:modelValue="getData"
+                :items="paths[tab]"
                 class="combobox">
             </v-combobox>
-            <plotly-chart :data="dataOutcomes" :layout="layoutOutcomes" />
+            <h3 style="text-align: center;">{{ infoLabels[tab] }}</h3>
+            <plotly-chart :data="dataPlot[tab]" :layout="layouts[tab]" />
         </v-window-item>
 
-        <v-window-item value="1">
-            <h3 style="text-align: center;">{{ infoLabel2 }}</h3>
-            <v-combobox
-                v-model="selectedPathScores"
-                :items="pathsScores"
-                @update:modelValue="getData(activeTab)"
-                class="combobox">
-            </v-combobox>
-            <plotly-chart :data="dataScores" :layout="layoutScores" />
-        </v-window-item>
     </v-window>
     <div v-if="isLoading" class="progress-overlay">
       <v-progress-circular
@@ -51,48 +41,79 @@ export default {
         return {
             apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             id: 1,
-            activeTab: 0,
+            activeTab: 'outcomesPre',
             TIK_STEP: 3,
 
-            selectedPathOutcomes: null,
-            selectedPathScores: null,
-            paths: [],
+            selectedPaths: {
+                outcomesPre: 'null',
+                outcomesLive: 'null',
+                scores: 'null'
+            },
 
-            infoLabel1: '',
-            infoLabel2: ''
-            ,
+            selectedPathOutcomesPre: '',
+            selectedPathOutcomesLive: '',
+            selectedPathScores: '',          
+
+            infoLabels: {
+                outcomesPre: '',
+                outcomesLive: '',
+                scores: ''
+            },
+
+            ranges: {
+                outcomesPre: [0, 10],
+                outcomesLive: [0, 10],
+                scores: [-1, 10]
+            },
+
             isLoading: true,
 
-            pathsOutcomes: [],
-            pathsScores: [],
+            paths: {
+                outcomesPre: [],
+                outcomesLive: [],
+                scores: []
+            },
 
-            bookieKey1: '',
-            bookieKey2: '',
-
-            similarityOutcomes: 0,
-            similarityScores: 0,
+            similarities: {
+                outcomesPre: 0,
+                outcomesLive: 0,
+                scores: 0,
+            },
 
             game1: {
-                outcomes: [],
+                outcomesPre: [],
+                outcomesLive: [],
+                bookieKey: '',
                 scores: [],
             },
             game2: {
-                outcomes: [],
+                outcomesPre: [],
+                outcomesLive: [],
+                bookieKey: '',
                 scores: [],
             },
-            dataOutcomes: [],
-            dataScores: [],
-            layoutOutcomes: {
-                grid: {rows: 2, columns: 1},
-                title: 'История',
-                // yaxis1: {range: [0, 10]},
-                // yaxis2: {range: [0, 10]}
+
+            dataPlot: {
+                outcomesPre: [],
+                outcomesLive: [],
+                scores: [],
             },
-            layoutScores: {
-                grid: {rows: 2, columns: 1},
-                title: 'История',
-                // yaxis1: {range: [0, 10]},
-                // yaxis2: {range: [0, 10]}
+
+            layouts: {
+                outcomesPre: {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История',
+                },
+
+                outcomesLive: {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История',
+                },
+
+                scores: {
+                    grid: {rows: 2, columns: 1},
+                    title: 'История',
+                },
             },
     
 
@@ -101,79 +122,36 @@ export default {
 
     async mounted() {
         this.id = Number(this.$route.params.id);
-        this.typeGraph = this.$route.params.type;
-        if (this.typeGraph === 'outcomes') this.activeTab = 0;
-        if (this.typeGraph === 'scores') this.activeTab = 1;
-        this.pathsOutcomes = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'outcomes'})).data;
-        this.pathsScores = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: 'scores'})).data;
-        if (this.pathsOutcomes.length === 0 || this.pathsScores.length === 0) {
-            if (this.pathsOutcomes.length === 0) this.infoLabel1 = 'Данные по игре отсутствуют!';
-            if (this.pathsScores.length === 0) this.infoLabel2 = 'Данные по игре отсутствуют!';
-            this.isLoading = false;
-        } else {
-            this.infoLabel1 = '';
-            this.infoLabel2 = '';
-            this.selectedPathOutcomes = this.pathsOutcomes[0];
-            this.selectedPathScores = this.pathsScores[0];
-            this.getData(this.activeTab);
-        }
+        this.activeTab = this.$route.params.type;
+        this.getData();
         
     },
 
     methods: {
         async updatePlot(e=null){
-            if (this.activeTab){ // scores
-                this.dataScores = [{
-                    x: Object.keys(this.game1.scores),
-                    y: Object.keys(this.game1.scores).map(now => this.game1.scores[now][this.selectedPathScores]?.val),
-                    type: 'bar',
-                    name: this.bookieKey1,
-                    xaxis: 'x1',
-                    yaxis: 'y1',
-                    text: Object.keys(this.game1.scores).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
-                    hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
-                    textposition: 'none',
-                },
-                {
-                    x: Object.keys(this.game2.scores),
-                    y: Object.keys(this.game2.scores).map(now => this.game2.scores[now][this.selectedPathScores]?.val),
-                    type: 'bar',
-                    name: this.bookieKey2,
-                    xaxis: 'x2',
-                    yaxis: 'y2',
-                    text: Object.keys(this.game2.scores).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
-                    hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
-                    textposition: 'none',
-                }
-                ];
-                this.paths = this.copy(this.pathsScores);
-            } else {
-                this.dataOutcomes = [{
-                    x: Object.keys(this.game1.outcomes),
-                    y: Object.keys(this.game1.outcomes).map(now => this.game1.outcomes[now][this.selectedPathOutcomes]?.val),
-                    type: 'bar',
-                    name: this.bookieKey1,
-                    xaxis: 'x1',
-                    yaxis: 'y1',
-                    text: Object.keys(this.game1.outcomes).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
-                    hovertemplate: '%{text} ' + 'Кэф.: %{y:.2f}',
-                    showlegend: false,
-                    textposition: 'none'
-                },
-                {
-                    x: Object.keys(this.game2.outcomes),
-                    y: Object.keys(this.game2.outcomes).map(now => this.game2.outcomes[now][this.selectedPathOutcomes]?.val),
-                    type: 'bar',
-                    name: this.bookieKey2,
-                    xaxis: 'x2',
-                    yaxis: 'y2',
-                    text: Object.keys(this.game1.outcomes).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
-                    hovertemplate: '%{text} ' + 'Кэф.: %{y:.2f}',
-                    showlegend: false,
-                    textposition: 'none'
-                },
-                ];
-            }
+            this.dataPlot[this.activeTab] = [{
+                x: Object.keys(this.game1[this.activeTab]),
+                y: Object.keys(this.game1[this.activeTab]).map(now => this.game1[this.activeTab][now][this.selectedPaths[this.activeTab]]?.val),
+                type: 'bar',
+                name: this.game1.bookieKey,
+                xaxis: 'x1',
+                yaxis: 'y1',
+                text: Object.keys(this.game1[this.activeTab]).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
+                hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
+                textposition: 'none',
+            },
+            {
+                x: Object.keys(this.game2[this.activeTab]),
+                y: Object.keys(this.game2[this.activeTab]).map(now => this.game2[this.activeTab][now][this.selectedPaths[this.activeTab]]?.val),
+                type: 'bar',
+                name: this.game2.bookieKey,
+                xaxis: 'x2',
+                yaxis: 'y2',
+                text: Object.keys(this.game2[this.activeTab]).map(now => `Время: ${this.getTimeFromTimestamp(now)}`),
+                hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
+                textposition: 'none',
+            },
+            ];
         },
 
         getTimeFromTimestamp(timestamp){
@@ -184,50 +162,53 @@ export default {
             const formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
             return formattedTime;
         },
-        async getData(type=0){
+        async getData(){
             this.isLoading = true;
-            if (this.activeTab === 0) this.typeGraph = 'outcomes';
-            if (this.activeTab === 1) this.typeGraph = 'scores';
-            router.push({path: `/graphic/${this.id}/${this.typeGraph}`});
-            var res = null;
-            if (type === 0) {
-                res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathOutcomes});
-                res = res.data;
-                this.game1.outcomes = res.game1;
-                this.game2.outcomes = res.game2;
-                this.formatData(this.game1.outcomes, this.game2.outcomes);
-                const rangeOutcomes1 = Math.max(...res.game1.map(obj => obj.odds));
-                const rangeOutcomes2 = Math.max(...res.game2.map(obj => obj.odds));
-                const rangeOutcomes = Math.max(rangeOutcomes1, rangeOutcomes2);
-                this.layoutOutcomes = {
-                    grid: {rows: 2, columns: 1},
-                    title: 'История коэффициентов',
-                    yaxis1: {range: [0, rangeOutcomes]},
-                    yaxis2: {range: [0, rangeOutcomes]}
-                }
-                this.compareOutcomes();
+            router.push({path: `/graphic/${this.id}/${this.activeTab}`});
+            if (this.paths[this.activeTab].length === 0) {
+                this.paths[this.activeTab] = (await this.postRequest(`http://${this.apiHost}/api/paths`, {id: this.id, type: this.activeTab})).data;
+                this.selectedPaths[this.activeTab] = this.paths[this.activeTab][0];
+                this.selectedPathOutcomesPre = this.paths[this.activeTab][0];
+                this.selectedPathOutcomesLive = this.paths[this.activeTab][0];
+                this.selectedPathScores = this.paths[this.activeTab][0];
             }
-            if (type === 1) {
-                res = await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: type, path: this.selectedPathScores});
-                res = res.data;
-                this.game1.scores = res.game1;
-                this.game2.scores = res.game2;
-                this.formatData(this.game1.scores, this.game2.scores);
-                const rangeScores1 = Math.max(...res.game1.map(obj => obj.score));
-                const rangeScores2 = Math.max(...res.game2.map(obj => obj.score));
-                const rangeScores = Math.max(rangeScores1, rangeScores2);
-                this.layoutScores = {
-                    grid: {rows: 2, columns: 1},
-                    title: 'История счета',
-                    yaxis1: {range: [-1, rangeScores]},
-                    yaxis2: {range: [-1, rangeScores]}
-                }
+            if (this.paths[this.activeTab].length === 0) {
+                this.infoLabels[this.activeTab] =  'Данные по игре отсутствуют!'
+                this.isLoading = false;
+                return;
+            } else {
+                this.infoLabels[this.activeTab] =  '';
+            }
+            
+            const res = (await this.postRequest(`http://${this.apiHost}/api/graphic`, {id: this.id, type: this.activeTab, path: this.selectedPaths[this.activeTab]})).data;
+            this.game1[this.activeTab] = res.game1;
+            this.game2[this.activeTab] = res.game2;
+            this.formatData(this.game1[this.activeTab], this.game2[this.activeTab]);
+            var range = [];
+            if (this.activeTab === 'outcomesPre' || this.activeTab === 'outcomesLive'){
+                range[0] = Math.max(...res.game1.map(obj => obj.odds));
+                range[1] = Math.max(...res.game2.map(obj => obj.odds));
+            } else {
+                range[0] = Math.max(...res.game1.map(obj => obj.score));
+                range[1] = Math.max(...res.game2.map(obj => obj.score));
+            }
+            range = Math.max(...range);
+            this.ranges[this.activeTab][1] = range;
+            this.layouts[this.activeTab] = {
+                grid: {rows: 2, columns: 1},
+                title: 'История',
+                yaxis1: {range: [0, this.ranges[this.activeTab][1]]},
+                yaxis2: {range: [0, this.ranges[this.activeTab][1]]}
+            }
+            if (this.activeTab === 'outcomesPre' || this.activeTab === 'outcomesLive'){
+                this.compareOutcomes();
+            } else {
                 this.compareScores();
             }
 
 
-            this.bookieKey1 = res.game1[0].bookieKey;
-            this.bookieKey2 = res.game2[0].bookieKey;
+            this.game1.bookieKey = res.game1[0].bookieKey;
+            this.game2.bookieKey = res.game2[0].bookieKey;
             this.updatePlot();
             this.isLoading = false;
         },
@@ -265,6 +246,12 @@ export default {
             return sum_;
         },
 
+        updateSelectedPaths(key, val){
+            this.selectedPaths[key] = val;
+            console.log(this.selectedPaths[key]);
+            this.getData();
+        },
+
 
         formatData(game1, game2){
             const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
@@ -293,7 +280,7 @@ export default {
                         lastStateGame1[game1[indGame1].path] = {
                             ind: indGame1,
                             time: timeStep,
-                            val: this.activeTab ? game1[indGame1].score : game1[indGame1].odds
+                            val: this.activeTab.includes('outcomes') ? game1[indGame1].odds : game1[indGame1].score
                         };
                         if (lastStateGame1[game1[indGame1].path].val === 0) lastStateGame1[game1[indGame1].path].val = 0.2;
                     } else break;
@@ -304,7 +291,7 @@ export default {
                         lastStateGame2[game2[indGame2].path] = {
                             ind: indGame2,
                             time: timeStep,
-                            val: this.activeTab ? game2[indGame2].score : game2[indGame2].odds
+                            val: this.activeTab.includes('outcomes') ? game2[indGame2].odds : game2[indGame2].score
                         };
                         if (lastStateGame2[game2[indGame2].path].val === 0) lastStateGame2[game2[indGame2].path].val = 0.2;
                     } else break;
@@ -313,18 +300,13 @@ export default {
                 newGame2[timeStep] = this.copy(lastStateGame2);
             }
 
-            if (this.activeTab){
-                this.game1.scores = newGame1;
-                this.game2.scores = newGame2;
-            } else {
-                this.game1.outcomes = newGame1;
-                this.game2.outcomes = newGame2;
-            }
+            this.game1[this.activeTab] = newGame1;
+            this.game2[this.activeTab] = newGame2;
         },
         
         async compareOutcomes(){
-            const newGame1 = this.game1.outcomes;
-            const newGame2 = this.game2.outcomes;
+            const newGame1 = this.game1[this.activeTab];
+            const newGame2 = this.game2[this.activeTab];
 
             const totalSimOutcOnTik = {};
             const totalSimOutc = {};
@@ -348,14 +330,14 @@ export default {
                 totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
             }
             const result = Object.values(totalSimOutc);
-            this.similarityOutcomes = this.sum(result) / result.length;
-            this.layoutOutcomes.title = 'История коэффициентов. Сходство: ' + 
-            (this.similarityOutcomes ? Math.floor(this.similarityOutcomes * 10000) / 100 + '%' : 'неизвестно');
+            this.similarities[this.activeTab] = this.sum(result) / result.length;
+            this.layouts[this.activeTab].title = 'История. Сходство: ' + 
+            (this.similarities[this.activeTab] ? Math.floor(this.similarities[this.activeTab] * 10000) / 100 + '%' : 'неизвестно');
         },
 
         async compareScores(){
-            const newGame1 = this.game1.scores;
-            const newGame2 = this.game2.scores;
+            const newGame1 = this.game1[this.activeTab];
+            const newGame2 = this.game2[this.activeTab];
 
             const maxScore = {};
 
@@ -397,9 +379,9 @@ export default {
                 totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
             }
             const result = Object.values(totalSimOutc);
-            this.similarityScores = this.sum(result) / result.length;
+            this.similarities[this.activeTab] = this.sum(result) / result.length;
             this.layoutScores.title = 'История счета. Сходство: ' + 
-            (this.similarityScores ? Math.floor(this.similarityScores * 10000) / 100 + '%' : 'неизвестно');
+            (this.similarities[this.activeTab] ? Math.floor(this.similarities[this.activeTab] * 10000) / 100 + '%' : 'неизвестно');
         
         }
     }
