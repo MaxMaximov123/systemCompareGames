@@ -121,7 +121,7 @@ export default {
                     max: this.queryParams.simNamesMax ? this.queryParams.simNamesMax : 1,
                 },
                 timeDiscrepancy: {
-                    min: this.queryParams.timeDiscrepancyMin ? this.queryParams.timeDiscrepancy : 0,
+                    min: this.queryParams.timeDiscrepancyMin ? this.queryParams.timeDiscrepancyMin : 0,
                     max: this.queryParams.timeDiscrepancyMax ? this.queryParams.timeDiscrepancyMax : 1,
                 },
 
