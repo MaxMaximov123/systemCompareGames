@@ -380,7 +380,7 @@ export default {
             }
             const result = Object.values(totalSimOutc);
             this.similarities[this.activeTab] = this.sum(result) / result.length;
-            this.layoutScores.title = 'История счета. Сходство: ' + 
+            this.layouts[this.activeTab].title = 'История. Сходство: ' + 
             (this.similarities[this.activeTab] ? Math.floor(this.similarities[this.activeTab] * 10000) / 100 + '%' : 'неизвестно');
         
         }

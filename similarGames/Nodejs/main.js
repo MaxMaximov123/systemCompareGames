@@ -12,6 +12,25 @@ const TIK_STEP = 3;
 const START_SHIFT = -5;
 const FIN_SHIFT = 5;
 
+// допустимая дистанция между играми для каждого вида спорта (мин)
+const permissibleSportsDistance = {
+    "AMERICAN_FOOTBALL": 60,
+    "BASEBALL": 60,
+    "BASKETBALL": 60,
+    "CRICKET": 60,
+    "CYBERSPORT": 60,
+    "FUTSAL": 60,
+    "HANDBALL": 60,
+    "HOCKEY": 60,
+    "SNOOKER": 60,
+    "SOCCER": 60,
+    "TABLE_TENNIS": 30,
+    "TENNIS": 60,
+    "VOLLEYBALL": 60,
+    "WATER_POLO": 60,
+
+}
+
 
 /**
  * @param {Array} game1 - History of first game
@@ -211,32 +230,34 @@ async function start(sportKey) {
 
     while (true){
         const game1Ids = await db('games')
-        .join('outcomes', 'games.id', 'outcomes.id')
-        .select('games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.isLive', 'games.globalGameId')
-        .min('outcomes.now as startTime')
-        .max('outcomes.now as finTime')
+        .select('games.gameId as id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
+        'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom')
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
-        .orderBy('startTime', 'desc')
+        .orederBy('games.id', 'desc')
         .limit(150) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
                 const game1Id = game1Ids[numId1];
-                if (game1Id.startTime == null || game1Id.finTime == null || (new Date().getTime() - game1Id.startTime) / 3600000 > TIMELIVEGAME){
+                if (game1Id.startExist == null || game1Id.finExist == null || (new Date().getTime() - game1Id.startExist) / 3600000 > TIMELIVEGAME){
                     continue;
                 }
-                if ((game1Id.finTime - game1Id.startTime) / 60000 >= TIMEDELTA){    
+                if ((game1Id.finExist - game1Id.startExist) / 60000 >= TIMEDELTA){    
                     for (let numId2=numId1;numId2<game1Ids.length;numId2++){
                         const game2Id = game1Ids[numId2];
                         if (game2Id.id === game1Id.id || game2Id.bookieKey === game1Id.bookieKey) continue;
+                        const resultStartTime = game1Id.startExist || game.liveFrom || null
+                        // _______________________________________
                         const pairExist = await db('pairs').select('id').where(function () {
                             this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
                         }).orWhere(function (){
                             this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
                         });
                         if (pairExist.length > 0) continue;
-                        if (game2Id.startTime == null || game2Id.finTime == null || (new Date().getTime() - game2Id.startTime) / 3600000 > TIMELIVEGAME){
+                        // ____________________________________________
+
+                        if (game2Id.startExist == null || game2Id.finExist == null || (new Date().getTime() - game2Id.startExist) / 3600000 > TIMELIVEGAME){
                             console.log('SKIP', game1Id.id, game2Id.id)
                             try {
                                 await db('pairs').insert({
@@ -262,8 +283,8 @@ async function start(sportKey) {
                             continue;
                         }
 
-                        if ((game2Id.finTime - game2Id.startTime) / 60000 >= TIMEDELTA){
-                            if (game2Id.finTime < game2Id.startTime || game2Id.finTime < game2Id.startTime) {
+                        if ((game2Id.finExist - game2Id.startExist) / 60000 >= TIMEDELTA){
+                            if (game2Id.finExist < game2Id.startExist || game2Id.finExist < game2Id.startExist) {
                                 console.log('SKIP', game1Id.id, game2Id.id)
                                 try {
                                     await db('pairs').insert({
