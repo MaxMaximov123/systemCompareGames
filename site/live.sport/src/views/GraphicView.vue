@@ -255,7 +255,7 @@ export default {
 
         formatData(game1, game2){
             const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
-            const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
+            const maxTime = Math.floor(Math.min(game1.at(-1).now, game2.at(-1).now) / 1000);
 
             const newGame1 = {};
             const newGame2 = {};

@@ -10,57 +10,32 @@
             <th>Сходство пре. кэфов:</th>
             <th>Сходство лайв кэфов:</th>
             <th>Сходство счета:</th>
-            <th>Объединены новой системой?</th>
-            <th>Объединены старой системой?</th>
+            <th>Новой системой?</th>
+            <th>Старой системой?</th>
 
             <th rowspan="2">
                 <v-btn @click="applyFilters">Применить</v-btn>
             </th>
         </tr>
         <tr>
-            <td>
+            <td style="width: 14.5%;" v-for="filter in Object.keys(filters).filter(f => f !== 'groupedNewSystem' && f !== 'groupedOldSystem')" :key="filter">
                 <div class="data-frame">
-                    <v-text-field v-model="filters.simNames.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters.simNames.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                </div>
-            </td>
-            <td>
-                <div class="data-frame">
-                    <v-text-field v-model="filters.timeDiscrepancy.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters.timeDiscrepancy.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters[filter].min" style="margin-right: 10px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                 </div>
             </td>
 
-            <td>
-                <div class="data-frame">
-                    <v-text-field v-model="filters.simOutcomesPre.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters.simOutcomesPre.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                </div>
-            </td>
-
-            <td>
-                <div class="data-frame">
-                    <v-text-field v-model="filters.simOutcomesLive.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters.simOutcomesLive.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                </div>
-            </td>
-
-            <td>
-                <div class="data-frame">
-                    <v-text-field v-model="filters.simScores.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters.simScores.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                </div>
-            </td>
-
-            <td>
+            <td style="width: 9%;">
                 <v-combobox class="data-frame"
+                    variant="outlined"
                     v-model="filters.groupedNewSystem"
                     :items="['Все', 'Да', 'Нет']">
                 </v-combobox>
             </td>
 
-            <td>
+            <td style="width: 9%;">
                 <v-combobox class="data-frame"
+                    variant="outlined"
                     v-model="filters.groupedOldSystem"
                     :items="['Все', 'Да', 'Нет']">
                 </v-combobox>
@@ -258,7 +233,7 @@ export default {
     .filters {
         font-size: 80%;
         margin: auto;
-        width: 80%;
+        width: 90%;
     }
 
     .filters td {
@@ -268,5 +243,6 @@ export default {
 
     .data-frame {
         display: flex;
+        font-size: 10px;
     }
 </style>
