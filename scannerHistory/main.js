@@ -238,8 +238,9 @@ socket.on('message', (message) => {
 					addOucome({
 						id: gameId,
 						path: path,
-						odds: typeof paths[path] === 'boolean' ? Number(paths[path]) + 1 : paths[path],
-						now: new Date().getTime()
+						odds: paths[path],
+						now: new Date().getTime(),
+						isLive: game?.isLive,
 					})
 				}
 			}
