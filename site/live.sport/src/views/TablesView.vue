@@ -5,28 +5,13 @@
     
     <table class="filters">
         <tr>
-            <th>
-                Сходство названий:
-            </th>
-
-            <th>
-                Сходство пре. кэфов:
-            </th>
-            <th>
-                Сходство лайв кэфов:
-            </th>
-
-            <th>
-                Сходство счета:
-            </th>
-
-            <th>
-                Объединены новой системой?
-            </th>
-
-            <th>
-                Объединены старой системой?
-            </th>
+            <th>Сходство названий:</th>
+            <th>Пересечение старта:</th>
+            <th>Сходство пре. кэфов:</th>
+            <th>Сходство лайв кэфов:</th>
+            <th>Сходство счета:</th>
+            <th>Объединены новой системой?</th>
+            <th>Объединены старой системой?</th>
 
             <th rowspan="2">
                 <v-btn @click="applyFilters">Применить</v-btn>
@@ -37,6 +22,12 @@
                 <div class="data-frame">
                     <v-text-field v-model="filters.simNames.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                     <v-text-field v-model="filters.simNames.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                </div>
+            </td>
+            <td>
+                <div class="data-frame">
+                    <v-text-field v-model="filters.timeDiscrepancy.min" style="margin-right: 10px;" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field v-model="filters.timeDiscrepancy.max" label="До" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                 </div>
             </td>
 
@@ -116,6 +107,11 @@ export default {
                     max: 1,
                 },
 
+                timeDiscrepancy: {
+                    min: 0,
+                    max: 1,
+                },
+
                 simOutcomesPre: {
                     min: 0,
                     max: 1,
@@ -148,6 +144,10 @@ export default {
                 simNames: {
                     min: this.queryParams.simNamesMin ? this.queryParams.simNamesMin : 0,
                     max: this.queryParams.simNamesMax ? this.queryParams.simNamesMax : 1,
+                },
+                timeDiscrepancy: {
+                    min: this.queryParams.timeDiscrepancyMin ? this.queryParams.timeDiscrepancy : 0,
+                    max: this.queryParams.timeDiscrepancyMax ? this.queryParams.timeDiscrepancyMax : 1,
                 },
 
                 simOutcomesPre: {
@@ -182,6 +182,8 @@ export default {
                 groupedOldSystem: this.filters.groupedOldSystem,
                 simNamesMin: this.filters.simNames.min,
                 simNamesMax: this.filters.simNames.max,
+                timeDiscrepancyMin: this.filters.timeDiscrepancy.min,
+                timeDiscrepancyMax: this.filters.timeDiscrepancy.max,
                 simOutcomesPreMin: this.filters.simOutcomesPre.min,
                 simOutcomesPreMax: this.filters.simOutcomesPre.max,
                 simOutcomesLiveMin: this.filters.simOutcomesLive.min,

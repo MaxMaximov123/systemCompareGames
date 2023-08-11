@@ -11,6 +11,7 @@
                 <th>Начало</th>
                 <th>В лайве</th>
                 <th>Названия</th>
+                <th>Пересечение старта</th>
                 <th>Пре. кэфы.</th>
                 <th>Лайв кэфы.</th>
                 <th>Счет</th>
@@ -51,6 +52,9 @@
                     </td>
                     <td rowspan="2">
                         {{ Math.floor(item.similarityNames * 100 * 100) / 100 + '%' }}
+                    </td>
+                    <td rowspan="2">
+                        {{ Math.floor(item.timeDiscrepancy * 100 * 100) / 100 + '%' }}
                     </td>
                     <td rowspan="2">
                         {{ item.similarityOutcomesPre ? Math.floor(item.similarityOutcomesPre * 100 * 100) / 100 + '%' : 'Неизвестно' }}
