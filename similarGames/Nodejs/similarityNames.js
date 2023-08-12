@@ -265,14 +265,18 @@ async function similarityNames(name1, name2, bookieKey1, bookieKey2){
     name1 = clearingName(name1, bookieKey1);
     name2 = clearingName(name2, bookieKey2);
 
-    const name1Words = name1.split(' ').filter(word => word.length > 0);
-    const name2Words = name2.split(' ').filter(word => word.length > 0);
+    var name1Words = name1.split(' ').filter(word => word.length > 0);
+    var name2Words = name2.split(' ').filter(word => word.length > 0);
 
-    const name1Options = await Promise.all(name1Words.map(async word => await wordToOptions(word)));
-    const name2Options = await Promise.all(name2Words.map(async word => await wordToOptions(word)));
+    var name1Options = await Promise.all(name1Words.map(async word => await wordToOptions(word)));
+    var name2Options = await Promise.all(name2Words.map(async word => await wordToOptions(word)));
+
+    name1Words = name2Words = null;   
 
     const name1WordSets = createSets(name1Options);
     const name2WordSets = createSets(name2Options);
+
+    name1Options = name2Options = null;
 
     const pairsWithTheBestSimilarity = [];
 
@@ -339,6 +343,6 @@ async function main(){
 
 
 const example = async () => console.log(await similarityNames('Афанасьев М.', 'Afanasev M A', 'OLIMP', 'FONBET'));
-example();
+// example();
 
 module.exports = similarityNames;

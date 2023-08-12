@@ -238,7 +238,7 @@ async function start(sportKey) {
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startExist', 'desc')
-        .limit(100) // получение списка id1
+        .limit(20) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -274,10 +274,10 @@ async function start(sportKey) {
                             var totalOutcomesPre = 0;
                             var totalOutcomesLive = 0;
                             var totalScores = 0;
+                            var timeDiscrepancy = 0;
                             
                             const resultStartTime1 = Number(game1Id.startTime) || Number(game1Id.liveFrom) || null;
                             const resultStartTime2 = Number(game2Id.startTime) || Number(game2Id.liveFrom) || null;
-                            var timeDiscrepancy = 0;
                             if (resultStartTime1 && resultStartTime2){
                                 const realStartTimeDistance = Math.abs(resultStartTime1 - resultStartTime2);
                                 timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
