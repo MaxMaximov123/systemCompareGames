@@ -7,4 +7,5 @@ RUN npm install
 
 COPY similarGames/Nodejs/ ./
 
-CMD ["node", "--max-old-space-size=5120", "main.js"]
+# "--max-old-space-size=5120"
+CMD ["node", "main.js"]
