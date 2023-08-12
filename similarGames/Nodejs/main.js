@@ -210,7 +210,7 @@ async function start(sportKey) {
     const TIMELIVEGAME = 24 // время (в часах) через которое игра удаляется
 
     //_______________________________________//
-
+    console.log(sportKey);
 
 
     while (true){
