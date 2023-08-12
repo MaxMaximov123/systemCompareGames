@@ -336,28 +336,29 @@ async function start(sportKey) {
                                 need: needGroup,
                                 timeDiscrepancy: timeDiscrepancy
                             });
-                            db('pairs').insert({
-                                'id1': game1Id.id,
-                                'id2': game2Id.id,
-                                'isLive': game1Id.isLive,
-                                'game1Team1Name': game1Id?.team1Name,
-                                'game2Team1Name': game2Id?.team1Name,
-                                'game1Team2Name': game1Id?.team2Name,
-                                'game2Team2Name': game2Id?.team2Name,
-                                'similarityNames': totalNames,
-                                'similarityOutcomesPre': totalOutcomesPre,
-                                'similarityOutcomesLive': totalOutcomesLive,
-                                'similarityScores': totalScores,
-                                'totalSimilarity': (totalOutcomesPre + totalOutcomesLive + totalScores) / 3,
-                                'timeDiscrepancy': timeDiscrepancy,
-                                'needGroup': needGroup,
-                                'grouped': game1Id.globalGameId === game2Id.globalGameId,
-                                'now': new Date().getTime(),
-                            }).then((res) => {
+                            try{
+                                await db('pairs').insert({
+                                    'id1': game1Id.id,
+                                    'id2': game2Id.id,
+                                    'isLive': game1Id.isLive,
+                                    'game1Team1Name': game1Id?.team1Name,
+                                    'game2Team1Name': game2Id?.team1Name,
+                                    'game1Team2Name': game1Id?.team2Name,
+                                    'game2Team2Name': game2Id?.team2Name,
+                                    'similarityNames': totalNames,
+                                    'similarityOutcomesPre': totalOutcomesPre,
+                                    'similarityOutcomesLive': totalOutcomesLive,
+                                    'similarityScores': totalScores,
+                                    'totalSimilarity': (totalOutcomesPre + totalOutcomesLive + totalScores) / 3,
+                                    'timeDiscrepancy': timeDiscrepancy,
+                                    'needGroup': needGroup,
+                                    'grouped': game1Id.globalGameId === game2Id.globalGameId,
+                                    'now': new Date().getTime(),
+                                })
                                 console.log('pair added');
-                            }).catch((error) => {
+                            } catch (error) {
                                 console.log(error);
-                            });
+                            };
                         }
                         
                     }

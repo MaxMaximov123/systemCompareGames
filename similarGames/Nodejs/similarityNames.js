@@ -187,7 +187,6 @@ async function translate(name){
     try {
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0];
     } catch (e){
-        console.log(e);
         return name;
     }
 }
