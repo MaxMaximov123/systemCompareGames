@@ -238,7 +238,7 @@ async function start(sportKey) {
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startExist', 'desc')
-        .limit(150) // получение списка id1
+        .limit(100) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -285,15 +285,15 @@ async function start(sportKey) {
                             
                             if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                                 totalOutcomesPre = await compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
-                                if (totalOutcomesPre == null || totalOutcomesPre === NaN || totalOutcomesPre !== totalOutcomesPre) totalOutcomesPre = 0;
+                                if (totalOutcomesPre == null || !totalOutcomesPre || totalOutcomesPre !== totalOutcomesPre) totalOutcomesPre = 0;
                             }
                             if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
                                 totalOutcomesLive = await compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
-                                if (totalOutcomesLive !== totalOutcomesLive || totalOutcomesLive === null || totalOutcomesLive === NaN) totalOutcomesLive = 0;
+                                if (totalOutcomesLive !== totalOutcomesLive || totalOutcomesLive === null || !totalOutcomesLive) totalOutcomesLive = 0;
                             }
                             if (game1DataScores.length > 1 && game2DataScores.length > 1){
                                 totalScores = await compareScores(game1DataScores, game2DataScores);
-                                if (totalScores !== totalScores === null || totalScores === NaN) totalScores = 0;
+                                if (totalScores !== totalScores === null || !totalScores) totalScores = 0;
                             }
                                 
                             const namesToSim = {
