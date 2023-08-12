@@ -106,37 +106,15 @@ async function formatDataGames(game1, game2, outcomes=true){
     return [newGame1, newGame2];
 }
 
-function compareNames(namesData){
-    return new Promise((resolve, reject) => {
-        const url = process.env.PYTHON_API_URL;
-        // const url = 'http://127.0.0.1:5000/api/names';
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(namesData)
-        })
-        .then(response => response.json())
-        .then(data => {
-          const result = Math.max(Number(data.n1), Number(data.n2));
-          resolve(result);
-        })
-        .catch(error => {
-          console.log(error)
-          resolve(null);
-        });
-    })
-}
-
 async function compareOutcomes(game1, game2){
-    const newGames = await formatDataGames(game1, game2);
-    const newGame1 = newGames[0];
-    const newGame2 = newGames[1];
+    var newGames = await formatDataGames(game1, game2);
+    const newGame1 = copy(newGames[0]);
+    const newGame2 = copy(newGames[1]);
 
-    const totalSimOutcOnTik = {};
-    const totalSimOutc = {};
+    newGames = null;
+
+    var totalSimOutcOnTik = {};
+    var totalSimOutc = {};
 
     // ___________Сравнение_данных______________
     for (const tik in newGame1){
@@ -156,17 +134,21 @@ async function compareOutcomes(game1, game2){
     for (let key in totalSimOutcOnTik){
         totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
     }
+    totalSimOutcOnTik = null;
     const result = Object.values(totalSimOutc);
+    totalSimOutc = null;
     return sum(result) / result.length;
 }
 
 async function compareScores(game1, game2){
-    const newGames = await formatDataGames(game1, game2, false);
-    const newGame1 = newGames[0];
-    const newGame2 = newGames[1];
+    var newGames = await formatDataGames(game1, game2, false);
+    const newGame1 = copy(newGames[0]);
+    const newGame2 = copy(newGames[1]);
 
-    const totalSimOutcOnTik = {};
-    const totalSimOutc = {};
+    newGames = null;
+
+    var totalSimOutcOnTik = {};
+    var totalSimOutc = {};
 
     const maxScore = {};
 
@@ -204,7 +186,9 @@ async function compareScores(game1, game2){
     for (let key in totalSimOutcOnTik){
         totalSimOutc[key] = totalSimOutcOnTik[key].sim / totalSimOutcOnTik[key].count;
     }
+    totalSimOutcOnTik = null;
     const result = Object.values(totalSimOutc);
+    totalSimOutc = null;
     return sum(result) / result.length;
 }
 
@@ -390,7 +374,7 @@ async function start(sportKey) {
 async function main(){
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';')
-    for (sportKey of sportKeys){
+    for (let sportKey of sportKeys){
         console.log('START', sportKey);
         start(sportKey);
     }
