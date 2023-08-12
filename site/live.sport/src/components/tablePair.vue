@@ -11,7 +11,7 @@
                 <th>Начало</th>
                 <th>В лайве</th>
                 <th>Названия</th>
-                <th>Пересечение старта</th>
+                <th>Сходство начала</th>
                 <th>Пре. кэфы.</th>
                 <th>Лайв кэфы.</th>
                 <th>Счет</th>
@@ -43,7 +43,7 @@
                         <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey1 + '.png'">
                     </td>
                     <td>
-                        {{ Number(item.startTime1) ? formatDateFromUnixTimestamp(item.startTime1) : 'Неизвестно'}}
+                        {{ Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно'}}
                     </td>
                     <td style="position: relative; width: 10%; border: 1px solid #000"
                     class="py-1 px-2 text-center text-no-wrap text-caption">
@@ -96,7 +96,7 @@
                         <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
                     </td>
                     <td>
-                        {{ Number(item.startTime2) ? formatDateFromUnixTimestamp(item.startTime2) : 'Неизвестно'}}
+                        {{ Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно'}}
                     </td>
                     <td style="position: relative; width: 10%; border: 1px solid #000"
                     class="py-1 px-2 text-center text-no-wrap text-caption">
