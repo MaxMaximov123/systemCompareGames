@@ -4,6 +4,7 @@ const fs = require('fs')
 // const getRes = require('./names')
 const similarityNames = require('./similarityNames.js');
 
+
 const db = knex(config.development);
 
 const TIK_STEP = 3;
