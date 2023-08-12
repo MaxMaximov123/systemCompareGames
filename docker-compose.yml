@@ -76,7 +76,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: TABLE_TENNIS;WATER_POLO;BASEBALL
+      SPORTKEYS: CYBERSPORT;CRICKET;WATER_POLO;BASEBALL
     depends_on:
       # - python
       - db
@@ -131,7 +131,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: CYBERSPORT;CRICKET
+      SPORTKEYS: SOCCER;TABLE_TENNIS
     depends_on:
       - db
     networks:
