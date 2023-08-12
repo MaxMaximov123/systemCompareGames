@@ -376,7 +376,7 @@ async function start(sportKey) {
 
                 }
 
-                await forecast(game1Ids, numId1);
+                forecast(game1Ids, numId1);
             }
         }
         else {
