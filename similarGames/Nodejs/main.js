@@ -238,7 +238,7 @@ async function start(sportKey) {
         .where('games.sportKey', sportKey)
         .groupBy('games.id')
         .orderBy('startExist', 'desc')
-        .limit(20) // получение списка id1
+        .limit(100) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -249,6 +249,10 @@ async function start(sportKey) {
                 if ((game1Id.finExist - game1Id.startExist) / 60000 >= TIMEDELTA){    
                     for (let numId2=numId1;numId2<game1Ids.length;numId2++){
                         const game2Id = game1Ids[numId2];
+                        for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
+                            game1Id[numKey] = Number(game1Id[numKey]);
+                            game2Id[numKey] = Number(game2Id[numKey]);
+                        }
                         if (game2Id.id === game1Id.id || game2Id.bookieKey === game1Id.bookieKey) continue;
                         // _______________________________________
                         const pairExist = await db('pairs').select('id').where(function () {
@@ -276,10 +280,17 @@ async function start(sportKey) {
                             var totalScores = 0;
                             var timeDiscrepancy = 0;
                             
-                            const resultStartTime1 = Number(game1Id.startTime) || Number(game1Id.liveFrom) || null;
-                            const resultStartTime2 = Number(game2Id.startTime) || Number(game2Id.liveFrom) || null;
-                            if (resultStartTime1 && resultStartTime2){
-                                const realStartTimeDistance = Math.abs(resultStartTime1 - resultStartTime2);
+                            // const resultStartTime1 = Number(game1Id.startTime) || Number(game1Id.liveFrom) || null;
+                            // const resultStartTime2 = Number(game2Id.startTime) || Number(game2Id.liveFrom) || null;
+                            if ((game1Id.startTime || game1Id.liveFrom) && (game2Id.startTime || game2Id.liveFrom)){
+                                const realStartTimeDistance = Math.min(
+                                    ...[
+                                        game1Id.startTime && game2Id.startTime ? Math.abs(game1Id.startTime - game2Id.startTime) : null,
+                                        game1Id.startTime && game2Id.liveFrom ? Math.abs(game1Id.startTime - game2Id.liveFrom) : null,
+                                        game1Id.liveFrom && game2Id.startTime ? Math.abs(game1Id.liveFrom - game2Id.startTime) : null,
+                                        game1Id.liveFrom && game2Id.liveFrom ? Math.abs(game1Id.liveFrom - game2Id.liveFrom) : null,
+                                    ].filter((distance) => distance !== null)
+                                )
                                 timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
                             }
                             
