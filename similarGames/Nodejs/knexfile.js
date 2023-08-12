@@ -11,7 +11,7 @@ module.exports = {
             database: process.env.POSTGRES_DB
         },
         
-        pool: { min: 10, max: 30 }
+        pool: { min: 10, max: 40 }
 
     }
     };
