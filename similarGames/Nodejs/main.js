@@ -215,24 +215,24 @@ async function start(sportKey) {
 
     while (true){
         const game1Ids = await db('games')
-        .join('outcomes', 'games.id', 'outcomes.id')
-        .select(
-            'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
-            'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey'
-            )
-        .min('outcomes.now as startExist')
-        .max('outcomes.now as finExist')
-        .where('games.sportKey', sportKey)
-        .groupBy('games.id')
-        .orderBy('startExist', 'desc')
-        .limit(50) // получение списка id1
+            .join('outcomes', 'games.id', 'outcomes.id')
+            .select(
+                'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
+                'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey'
+                )
+            .min('outcomes.now as startExist')
+            .max('outcomes.now as finExist')
+            .whereIn('games.sportKey', sportKey)
+            .groupBy('games.id')
+            .orderBy('startExist', 'desc')
+            .limit(50) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
                 // const used = process.memoryUsage();
                 // console.log(used);
                 const game1Id = game1Ids[numId1];
-                if (game1Id.startExist == null || game1Id.finExist == null || (new Date().getTime() - game1Id.startExist) / 3600000 > TIMELIVEGAME) continue;
+                if (game1Id.startExist === null || game1Id.finExist === null || (new Date().getTime() - game1Id.startExist) / 3600000 > TIMELIVEGAME) continue;
 
                 if ((game1Id.finExist - game1Id.startExist) / 60000 >= TIMEDELTA){    
                     for (let numId2=numId1;numId2<game1Ids.length;numId2++){
@@ -381,10 +381,11 @@ async function start(sportKey) {
 async function main(){
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';')
-    for (let sportKey of sportKeys){
-        console.log('START', sportKey);
-        start(sportKey);
-    }
+    start(sportKeys);
+    // for (let sportKey of sportKeys){
+    //     console.log('START', sportKey);
+    //     start(sportKey);
+    // }
 }
 
 if (require.main === module) {
