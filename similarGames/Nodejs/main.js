@@ -216,8 +216,10 @@ async function start(sportKey) {
     while (true){
         const game1Ids = await db('games')
         .join('outcomes', 'games.id', 'outcomes.id')
-        .select('games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
-        'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey')
+        .select(
+            'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
+            'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey'
+            )
         .min('outcomes.now as startExist')
         .max('outcomes.now as finExist')
         .where('games.sportKey', sportKey)
@@ -227,6 +229,11 @@ async function start(sportKey) {
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
+                // const used = process.memoryUsage();
+                // for (let key in used) {
+                //     console.log(`${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+                // }
+
                 const game1Id = game1Ids[numId1];
                 if (game1Id.startExist == null || game1Id.finExist == null || (new Date().getTime() - game1Id.startExist) / 3600000 > TIMELIVEGAME){
                     continue;
@@ -253,6 +260,7 @@ async function start(sportKey) {
                         }
 
                         if ((game2Id.finExist - game2Id.startExist) / 60000 >= TIMEDELTA){
+                            if (game2Id.finExist < game1Id.startTime || game1Id.finExist < game2Id.startExist) continue;
                             var totalOutcomesPre = 0;
                             var totalOutcomesLive = 0;
                             var totalScores = 0;
@@ -263,7 +271,7 @@ async function start(sportKey) {
                             
                             if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                                 totalOutcomesPre = await compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
-                                if (totalOutcomesPre == null || !totalOutcomesPre || totalOutcomesPre !== totalOutcomesPre) totalOutcomesPre = 0;
+                                if (!totalOutcomesPre || totalOutcomesPre !== totalOutcomesPre) totalOutcomesPre = 0;
                             }
                             game1DataOutcomesPre = null;
                             game2DataOutcomesPre = null;
@@ -273,7 +281,7 @@ async function start(sportKey) {
                             
                             if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
                                 totalOutcomesLive = await compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
-                                if (totalOutcomesLive !== totalOutcomesLive || totalOutcomesLive === null || !totalOutcomesLive) totalOutcomesLive = 0;
+                                if (totalOutcomesLive !== totalOutcomesLive || !totalOutcomesLive) totalOutcomesLive = 0;
                             }
                             game1DataOutcomesLive = null;
                             game2DataOutcomesLive = null;
@@ -283,7 +291,7 @@ async function start(sportKey) {
 
                             if (game1DataScores.length > 1 && game2DataScores.length > 1){
                                 totalScores = await compareScores(game1DataScores, game2DataScores);
-                                if (totalScores !== totalScores === null || !totalScores) totalScores = 0;
+                                if (totalScores !== totalScores || !totalScores) totalScores = 0;
                             }
                             game1DataScores = null;
                             game2DataScores = null;
@@ -296,7 +304,8 @@ async function start(sportKey) {
                                         game1Id.liveFrom && game2Id.startTime ? Math.abs(game1Id.liveFrom - game2Id.startTime) : null,
                                         game1Id.liveFrom && game2Id.liveFrom ? Math.abs(game1Id.liveFrom - game2Id.liveFrom) : null,
                                     ].filter((distance) => distance !== null)
-                                )
+                                );
+                                // console.log(realStartTimeDistance / 60 / 1000)
                                 timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
                             }
                             
