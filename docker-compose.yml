@@ -57,7 +57,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: SOCCER;BASKETBALL;BASEBALL;CRICKET;WATER_POLO
+      SPORTKEYS: SOCCER;AMERICAN_FOOTBALL;HOCKEY
     depends_on:
       # - python
       - db
@@ -76,7 +76,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: TABLE_TENNIS;CYBERSPORT;VOLLEYBALL;FUTSAL;AMERICAN_FOOTBALL
+      SPORTKEYS: TABLE_TENNIS;WATER_POLO;BASEBALL
     depends_on:
       # - python
       - db
@@ -95,9 +95,44 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: TENNIS;HOCKEY;HANDBALL;SNOOKER
+      SPORTKEYS: TENNIS;SNOOKER;VOLLEYBALL
     depends_on:
-      # - python
+      - db
+    networks:
+      - mynetwork
+  
+  similarer4:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/Nodejs/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEYS: BASKETBALL;FUTSAL;HANDBALL
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+  
+  similarer5:
+    restart: always
+    build:
+      context: .
+      dockerfile: similarGames/Nodejs/Dockerfile
+    environment:
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: jbfgslgsdlfkngd
+      POSTGRES_DB: history
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      PYTHON_API_URL: http://python:5000/api/names
+      SPORTKEYS: CYBERSPORT;CRICKET
+    depends_on:
       - db
     networks:
       - mynetwork
