@@ -103,7 +103,7 @@ services:
     networks:
       - mynetwork
   
-  similarer3:
+  similarer4:
     restart: always
     build:
       context: .
