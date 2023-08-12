@@ -377,14 +377,14 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
-    // await Promise.all(sportKeys.map(sportKey => start(sportKey)));
-    async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
-    if (err) {
-        console.error(err);
-    } else {
-        console.log(results);
-    }
-    });
+    await Promise.all(sportKeys.map(sportKey => start(sportKey)));
+    // async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
+    // if (err) {
+    //     console.error(err);
+    // } else {
+    //     console.log(results);
+    // }
+    // });
     
     // for (let sportKey of sportKeys){
     //     console.log('START', sportKey);
