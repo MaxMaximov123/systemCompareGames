@@ -225,7 +225,7 @@ async function start(sportKey) {
             .where('games.sportKey', sportKey)
             .groupBy('games.id')
             .orderBy('startExist', 'desc')
-            .limit(50) // получение списка id1
+            .limit(100) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -377,14 +377,14 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
-    await Promise.all(sportKeys.map(sportKey => start(sportKey)));
-    // async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
-    // if (err) {
-    //     console.error(err);
-    // } else {
-    //     console.log(results);
-    // }
-    // });
+    // await Promise.all(sportKeys.map(sportKey => start(sportKey)));
+    async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log(results);
+    }
+    });
     
     // for (let sportKey of sportKeys){
     //     console.log('START', sportKey);
