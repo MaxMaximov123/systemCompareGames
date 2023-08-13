@@ -3,7 +3,7 @@ const config = require('./knexfile');
 const fs = require('fs')
 // const getRes = require('./names')
 const similarityNames = require('./similarityNames.js');
-
+const lodash = require('lodash');
 
 const db = knex(config.development);
 
@@ -56,7 +56,7 @@ const maxSportStartTimeDistance = {
 
 
 function copy(obj){
-    return {...obj}
+    return lodash.cloneDeep(obj);
     // return JSON.parse(JSON.stringify(obj));
 }
 
