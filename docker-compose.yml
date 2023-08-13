@@ -33,16 +33,6 @@ services:
       - mynetwork
     
     command: sh ./start.sh
-
-  # python:
-  #   restart: always
-  #   build:
-  #     context: .
-  #     dockerfile: similarGames/pythonApi/Dockerfile
-  #   ports:
-  #     - 5000:5000  # Проброс порта 8000 на локальной машине на порт 8000 в контейнере
-  #   networks:
-  #     - mynetwork
     
   
   similarer1:
@@ -57,7 +47,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: TENNIS;SOCCER;HOCKEY;BASEBALL
+      SPORTKEYS: SOCCER
     depends_on:
       # - python
       - db
@@ -76,7 +66,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: FUTSAL;TABLE_TENNIS;WATER_POLO;CYBERSPORT
+      SPORTKEYS: TABLE_TENNIS;WATER_POLO;AMERICAN_FOOTBALL;SNOOKER
     depends_on:
       # - python
       - db
@@ -95,7 +85,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: VOLLEYBALL;WATER_POLO;CYBERSPORT;SNOOKER
+      SPORTKEYS: TENNIS;BASKETBALL;FUTSAL;CRICKET
       BADSPORTS: HANDBALL;AMERICAN_FOOTBALL
     depends_on:
       # - python
@@ -115,7 +105,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: HANDBALL;AMERICAN_FOOTBALL
+      SPORTKEYS: CYBERSPORT;HOCKEY;BASEBALL;VOLLEYBALL;HANDBALL
       BADSPORTS: HANDBALL;AMERICAN_FOOTBALL
     depends_on:
       # - python
