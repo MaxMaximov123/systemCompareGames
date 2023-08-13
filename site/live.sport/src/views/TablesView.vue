@@ -114,6 +114,7 @@ export default {
             },
 
             sportKeys: [
+                "Все",
                 "SOCCER",
                 "TABLE_TENNIS",
                 "TENNIS",
@@ -130,7 +131,7 @@ export default {
                 "WATER_POLO",
                 ],
 
-            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
+            apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
             currentPage: 1,
             pageCount: 1000,
@@ -268,10 +269,10 @@ export default {
     .filters td {
         /* display: flex; */
         border: 2px solid rgb(255, 255, 255);
+        font-size: 1px;
     }
 
     .data-frame {
         display: flex;
-        font-size: 10px;
     }
 </style>

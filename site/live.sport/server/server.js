@@ -116,6 +116,7 @@ app.post('/api/pairs', async (req, res) => {
         .whereIn('games1.sportKey', sportKey)
       result.pairs = pairs;
       result.pageCount = await db('pairs')
+      .join('games as games1', 'pairs.id1', 'games1.id')
       .where('similarityNames', '>=', requestData.filters.simNames.min)
       .where('similarityNames', '<=', requestData.filters.simNames.max)
       .where('timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
@@ -129,7 +130,7 @@ app.post('/api/pairs', async (req, res) => {
       .whereIn('needGroup', groupedNewSystem)
       .whereIn('grouped', groupedOldSystem)
       .whereIn('games1.sportKey', sportKey)
-      .count('id');
+      .count('pairs.id');
       result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));
     } catch(e){
