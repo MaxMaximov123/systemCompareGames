@@ -238,6 +238,8 @@ async function start(sportKey) {
 
                 if ((game1Id.finExist - game1Id.startExist) / 60000 >= TIMEDELTA){    
                     for (let numId2=numId1;numId2<game1Ids.length;numId2++){
+                        // const used = process.memoryUsage();
+                        // console.log(used);
                         const game2Id = game1Ids[numId2];
                         for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                             game1Id[numKey] = Number(game1Id[numKey]);
@@ -331,18 +333,15 @@ async function start(sportKey) {
                                 similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
                             ])
 
-                            console.log(n1n2, n3n4, n1n4, n2n3);
                             const totalNames = Math.max(
                                 (n1n2.sameWordsCount + n3n4.sameWordsCount) / 2, 
                                 (n1n4.sameWordsCount + n2n3.sameWordsCount) / 2);
 
                             var needGroup = false;
-                            if (totalNames >= 0.95 && (totalOutcomesPre >= 0.8 || totalOutcomesLive >= 0.8) && totalScores >= 0.8){
-                                needGroup = true;
-                            } 
-                            if (totalNames >= 0.75 && (totalOutcomesPre >= 0.9 || totalOutcomesLive >= 0.9) && totalScores >= 0.85){
-                                needGroup = true;
-                            } 
+                            if (totalNames >= 0.95 && totalOutcomesPre >= 0.8) needGroup = true;
+                            else if (totalNames >= 0.75 && totalOutcomesPre >= 0.9) needGroup = true;
+                            else if (totalNames >= 0.95 && (totalOutcomesPre >= 0.8 || totalOutcomesLive >= 0.8) && totalScores >= 0.8) needGroup = true;
+                            else if (totalNames >= 0.75 && (totalOutcomesPre >= 0.9 || totalOutcomesLive >= 0.9) && totalScores >= 0.85) needGroup = true;
                             console.log('Comparing...', 
                             {
                                 id1: game1Id.id, 
