@@ -9,7 +9,7 @@ const slovar = {
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
     'з': ['z', 'th'], 
-    'и': ['i', 'e', 'y', 'ii', 'ie'],
+    'и': ['i', 'e', 'y', 'ii', 'ie', 'ea'],
     'й': ['i', 'y', 'j'], 
     'к': ['k', 'c'], 
     'л': ['l'], 
@@ -19,7 +19,7 @@ const slovar = {
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
-    'т': ['t'], 
+    'т': ['t', 'ch'], 
     'у': ['u', 'oo', 'o'], 
     'ф': ['f', 'ph'], 
     'х': ['h', 'ch', 'kh'],
@@ -28,83 +28,120 @@ const slovar = {
     'ш': ['sh', 'sz'], 
     'щ': ['sch', 'shch', 'sh', 'ch', 'szcz'], 
     'ъ': [''], 
-    'ы': ['y', 's'], 
+    'ы': ['y', 's', 'a'], 
     'ь': [''], 
     'э': ['e', 'ie', 'ye'],
     'ю': ['u', 'iu', 'yu'], 
     'я': ['ya', 'ia', 'j', 'ya'],
-    'y': ['y', 'i']
+    'y': ['y', 'i'],
+    'II': ['2', ],
+    'III': ['3', ]
 }
 
-const modifiers = {
+const replacements = {
     "BETRADAR": [
-        /\sbesports\s/gi,
-        /\sfc\s/gi,
-        /\ssc\s/gi,
-        /\s\(.+\)\s/gi,
-        /\spro\s/gi,
+        [/\sesports?\s/gi, ' '],
+        [/\sfc\s/gi, ' '],
+        [/\scf\s/gi, ' '],
+        [/\ssc\s/gi, ' '],
+        [/\s\(w\)\s/gi, ' '],
+        [/\spro\s/gi, ' '],
+        [/\sSve\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
 
     ],
     "OLIMP": [
-        /\s\(до\s\d+\)\s/gi,
-        /\sesports\s/gi,
-        /\s\(жен\)\s/gi,
-        /\s\(рез\)\s/gi,
-        /\sунив\s/gi,
-        /\sуниверситет\s/gi,
-        /\spro\s/gi,
+        [/\s\(до\s\d+\)\s/gi, ' '],
+        [/\sesports?\s/gi, ' '],
+        [/\s\(жен\)\s/gi, ' '],
+        [/\s\(рез\)\s/gi, ' '],
+        [/\sунив\.?\s/gi, ' '],
+        [/\sуниверситет\s/gi, ' '],
+        [/\spro\s/gi, ' '],
+        [/\sФК\s/gi, ' '],
+        [/\sСВ\s/gi, ' '],
+        [/\sfv\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
 
     ],
     "VIRGINBET": [
-        /\s\[W\]\s/gi,
-        /\sU\d+\s/gi,
-        /\sesports\s/gi,
-        /\sfc\s/gi,
-        /\spro\s/gi,
+        [/\s\[W\]\s/g, ' '],
+        [/\sU\d+\s/gi, ' '],
+        [/\scf\s/gi, ' '],
+        [/\sesports?\s/gi, ' '],
+        [/\sfc\s/gi, ' '],
+        [/\spro\s/gi, ' '],
+        [/\sfv\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
 
     ],
     "BET365": [
-        /\sU\d+\s/gi,
-        /\sfk\s/gi,
-        /\sesports\s/gi,
-        /\swomen\s/gi,
-        /\suniversity\s/gi,
-        /\s\(women\)\s/gi,
-        /\sreserves\s/gi,
-        /\sпро\s/gi,
+        [/\sU\d+\s/gi, ' '],
+        [/\sfk\s/gi, ' '],
+        [/\sesports?\s/gi, ' '],
+        [/\swomen\s/gi, ' '],
+        [/\scf\s/gi, ' '],
+        [/\suniversity\s/gi, ' '],
+        [/\s\(women\)\s/gi, ' '],
+        [/\sreserves\s/gi, ' '],
+        [/\sпро\s/gi, ' '],
+        [/\sfv\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
 
     ],
     "BETMGM": [
-        /\s\(.+\)\s/gi,
-        /\sfc\s/gi,
-        /\sfk\s/gi,
-        /\sc\s/gi,
-        /\suniversity\s/gi,
-        /\spro\s/gi,
+        [/\s\(women\)\s/gi, ' '],
+        [/\sfc\s/gi, ' '],
+        [/\sfk\s/gi, ' '],
+        [/\scf\s/gi, ' '],
+        [/\sc\s/gi, ' '],
+        [/\s\([A-Z]{3}\)\s/g, ' '],
+        [/\suniversity\s/gi, ' '],
+        [/\spro\s/gi, ' '],
+        [/\s\(U\d+\)\s/gi, ' '],
+        [/\sfv\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
 
 
     ],
     "PINNACLE": [
-        /\sfc\s/gi,
-        /\sfk\s/gi,
-        /\sc\s/gi,
-        /\sU\d+\s/gi,
-        /\sesport\w*\s/gi,
-        /\syouth\s/gi,
-        /\suniversity\s/gi,
-        /\sreserves\s/gi,
-        /\spro\s/gi,
+        [/\sfc\s/gi, ' '],
+        [/\sfk\s/gi, ' '],
+        [/\sc\s/gi, ' '],
+        [/\sU\d+\s/gi, ' '],
+        [/\sesports?\s/gi, ' '],
+        [/\syouth\s/gi, ' '],
+        [/\scf\s/gi, ' '],
+        [/\suniversity\s/gi, ' '],
+        [/\sreserves\s/gi, ' '],
+        [/\spro\s/gi, ' '],
+        [/\sF\.C\.\s/gi, ' '],
+        [/\sSV\s/gi, ' '],
+        [/\sSve\s/gi, ' '],
+        [/\sfv\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
 
 
     ],
     "FONBET": [
-        /\suniversity\s/gi,
-        /\s\(w\)\s/gi,
-        /\s\(r\)\s/gi,
-        /\sesport\w*\s/gi,
-        /\sU\d+\s/gi,
-        /\spro\s/gi,
-
+        [/\suniversity\s/gi, ' '],
+        [/\s\(univ\)\s/gi, ' '],
+        [/\suniv\.?\s/gi, ' '],
+        [/\s\(w\)\s/gi, ' '],
+        [/\s\(r\)\s/gi, ' '],
+        [/\scf\s/gi, ' '],
+        [/\sesports?\s/gi, ' '],
+        [/\sU\d+\s/gi, ' '],
+        [/\spro\s/gi, ' '],
+        [/\sfv\s/gi, ' '],
+        [/\sII\s/gi, ' 2 '],
+        [/\sIII\s/gi, ' 3 '],
     ],
 }
 
@@ -122,14 +159,15 @@ const googleTranslateURL = (from, to, txt) =>
 
 
 function clearingName(name, bookieKey){
-    for (let component of modifiers[bookieKey]){
-        name = name.replace(component, ' ');
+
+    for (let replacement of replacements[bookieKey]){
+        name = name.replace(replacement[0], replacement[1]);
     }
-    for (let component of unimportantComponents){
-        name = name.replace(component, ' ');
-        name = name.replace(capitalizeFirstLetter(component), ' ');
+    for (let replacement of unimportantComponents){
+        name = name.replace(replacement[0], replacement[1]);
+        name = name.replace(capitalizeFirstLetter(replacement[0]), replacement[1]);
     }
-    name = name.replace('  ', ' ');
+    name = name.replace(/\s+/g, ' ');
     return name;
 }
 
@@ -227,6 +265,7 @@ function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
 }
 
 function getSameWordsCount(set1Words, set2Words){
+    // console.log(set1Words, set2Words)
     var sameWordsCount = 0;
     var wordsMatched = false;
     var wordNotExist = true;
@@ -269,6 +308,7 @@ async function similarityNames(name1, name2, bookieKey1, bookieKey2){
 
     var name1Options = await Promise.all(name1Words.map(async word => await wordToOptions(word)));
     var name2Options = await Promise.all(name2Words.map(async word => await wordToOptions(word)));
+
 
     name1Words = name2Words = null;   
 
@@ -341,7 +381,6 @@ async function main(){
 // _____________________Example_______________
 
 
-const example = async () => console.log(await similarityNames('Афанасьев М.', 'Afanasev M A', 'OLIMP', 'FONBET'));
-// example();
-
+const example = async () => console.log(await similarityNames('TSV 1860 Munchen II', 'Munich 1860 2', 'BET365', 'BETRADAR'));
+example();
 module.exports = similarityNames;

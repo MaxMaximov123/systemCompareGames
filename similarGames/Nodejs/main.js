@@ -209,7 +209,7 @@ async function start(sportKey) {
 
     //_______________________________________//
 
-    const TIMEDELTA = 10 // минимальное время игры для ее сравнения (мин)
+    const TIMEDELTA = 0 // минимальное время игры для ее сравнения (мин)
     const TIMELIVEGAME = 24 // время (в часах) через которое игра удаляется
 
     //_______________________________________//
@@ -217,7 +217,7 @@ async function start(sportKey) {
 
 
     while (true){
-        const game1Ids = await db('games')
+        const games1 = await db('games')
             .join('outcomes', 'games.id', 'outcomes.id')
             .select(
                 'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
@@ -230,46 +230,46 @@ async function start(sportKey) {
             .orderBy('startExist', 'desc')
             .limit(20) // получение списка id1
         
-        if (game1Ids){
-            for (let numId1=0;numId1<game1Ids.length;numId1++){
+        if (games1){
+            for (let numId1=0;numId1<games1.length;numId1++){
                 // const used = process.memoryUsage();
                 // console.log(used);
-                const game1Id = game1Ids[numId1];
-                if (game1Id.startExist === null || game1Id.finExist === null || (new Date().getTime() - game1Id.startExist) / 3600000 > TIMELIVEGAME) continue;
+                const game1 = games1[numId1];
+                if (game1.startExist === null || game1.finExist === null || (new Date().getTime() - game1.startExist) / 3600000 > TIMELIVEGAME) continue;
 
-                if ((game1Id.finExist - game1Id.startExist) / 60000 >= TIMEDELTA){    
-                    for (let numId2=numId1;numId2<game1Ids.length;numId2++){
+                if ((game1.finExist - game1.startExist) / 60000 >= TIMEDELTA){    
+                    for (let numId2=numId1;numId2<games1.length;numId2++){
                         // const used = process.memoryUsage();
                         // console.log(used);
-                        const game2Id = game1Ids[numId2];
+                        const game2 = games1[numId2];
                         for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
-                            game1Id[numKey] = Number(game1Id[numKey]);
-                            game2Id[numKey] = Number(game2Id[numKey]);
+                            game1[numKey] = Number(game1[numKey]);
+                            game2[numKey] = Number(game2[numKey]);
                         }
-                        if (game2Id.id === game1Id.id || game2Id.bookieKey === game1Id.bookieKey) continue;
+                        if (game2.id === game1.id || game2.bookieKey === game1.bookieKey) continue;
                         // _______________________________________
                         const pairExist = await db('pairs').select('id').where(function () {
-                            this.where('id1', game1Id.id).andWhere('id2', game2Id.id);
+                            this.where('id1', game1.id).andWhere('id2', game2.id);
                         }).orWhere(function (){
-                            this.where('id2', game1Id.id).andWhere('id1', game2Id.id);
+                            this.where('id2', game1.id).andWhere('id1', game2.id);
                         });
                         if (pairExist.length > 0) continue;
                         // ____________________________________________
 
-                        if (game2Id.startExist == null || game2Id.finExist == null || (new Date().getTime() - game2Id.startExist) / 3600000 > TIMELIVEGAME){
+                        if (game2.startExist == null || game2.finExist == null || (new Date().getTime() - game2.startExist) / 3600000 > TIMELIVEGAME){
                             continue;
                         }
 
-                        if ((game2Id.finExist - game2Id.startExist) / 60000 >= TIMEDELTA){
-                            if (game2Id.finExist < game1Id.startTime || game1Id.finExist < game2Id.startExist) continue;
+                        if ((game2.finExist - game2.startExist) / 60000 >= TIMEDELTA){
+                            if (game2.finExist < game1.startTime || game1.finExist < game2.startExist) continue;
                             var totalOutcomesPre = 0;
                             var totalOutcomesLive = 0;
                             var totalScores = 0;
                             var timeDiscrepancy = 0;
 
-                            if (game1Id.isLive === true || game2Id.isLive === true){
-                                var game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', true).orderBy('now', 'asc');
-                                var game2DataOutcomesLive = await db('outcomes').select('*').where('id', game2Id.id).where('isLive', true).orderBy('now', 'asc');
+                            if (game1.isLive === true || game2.isLive === true){
+                                var game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1.id).where('isLive', true).orderBy('now', 'asc');
+                                var game2DataOutcomesLive = await db('outcomes').select('*').where('id', game2.id).where('isLive', true).orderBy('now', 'asc');
                                 
                                 if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
                                     totalOutcomesLive = compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
@@ -278,8 +278,8 @@ async function start(sportKey) {
                                 game1DataOutcomesLive = null;
                                 game2DataOutcomesLive = null;
                             }
-                            var game1DataOutcomesPre = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', false).orderBy('now', 'asc');
-                            var game2DataOutcomesPre = await db('outcomes').select('*').where('id', game2Id.id).where('isLive', false).orderBy('now', 'asc');
+                            var game1DataOutcomesPre = await db('outcomes').select('*').where('id', game1.id).where('isLive', false).orderBy('now', 'asc');
+                            var game2DataOutcomesPre = await db('outcomes').select('*').where('id', game2.id).where('isLive', false).orderBy('now', 'asc');
                             
                             if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                                 totalOutcomesPre = compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
@@ -289,8 +289,8 @@ async function start(sportKey) {
                             game2DataOutcomesPre = null;
                             
                             
-                            var game1DataScores = await db('scores').select('*').where('id', game1Id.id).orderBy('now', 'asc');
-                            var game2DataScores = await db('scores').select('*').where('id', game2Id.id).orderBy('now', 'asc');
+                            var game1DataScores = await db('scores').select('*').where('id', game1.id).orderBy('now', 'asc');
+                            var game2DataScores = await db('scores').select('*').where('id', game2.id).orderBy('now', 'asc');
 
                             if (game1DataScores.length > 1 && game2DataScores.length > 1){
                                 totalScores = compareScores(game1DataScores, game2DataScores);
@@ -299,39 +299,39 @@ async function start(sportKey) {
                             game1DataScores = null;
                             game2DataScores = null;
                             
-                            if ((game1Id.startTime || game1Id.liveFrom) && (game2Id.startTime || game2Id.liveFrom)){
+                            if ((game1.startTime || game1.liveFrom) && (game2.startTime || game2.liveFrom)){
                                 const realStartTimeDistance = Math.min(
                                     ...[
-                                        game1Id.startTime && game2Id.startTime ? Math.abs(game1Id.startTime - game2Id.startTime) : null,
-                                        game1Id.startTime && game2Id.liveFrom ? Math.abs(game1Id.startTime - game2Id.liveFrom) : null,
-                                        game1Id.liveFrom && game2Id.startTime ? Math.abs(game1Id.liveFrom - game2Id.startTime) : null,
-                                        game1Id.liveFrom && game2Id.liveFrom ? Math.abs(game1Id.liveFrom - game2Id.liveFrom) : null,
+                                        game1.startTime && game2.startTime ? Math.abs(game1.startTime - game2.startTime) : null,
+                                        game1.startTime && game2.liveFrom ? Math.abs(game1.startTime - game2.liveFrom) : null,
+                                        game1.liveFrom && game2.startTime ? Math.abs(game1.liveFrom - game2.startTime) : null,
+                                        game1.liveFrom && game2.liveFrom ? Math.abs(game1.liveFrom - game2.liveFrom) : null,
                                     ].filter((distance) => distance !== null)
                                 );
                                 // console.log(realStartTimeDistance / 60 / 1000)
-                                timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1Id.sportKey] * 60 * 1000)));
+                                timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1.sportKey] * 60 * 1000)));
                             }
                             
                             const namesToSim = {
-                                game1Name1: game1Id?.team1Name,
-                                game2Name1: game2Id?.team1Name,
-                                game1Name2: game1Id?.team2Name,
-                                game2Name2: game2Id?.team2Name
+                                game1Name1: game1?.team1Name,
+                                game2Name1: game2?.team1Name,
+                                game1Name2: game1?.team2Name,
+                                game2Name2: game2?.team2Name
                             };
                             // const totalNames = await compareNames(namesToSim);
                             // const totalNames = Number(await getRes(...Object.values(namesToSim)));
                             // const forecastNames = {
-                                // 'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
-                                // 'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                // 'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                // 'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
+                                // 'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1.bookieKey, game2.bookieKey),
+                                // 'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1.bookieKey, game2.bookieKey),
+                                // 'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1.bookieKey, game2.bookieKey),
+                                // 'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2.bookieKey, game1.bookieKey),
                             // };
 
                             const [n1n2, n3n4, n1n4, n2n3] = await Promise.all([
-                                similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
-                                similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
+                                similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1.bookieKey, game2.bookieKey),
+                                similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1.bookieKey, game2.bookieKey),
+                                similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1.bookieKey, game2.bookieKey),
+                                similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2.bookieKey, game1.bookieKey),
                             ])
 
                             const totalNames = Math.max(
@@ -345,8 +345,8 @@ async function start(sportKey) {
                             else if (totalNames >= 0.75 && (totalOutcomesPre >= 0.9 || totalOutcomesLive >= 0.9) && totalScores >= 0.85) needGroup = true;
                             console.log('Comparing...', 
                             {
-                                id1: game1Id.id, 
-                                id2: game2Id.id, 
+                                id1: game1.id, 
+                                id2: game2.id, 
                                 outcPre: totalOutcomesPre, 
                                 outcLive: totalOutcomesLive,
                                 scores: totalScores, 
@@ -355,13 +355,13 @@ async function start(sportKey) {
                                 timeDiscrepancy: timeDiscrepancy
                             });
                             await db('pairs').insert({
-                                'id1': game1Id.id,
-                                'id2': game2Id.id,
-                                'isLive': game1Id.isLive,
-                                'game1Team1Name': game1Id?.team1Name,
-                                'game2Team1Name': game2Id?.team1Name,
-                                'game1Team2Name': game1Id?.team2Name,
-                                'game2Team2Name': game2Id?.team2Name,
+                                'id1': game1.id,
+                                'id2': game2.id,
+                                'isLive': game1.isLive,
+                                'game1Team1Name': game1?.team1Name,
+                                'game2Team1Name': game2?.team1Name,
+                                'game1Team2Name': game1?.team2Name,
+                                'game2Team2Name': game2?.team2Name,
                                 'similarityNames': totalNames,
                                 'similarityOutcomesPre': totalOutcomesPre,
                                 'similarityOutcomesLive': totalOutcomesLive,
@@ -369,7 +369,7 @@ async function start(sportKey) {
                                 'totalSimilarity': (totalOutcomesPre + totalOutcomesLive + totalScores) / 3,
                                 'timeDiscrepancy': timeDiscrepancy,
                                 'needGroup': needGroup,
-                                'grouped': game1Id.globalGameId === game2Id.globalGameId,
+                                'grouped': game1.globalGameId === game2.globalGameId,
                                 'now': new Date().getTime(),
                             })
                             console.log('pair added');
