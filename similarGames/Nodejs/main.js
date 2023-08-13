@@ -222,10 +222,10 @@ async function start(sportKey) {
                 )
             .min('outcomes.now as startExist')
             .max('outcomes.now as finExist')
-            .where('games.sportKey', sportKey)
+            .whereIn('games.sportKey', sportKey)
             .groupBy('games.id')
             .orderBy('startExist', 'desc')
-            .limit(100) // получение списка id1
+            .limit(300) // получение списка id1
         
         if (game1Ids){
             for (let numId1=0;numId1<game1Ids.length;numId1++){
@@ -237,6 +237,7 @@ async function start(sportKey) {
                 if ((game1Id.finExist - game1Id.startExist) / 60000 >= TIMEDELTA){    
                     for (let numId2=numId1;numId2<game1Ids.length;numId2++){
                         const game2Id = game1Ids[numId2];
+                        if (game1Id.sportKey === game2Id.sportKey) continue;
                         for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                             game1Id[numKey] = Number(game1Id[numKey]);
                             game2Id[numKey] = Number(game2Id[numKey]);
@@ -377,14 +378,15 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
+    await start(sportKeys);
     // await Promise.all(sportKeys.map(sportKey => start(sportKey)));
-    async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
-    if (err) {
-        console.error(err);
-    } else {
-        console.log(results);
-    }
-    });
+    // async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
+    // if (err) {
+    //     console.error(err);
+    // } else {
+    //     console.log(results);
+    // }
+    // });
     
     // for (let sportKey of sportKeys){
     //     console.log('START', sportKey);
