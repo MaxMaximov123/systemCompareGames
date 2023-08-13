@@ -55,6 +55,10 @@
     <div id="tables">
         <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
     </div>
+    <v-btn :loading="loadingUpdate" style="margin-left: 5%;" @click="render">
+        <v-icon>mdi-refresh</v-icon>
+        Обновить
+    </v-btn>
     
     <div style="font-size: 80%;">
     <v-pagination
@@ -113,6 +117,8 @@ export default {
                 groupedOldSystem: 'Все',
             },
 
+            loadingUpdate: false,
+
             sportKeys: [
                 "Все",
                 "SOCCER",
@@ -131,7 +137,7 @@ export default {
                 "WATER_POLO",
                 ],
 
-            apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
+            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
             currentPage: 1,
             pageCount: 1000,
@@ -205,7 +211,9 @@ export default {
         },
 
         async render(){
+            this.loadingUpdate = true;
             await this.getPairs();
+            this.loadingUpdate = false;
         },
 
         async updateGrouped(){

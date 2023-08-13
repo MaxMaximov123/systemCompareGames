@@ -59,7 +59,7 @@ function copy(obj){
     return JSON.parse(JSON.stringify(obj));
 }
 
-async function formatDataGames(game1, game2, outcomes=true){
+function formatDataGames(game1, game2, outcomes=true){
     const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
     const maxTime = Math.floor(Math.min(game1.at(-1).now, game2.at(-1).now) / 1000);
 
@@ -69,9 +69,9 @@ async function formatDataGames(game1, game2, outcomes=true){
     const path1 = game1[0].path;
     const path2 = game2[0].path;
     
-    const lastStateGame1 = {};
+    var lastStateGame1 = {};
     lastStateGame1[path1] = {ind: 0, time: minTime, val: null};
-    const lastStateGame2 = {};
+    var lastStateGame2 = {};
     lastStateGame2[path2] = {ind: 0, time: minTime, val: null};
     
     for (let timeStep=minTime;timeStep<maxTime;timeStep+=TIK_STEP){
@@ -103,15 +103,17 @@ async function formatDataGames(game1, game2, outcomes=true){
         newGame1[timeStep] = copy(lastStateGame1);
         newGame2[timeStep] = copy(lastStateGame2);
     }
+    
+    lastStateGame1 = null;
+    lastStateGame2 = null;
 
     return [newGame1, newGame2];
 }
 
-async function compareOutcomes(game1, game2){
-    var newGames = await formatDataGames(game1, game2);
+function compareOutcomes(game1, game2){
+    var newGames = formatDataGames(game1, game2);
     const newGame1 = copy(newGames[0]);
     const newGame2 = copy(newGames[1]);
-
     newGames = null;
 
     var totalSimOutcOnTik = {};
@@ -141,8 +143,8 @@ async function compareOutcomes(game1, game2){
     return sum(result) / result.length;
 }
 
-async function compareScores(game1, game2){
-    var newGames = await formatDataGames(game1, game2, false);
+function compareScores(game1, game2){
+    var newGames = formatDataGames(game1, game2, false);
     const newGame1 = copy(newGames[0]);
     const newGame2 = copy(newGames[1]);
 
@@ -262,31 +264,33 @@ async function start(sportKey) {
                             var totalScores = 0;
                             var timeDiscrepancy = 0;
 
+                            if (game1Id.isLive === true || game2Id.isLive === true){
+                                var game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', true).orderBy('now', 'asc');
+                                var game2DataOutcomesLive = await db('outcomes').select('*').where('id', game2Id.id).where('isLive', true).orderBy('now', 'asc');
+                                
+                                if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
+                                    totalOutcomesLive = compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
+                                    if (totalOutcomesLive !== totalOutcomesLive || !totalOutcomesLive) totalOutcomesLive = 0;
+                                }
+                                game1DataOutcomesLive = null;
+                                game2DataOutcomesLive = null;
+                            }
                             var game1DataOutcomesPre = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', false).orderBy('now', 'asc');
                             var game2DataOutcomesPre = await db('outcomes').select('*').where('id', game2Id.id).where('isLive', false).orderBy('now', 'asc');
                             
                             if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
-                                totalOutcomesPre = await compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
+                                totalOutcomesPre = compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
                                 if (!totalOutcomesPre || totalOutcomesPre !== totalOutcomesPre) totalOutcomesPre = 0;
                             }
                             game1DataOutcomesPre = null;
                             game2DataOutcomesPre = null;
-
-                            var game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1Id.id).where('isLive', true).orderBy('now', 'asc');
-                            var game2DataOutcomesLive = await db('outcomes').select('*').where('id', game2Id.id).where('isLive', true).orderBy('now', 'asc');
                             
-                            if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
-                                totalOutcomesLive = await compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
-                                if (totalOutcomesLive !== totalOutcomesLive || !totalOutcomesLive) totalOutcomesLive = 0;
-                            }
-                            game1DataOutcomesLive = null;
-                            game2DataOutcomesLive = null;
                             
                             var game1DataScores = await db('scores').select('*').where('id', game1Id.id).orderBy('now', 'asc');
                             var game2DataScores = await db('scores').select('*').where('id', game2Id.id).orderBy('now', 'asc');
 
                             if (game1DataScores.length > 1 && game2DataScores.length > 1){
-                                totalScores = await compareScores(game1DataScores, game2DataScores);
+                                totalScores = compareScores(game1DataScores, game2DataScores);
                                 if (totalScores !== totalScores || !totalScores) totalScores = 0;
                             }
                             game1DataScores = null;
@@ -313,16 +317,24 @@ async function start(sportKey) {
                             };
                             // const totalNames = await compareNames(namesToSim);
                             // const totalNames = Number(await getRes(...Object.values(namesToSim)));
-                            const forecastNames = {
-                                'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
-                                'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
-                                'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
-                            };
+                            // const forecastNames = {
+                                // 'n1+n2': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
+                                // 'n3+n4': await similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                // 'n1+n4': await similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                // 'n2+n3': await similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
+                            // };
 
+                            const [n1n2, n3n4, n1n4, n2n3] = await Promise.all([
+                                similarityNames(namesToSim.game1Name1, namesToSim.game2Name1, game1Id.bookieKey, game2Id.bookieKey),
+                                similarityNames(namesToSim.game1Name2, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                similarityNames(namesToSim.game1Name1, namesToSim.game2Name2, game1Id.bookieKey, game2Id.bookieKey),
+                                similarityNames(namesToSim.game2Name1, namesToSim.game1Name2, game2Id.bookieKey, game1Id.bookieKey),
+                            ])
+
+                            console.log(n1n2, n3n4, n1n4, n2n3);
                             const totalNames = Math.max(
-                                (forecastNames['n1+n2'].sameWordsCount + forecastNames['n3+n4'].sameWordsCount) / 2, 
-                                (forecastNames['n1+n4'].sameWordsCount + forecastNames['n2+n3'].sameWordsCount) / 2);
+                                (n1n2.sameWordsCount + n3n4.sameWordsCount) / 2, 
+                                (n1n4.sameWordsCount + n2n3.sameWordsCount) / 2);
 
                             var needGroup = false;
                             if (totalNames >= 0.95 && (totalOutcomesPre >= 0.8 || totalOutcomesLive >= 0.8) && totalScores >= 0.8){
@@ -342,7 +354,7 @@ async function start(sportKey) {
                                 need: needGroup,
                                 timeDiscrepancy: timeDiscrepancy
                             });
-                            db('pairs').insert({
+                            await db('pairs').insert({
                                 'id1': game1Id.id,
                                 'id2': game2Id.id,
                                 'isLive': game1Id.isLive,
@@ -359,15 +371,13 @@ async function start(sportKey) {
                                 'needGroup': needGroup,
                                 'grouped': game1Id.globalGameId === game2Id.globalGameId,
                                 'now': new Date().getTime(),
-                            }).then((res) => console.log('pair added'));
+                            })
+                            console.log('pair added');
                         }
                         
                     }
                 }
             }
-        }
-        else {
-            console.log('error');
         }
     }
 }
@@ -378,18 +388,19 @@ async function main(){
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
     // await Promise.all(sportKeys.map(sportKey => start(sportKey)));
-    async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
-    if (err) {
-        console.error(err);
-    } else {
-        console.log(results);
-    }
-    });
-    
-    // for (let sportKey of sportKeys){
-    //     console.log('START', sportKey);
-    //     start(sportKey);
+
+    // async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
+    // if (err) {
+    //     console.error(err);
+    // } else {
+    //     console.log(results);
     // }
+    // });
+    
+    for (let sportKey of sportKeys){
+        console.log('START', sportKey);
+        start(sportKey);
+    }
 }
 
 if (require.main === module) {

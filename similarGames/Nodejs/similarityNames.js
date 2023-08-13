@@ -201,7 +201,7 @@ async function wordToOptions(name){
     if (name.length <= 3){
         options.push(name.split(''));
     }
-
+    
     const setArray = new Set(options.map(x => JSON.stringify(x)))
     const uniqArray = [...setArray].map(x => JSON.parse(x))
     return uniqArray;
