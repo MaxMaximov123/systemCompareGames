@@ -33,8 +33,26 @@ app.post('/api/pairs', async (req, res) => {
     const stTime = new Date().getTime();
     const requestData = req.body;
 
+    const sportKeys = [
+      "SOCCER",
+      "TABLE_TENNIS",
+      "TENNIS",
+      "BASKETBALL",
+      "CYBERSPORT",
+      "HOCKEY",
+      "BASEBALL",
+      "VOLLEYBALL",
+      "HANDBALL",
+      "CRICKET",
+      "FUTSAL",
+      "SNOOKER",
+      "AMERICAN_FOOTBALL",
+      "WATER_POLO",
+    ];
     var groupedNewSystem = [];
     var groupedOldSystem = [];
+    var sportKey = [];
+
     if (requestData.filters.groupedNewSystem === 'Все') groupedNewSystem = [true, false];
     if (requestData.filters.groupedNewSystem === 'Да') groupedNewSystem = [true,];
     if (requestData.filters.groupedNewSystem === 'Нет') groupedNewSystem = [false,];
@@ -42,6 +60,9 @@ app.post('/api/pairs', async (req, res) => {
     if (requestData.filters.groupedOldSystem === 'Все') groupedOldSystem = [true, false];
     if (requestData.filters.groupedOldSystem === 'Да') groupedOldSystem = [true,];
     if (requestData.filters.groupedOldSystem === 'Нет') groupedOldSystem = [false,];
+
+    if (requestData.filters.sportKey === 'Все') sportKey = sportKeys;
+    else sportKey = [requestData.filters.sportKey,];
     
     try{
       var pairs = {};
@@ -92,6 +113,7 @@ app.post('/api/pairs', async (req, res) => {
         .where('similarityScores', '<=', requestData.filters.simScores.max)
         .whereIn('needGroup', groupedNewSystem)
         .whereIn('grouped', groupedOldSystem)
+        .whereIn('games1.sportKey', sportKey)
       result.pairs = pairs;
       result.pageCount = await db('pairs')
       .where('similarityNames', '>=', requestData.filters.simNames.min)
@@ -106,6 +128,7 @@ app.post('/api/pairs', async (req, res) => {
       .where('similarityScores', '<=', requestData.filters.simScores.max)
       .whereIn('needGroup', groupedNewSystem)
       .whereIn('grouped', groupedOldSystem)
+      .whereIn('games1.sportKey', sportKey)
       .count('id');
       result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));

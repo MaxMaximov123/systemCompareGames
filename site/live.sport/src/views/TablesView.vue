@@ -12,20 +12,21 @@
             <th>Сходство счета:</th>
             <th>Новой системой?</th>
             <th>Старой системой?</th>
+            <th>Спорт</th>
 
             <th rowspan="2">
                 <v-btn @click="applyFilters">Применить</v-btn>
             </th>
         </tr>
         <tr>
-            <td style="width: 14.5%;" v-for="filter in Object.keys(filters).filter(f => f !== 'groupedNewSystem' && f !== 'groupedOldSystem')" :key="filter">
+            <td style="width: 13%;" v-for="filter in Object.keys(filters).filter(f => filters[f].min !== undefined)" :key="filter">
                 <div class="data-frame">
-                    <v-text-field v-model="filters[filter].min" style="margin-right: 10px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field :size="x-learge" v-model="filters[filter].min" style="margin-right: 10px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                     <v-text-field v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                 </div>
             </td>
 
-            <td style="width: 9%;">
+            <td style="width: 10%;">
                 <v-combobox class="data-frame"
                     variant="outlined"
                     v-model="filters.groupedNewSystem"
@@ -33,11 +34,19 @@
                 </v-combobox>
             </td>
 
-            <td style="width: 9%;">
+            <td style="width: 10%;">
                 <v-combobox class="data-frame"
                     variant="outlined"
                     v-model="filters.groupedOldSystem"
                     :items="['Все', 'Да', 'Нет']">
+                </v-combobox>
+            </td>
+            
+            <td style="width: 15%;">
+                <v-combobox class="data-frame"
+                    variant="outlined"
+                    v-model="filters.sportKey"
+                    :items="sportKeys">
                 </v-combobox>
             </td>
 
@@ -99,9 +108,27 @@ export default {
                     min: 0,
                     max: 1,
                 },
+                sportKey: 'Все',
                 groupedNewSystem: 'Все',
                 groupedOldSystem: 'Все',
             },
+
+            sportKeys: [
+                "SOCCER",
+                "TABLE_TENNIS",
+                "TENNIS",
+                "BASKETBALL",
+                "CYBERSPORT",
+                "HOCKEY",
+                "BASEBALL",
+                "VOLLEYBALL",
+                "HANDBALL",
+                "CRICKET",
+                "FUTSAL",
+                "SNOOKER",
+                "AMERICAN_FOOTBALL",
+                "WATER_POLO",
+                ],
 
             apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
@@ -139,6 +166,7 @@ export default {
                 },
                 groupedNewSystem: this.queryParams.groupedNewSystem ? this.queryParams.groupedNewSystem : 'Все',
                 groupedOldSystem: this.queryParams.groupedOldSystem ? this.queryParams.groupedOldSystem : 'Все',
+                sportKey: this.queryParams.sportKey ? this.queryParams.sportKey : 'Все',
             },
         this.currentPage = Number(this.$route.params.page);
         this.render();
@@ -155,6 +183,7 @@ export default {
             return {
                 groupedNewSystem: this.filters.groupedNewSystem,
                 groupedOldSystem: this.filters.groupedOldSystem,
+                sportKey: this.filters.sportKey,
                 simNamesMin: this.filters.simNames.min,
                 simNamesMax: this.filters.simNames.max,
                 timeDiscrepancyMin: this.filters.timeDiscrepancy.min,
