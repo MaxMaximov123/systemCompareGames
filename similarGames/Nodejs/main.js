@@ -56,7 +56,8 @@ const maxSportStartTimeDistance = {
 
 
 function copy(obj){
-    return JSON.parse(JSON.stringify(obj));
+    return {...obj}
+    // return JSON.parse(JSON.stringify(obj));
 }
 
 function formatDataGames(game1, game2, outcomes=true){
