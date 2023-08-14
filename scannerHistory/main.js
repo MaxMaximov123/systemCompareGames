@@ -204,9 +204,10 @@ socket.on('message', (message) => {
 			if (game) {
 				merge(game, data);
 				cleanUpDeeply(game);
-				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill){
+				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
 					updateGame(gameId, {
 						globalGameId: game.globalGameId,
+						unavailableAt: game.unavailableAt,
 						startTime: new Date(game.startTime).getTime(),
 						liveFrom: new Date(game.liveFrom).getTime(),
 						liveTill: new Date(game.liveTill).getTime(),
@@ -225,6 +226,7 @@ socket.on('message', (message) => {
 					team2Name: game?.team2?.name,
 					sportKey: game?.sport?.key,
 					bookieKey: game?.bookie?.key,
+					unavailableAt: game?.unavailableAt,
 					startTime: new Date(game?.startTime).getTime(),
 					liveFrom: new Date(game?.liveFrom).getTime(),
 					liveTill: new Date(game?.liveTill).getTime(),
