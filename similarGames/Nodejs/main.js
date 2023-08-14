@@ -248,7 +248,7 @@ async function start(sportKey) {
                     if (pairExist.length > 0) continue;
                     // ____________________________________________
 
-                    if (game2.finExist < game1.startTime || game1.finExist < game2.startExist) continue;
+                    // if (game2.finExist < game1.startTime || game1.finExist < game2.startExist) continue;
                     var totalOutcomesPre = 0;
                     var totalOutcomesLive = 0;
                     var totalScores = 0;
