@@ -287,7 +287,7 @@ async function start(sportKey) {
                         (n1n2.sameWordsCount + n3n4.sameWordsCount) / 2, 
                         (n1n4.sameWordsCount + n2n3.sameWordsCount) / 2);
                     
-                    if (totalNames < 0.75 && game1.globalGameId === game2.globalGameId) continue;
+                    if (totalNames < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
 
                     if (game1.isLive === true || game2.isLive === true){
                         var game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1.id).where('isLive', true).orderBy('now', 'asc');
