@@ -234,6 +234,7 @@ async function start(sportKey) {
                 const game1 = games1[numId1];
                 for (let numId2=numId1;numId2<games1.length;numId2++){
                     const game2 = games1[numId2];
+                    // console.log(game1.id, game2.id, game1.sportKey);
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                         game1[numKey] = Number(game1[numKey]);
                         game2[numKey] = Number(game2[numKey]);
@@ -266,7 +267,7 @@ async function start(sportKey) {
                         // console.log(realStartTimeDistance / 60 / 1000)
                         timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1.sportKey] * 60 * 1000)));
                     }
-                    if (timeDiscrepancy < 0.5) continue;
+                    if (timeDiscrepancy < 0.5 && game1.globalGameId !== game2.globalGameId) continue;
 
                     const namesToSim = {
                         game1Name1: game1?.team1Name,
@@ -286,7 +287,7 @@ async function start(sportKey) {
                         (n1n2.sameWordsCount + n3n4.sameWordsCount) / 2, 
                         (n1n4.sameWordsCount + n2n3.sameWordsCount) / 2);
                     
-                    if (totalNames < 0.75) continue;
+                    if (totalNames < 0.75 && game1.globalGameId === game2.globalGameId) continue;
 
                     if (game1.isLive === true || game2.isLive === true){
                         var game1DataOutcomesLive = await db('outcomes').select('*').where('id', game1.id).where('isLive', true).orderBy('now', 'asc');
