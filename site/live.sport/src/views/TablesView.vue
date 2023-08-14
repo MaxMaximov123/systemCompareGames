@@ -4,7 +4,7 @@
     <h3 class="title">Результаты сравнения игр</h3>
     
     <table class="filters">
-        <tr>
+        <tr style="margin-right: 5%;">
             <th>Сходство названий:</th>
             <th>Пересечение старта:</th>
             <th>Сходство пре. кэфов:</th>
@@ -21,13 +21,13 @@
         <tr>
             <td style="width: 13%;" v-for="filter in Object.keys(filters).filter(f => filters[f].min !== undefined)" :key="filter">
                 <div class="data-frame">
-                    <v-text-field :size="x-learge" v-model="filters[filter].min" style="margin-right: 10px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field density="compact" :size="x-learge" v-model="filters[filter].min" style="margin-right: 5px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field density="compact" v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                 </div>
             </td>
 
             <td style="width: 10%;">
-                <v-combobox class="data-frame"
+                <v-combobox density="compact" class="data-frame"
                     variant="outlined"
                     v-model="filters.groupedNewSystem"
                     :items="['Все', 'Да', 'Нет']">
@@ -35,7 +35,7 @@
             </td>
 
             <td style="width: 10%;">
-                <v-combobox class="data-frame"
+                <v-combobox density="compact" class="data-frame"
                     variant="outlined"
                     v-model="filters.groupedOldSystem"
                     :items="['Все', 'Да', 'Нет']">
@@ -43,7 +43,7 @@
             </td>
             
             <td style="width: 15%;">
-                <v-combobox class="data-frame"
+                <v-combobox density="compact" class="data-frame"
                     variant="outlined"
                     v-model="filters.sportKey"
                     :items="sportKeys">
@@ -271,7 +271,7 @@ export default {
     .filters {
         font-size: 80%;
         margin: auto;
-        width: 90%;
+        width: 95%;
     }
 
     .filters td {
