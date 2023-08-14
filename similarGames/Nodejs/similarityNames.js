@@ -382,5 +382,5 @@ async function main(){
 
 
 const example = async () => console.log(await similarityNames('TSV 1860 Munchen II', 'Munich 1860 2', 'BET365', 'BETRADAR'));
-example();
+// example();
 module.exports = similarityNames;
