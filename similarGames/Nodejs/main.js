@@ -324,8 +324,8 @@ async function start(sportKey) {
                     var needGroup = false;
                     if (totalNames >= 0.95 && totalOutcomesPre >= 0.8) needGroup = true;
                     else if (totalNames >= 0.75 && totalOutcomesPre >= 0.9) needGroup = true;
-                    else if (totalNames >= 0.95 && (totalOutcomesPre >= 0.8 || totalOutcomesLive >= 0.8) && totalScores >= 0.8) needGroup = true;
-                    else if (totalNames >= 0.75 && (totalOutcomesPre >= 0.9 || totalOutcomesLive >= 0.9) && totalScores >= 0.85) needGroup = true;
+                    else if (totalNames >= 0.95 && (totalOutcomesPre >= 0.8 || totalOutcomesLive >= 0.75) && totalScores >= 0.7) needGroup = true;
+                    else if (totalNames >= 0.75 && (totalOutcomesPre >= 0.9 || totalOutcomesLive >= 0.8) && totalScores >= 0.75) needGroup = true;
                     console.log('Comparing...', 
                     {
                         id1: game1.id, 
