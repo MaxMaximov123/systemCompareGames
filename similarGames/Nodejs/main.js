@@ -340,7 +340,7 @@ async function start(sportKey) {
                     });
                     if (pairExist.length === 0){
                         try {
-                            db('pairs').insert({
+                            await db('pairs').insert({
                                 'id1': game1.id,
                                 'id2': game2.id,
                                 'isLive': game1.isLive,
@@ -362,7 +362,7 @@ async function start(sportKey) {
                         } catch(e) {}
                         const pairId = (await db('pairs').select('id').where({'id1': game1.id, 'id2': game2.id}))[0].id;
                         try {
-                            db('decisions').insert({
+                            await db('decisions').insert({
                                 'pairId': pairId,
                                 'similarityNames': totalSimilarityNames,
                                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -397,7 +397,7 @@ async function start(sportKey) {
                             // 'timeDiscrepancy': timeDiscrepancy,})
 
                             try {
-                                db('pairs').where('id', pairForUpdate.id).update({
+                                await db('pairs').where('id', pairForUpdate.id).update({
                                     'isLive': game1.isLive,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -411,7 +411,7 @@ async function start(sportKey) {
                                 console.log('update pair');
                             } catch(e) {console.log(e)}
                             try {
-                                db('decisions').insert({
+                                await db('decisions').insert({
                                     'pairId': pairForUpdate.id,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
