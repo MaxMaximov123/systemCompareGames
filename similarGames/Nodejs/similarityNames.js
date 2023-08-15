@@ -1,5 +1,7 @@
+const lodash = require('lodash');
+
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
-const slovar = {
+const slolet = {
     'а': ['a', 'o'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
@@ -163,67 +165,41 @@ function clearingName(name, bookieKey){
     for (let replacement of replacements[bookieKey]){
         name = name.replace(replacement[0], replacement[1]);
     }
-    for (let replacement of unimportantComponents){
-        name = name.replace(replacement[0], replacement[1]);
-        name = name.replace(capitalizeFirstLetter(replacement[0]), replacement[1]);
-    }
     name = name.replace(/\s+/g, ' ');
     return name;
 }
 
-function Transliteration(name){
-    var newNames = [''];
-    for (let indChar = 0; indChar < name.length; indChar++) {
-        if (slovar[name[indChar].toLowerCase()]){
-            if (name[indChar].toLowerCase() === name[indChar]){
-                const newNames1 = [];
-                for (let symbol of slovar[name[indChar]]){
-                    for (let word of newNames){
-                        newNames1.push(word + symbol);
-                    }
-                }
-                newNames = newNames1;
-            } else {
-                const newNames1 = [];
-                for (let symbol of slovar[name[indChar].toLowerCase()]){
-                    for (let word of newNames){
-                        newNames1.push(word + capitalizeFirstLetter(' ' + symbol).slice(1));
-                    }
-                }
-                newNames = newNames1;
-            }
-            
-        } else {
-            const newNames1 = [];
-            for (let word of newNames){
-                newNames1.push(word + name[indChar]);
-            }
-            newNames = newNames1;
+function Transliteration(word){
+    return [...word].reduce((words, char) => {
+        const currentSymbolsTranslations = slolet[char] || [char];
+        const newWords = [];
+    
+        for (let symbol of currentSymbolsTranslations) {
+          for (let existingWord of words) {
+            newWords.push(existingWord + symbol);
+          }
         }
-    }
-    return newNames;
+    
+        return newWords;
+      }, ['']);
 }
 
-function createSets(options){
-    var nameWordSets = options[0].slice();
-    for (let numComponent=1;numComponent<options.length;numComponent++){
-        const newNameWordSets = [];
-        for (let someComponent of options[numComponent]){
-            for (let lastComponent of nameWordSets){
-                lastComponent = lastComponent.slice();
-                lastComponent.push(...someComponent);
-                newNameWordSets.push(lastComponent);
-            }
+function createSets(options) {
+    return options.reduce((acc, currentOption) => {
+      const newSets = [];
+      for (const someComponent of currentOption) {
+        for (const lastComponent of acc) {
+          newSets.push([...lastComponent, ...someComponent]);
         }
-        nameWordSets = newNameWordSets.slice();
-    }
-
-    return nameWordSets;
-}
+      }
+      return newSets;
+    }, [[]]);
+  }
+  
 
 async function translate(name){
     try {
-        return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0];
+        return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0].toLowerCase();
     } catch (e){
         return name;
     }
@@ -232,7 +208,6 @@ async function translate(name){
 // Создаем вариации слова
 async function wordToOptions(name){
     const options = [];
-    options.push([name]);
     for (let option of Transliteration(name)) options.push([option]);
     options.push([await translate(name)]);
 
@@ -240,39 +215,34 @@ async function wordToOptions(name){
         options.push(name.split(''));
     }
     
-    const setArray = new Set(options.map(x => JSON.stringify(x)))
-    const uniqArray = [...setArray].map(x => JSON.parse(x))
-    return uniqArray;
+    return options;
 }
 
-function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
-    var longestWordSetCombinations = [[]];
-    for (let numWordInWordSet=0;numWordInWordSet<minimumSetLength;numWordInWordSet++){
-        const longestWordSetCombinations1 = [];
-        for (let word of nameWordSet){
-            for (let longestWordSetCombination of longestWordSetCombinations){
-                longestWordSetCombination = longestWordSetCombination.slice();
-                if (!longestWordSetCombination.includes(word)){
-                    longestWordSetCombination.push(word);
-                    longestWordSetCombinations1.push(longestWordSetCombination);
-                }
-                
-            }
+function getLongestWordSetCombinations(nameWordSet, minimumSetLength) {
+    return [...Array(minimumSetLength)].reduce(longestWordSetCombinations => {
+      const newCombinations = [];
+  
+      for (let word of nameWordSet) {
+        for (let longestWordSetCombination of longestWordSetCombinations) {
+          if (!longestWordSetCombination.includes(word)) {
+            newCombinations.push([...longestWordSetCombination, word]);
+          }
         }
-        longestWordSetCombinations = longestWordSetCombinations1;
-    }
-    return longestWordSetCombinations;
-}
+      }
+  
+      return newCombinations;
+    }, [[]]);
+  }
+  
 
 function getSameWordsCount(set1Words, set2Words){
-    // console.log(set1Words, set2Words)
-    var sameWordsCount = 0;
-    var wordsMatched = false;
-    var wordNotExist = true;
+    let sameWordsCount = 0;
+    let wordsMatched = false;
+    let wordNotExist = true;
     for (let numWord=0;numWord<set1Words.length;numWord++){
-        if (set1Words[numWord].toLowerCase() === set2Words[numWord].toLowerCase() || 
-            set1Words[numWord].toLowerCase().startsWith(set2Words[numWord].toLowerCase()) || 
-            set2Words[numWord].toLowerCase().startsWith(set1Words[numWord].toLowerCase())) 
+        if (set1Words[numWord] === set2Words[numWord] || 
+            set1Words[numWord].startsWith(set2Words[numWord]) || 
+            set2Words[numWord].startsWith(set1Words[numWord])) 
             {
                 sameWordsCount++;
                 if (set1Words[numWord] === set2Words[numWord] && set1Words[numWord].length >= 3 && set2Words[numWord].length >= 3){
@@ -288,42 +258,23 @@ function getSameWordsCount(set1Words, set2Words){
 }
 
 function pairWithTheBestSimilarity(arr){
-    var pair = {set1Words: [], set2Words: [], sameWordsCount: 0};
+    let pair = {set1Words: [], set2Words: [], sameWordsCount: 0};
     for (let obj of arr){
         if (obj.sameWordsCount >= pair.sameWordsCount){
-            pair = JSON.parse(JSON.stringify(obj));
+            pair = lodash.cloneDeep(obj);
         }
     }
     return pair;
 }
 
-async function similarityNames(name1, name2, bookieKey1, bookieKey2){
-    name1 = ' ' + name1 + ' ';
-    name2 = ' ' + name2 + ' ';
-    name1 = clearingName(name1, bookieKey1);
-    name2 = clearingName(name2, bookieKey2);
-
-    var name1Words = name1.split(' ').filter(word => word.length > 0);
-    var name2Words = name2.split(' ').filter(word => word.length > 0);
-
-    var name1Options = await Promise.all(name1Words.map(async word => await wordToOptions(word)));
-    var name2Options = await Promise.all(name2Words.map(async word => await wordToOptions(word)));
-
-
-    name1Words = name2Words = null;   
-
-    const name1WordSets = createSets(name1Options);
-    const name2WordSets = createSets(name2Options);
-
-    name1Options = name2Options = null;
-
+function findingBestSimilarity(name1WordSets, name2WordSets){
     const pairsWithTheBestSimilarity = [];
 
     for (let name1WordSet of name1WordSets){
         for (let name2WordSet of name2WordSets){
             const minimumSetLength = Math.min(name1WordSet.length, name2WordSet.length);
-            var staticSet = null;
-            var setCombinations = null;
+            let staticSet = null;
+            let setCombinations = null;
             if (name1WordSet.length <= name2WordSet.length){
                 staticSet = name1WordSet;
                 setCombinations = name2WordSet;
@@ -341,46 +292,73 @@ async function similarityNames(name1, name2, bookieKey1, bookieKey2){
     return pairWithTheBestSimilarity(pairsWithTheBestSimilarity);
 }
 
-async function forecast(count, name, lengthArr){
-    const results = {
-        'n1+n2': await similarityNames(name.n1, name.n2),
-        'n3+n4': await similarityNames(name.n3, name.n4),
-        'n1+n4': await similarityNames(name.n1, name.n4),
-        'n2+n3': await similarityNames(name.n2, name.n3),
-    };
-    console.log(count, '/', lengthArr);
-    if (Math.max(
-        (results['n1+n2'].sameWordsCount + results['n3+n4'].sameWordsCount) / 2, 
-        (results['n1+n4'].sameWordsCount + results['n2+n3'].sameWordsCount) / 2) > 0.75){
-        console.log(name, results);
+async function similarityNames(games){
+    for (let game in games){
+        games[game].name1 = ' ' + games[game].name1.toLowerCase() + ' ';
+        games[game].name2 = ' ' + games[game].name2.toLowerCase() + ' ';
+
+        games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
+        games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
+
+        games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+        games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+
+        [games[game].name1Options, games[game].name2Options] = await Promise.all([
+            Promise.all(games[game].name1Words.map(word => wordToOptions(word))),
+            Promise.all(games[game].name2Words.map(word => wordToOptions(word)))
+        ]);
+
+        delete games[game].name1Words;
+        delete games[game].name2Words;
+
+        games[game].name1WordSets = createSets(games[game].name1Options);
+        games[game].name2WordSets = createSets(games[game].name2Options);
+
+        delete games[game].name1Options;
+        delete games[game].name2Options;
     }
-}
 
 
-async function main(){
-    const knex = require('knex');
-    const config = require('./knexfile');
-    const db = knex(config.development);
-    const names = await db('pairs').select('game1Team1Name as n1', 'game2Team1Name as n2', 'game1Team2Name as n3', 'game2Team2Name as n4')
-    .where('grouped', false).where('needGroup', false).limit(1000);
-    console.log(names.length);
-    var count = 0;
-    for (let name of names){
-        await forecast(count, JSON.parse(JSON.stringify(name)), names.length);
-        
-        count++;
-        // if (!(await compareNames(n1, n2)) && !(await compareNames(n3, n4)) && !(await compareNames(n1, n4)) && !(await compareNames(n2, n3))){
-        //     console.log('Не объединил!', count1, name);
-        //     count1++;
-        // }
+    const similarityNames = {
+        game1Name1game2Name1: findingBestSimilarity(games.game1.name1WordSets, games.game2.name1WordSets),
+        game1Name2game2Name2: findingBestSimilarity(games.game1.name2WordSets, games.game2.name2WordSets),
+        game1Name1game2Name2: findingBestSimilarity(games.game1.name1WordSets, games.game2.name2WordSets),
+        game1Name2game2Name1: findingBestSimilarity(games.game1.name2WordSets, games.game2.name1WordSets),
     }
+    delete games.game1.name1Options;
+    delete games.game1.name2Options;
+    delete games.game2.name1Options;
+    delete games.game2.name2Options;
+
+    // console.log(similarityNames);
+    return Math.max(
+        (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
+        (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,
+    )
 }
+
 
 // main();
 
 // _____________________Example_______________
 
 
-const example = async () => console.log(await similarityNames('TSV 1860 Munchen II', 'Munich 1860 2', 'BET365', 'BETRADAR'));
+const example = async () => {
+    t = new Date();
+    console.log(await similarityNames({
+    game1: {
+        name1: 'TSV 1860 Мюнхен II',
+        name2: 'Спартак',
+        bookieKey: 'OLIMP',
+    },
+    game2: {
+        name1: 'Munich 1860 2',
+        name2: 'Spartak',
+        bookieKey: 'BETRADAR'
+    }
+}
+))
+console.log(new Date() - t)};
+
 // example();
 module.exports = similarityNames;
