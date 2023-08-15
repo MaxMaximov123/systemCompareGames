@@ -204,6 +204,27 @@ socket.on('message', (message) => {
 			if (game) {
 				merge(game, data);
 				cleanUpDeeply(game);
+				if (data.startTime){
+					try {
+						db('startTimeUpdates').insert({
+							gameId: game.id,
+							startTime: game.startTime,
+							time: new Date()
+						})
+						console.log('update game');
+					} catch (error) {console.error(error)}
+				}
+				if (data?.team1?.name || data?.team2?.name){
+					try {
+						db('teamsNamesUpdates').insert({
+							gameId: game.id,
+							team1Name: game.team1?.name,
+							team2Name: game.team2?.name,
+							time: new Date()
+						})
+						console.log('update game');
+					} catch (error) {console.error(error)}
+				}
 				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
 					updateGame(gameId, {
 						globalGameId: game.globalGameId,

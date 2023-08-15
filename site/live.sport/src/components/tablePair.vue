@@ -28,11 +28,11 @@
                         Пара {{ item.id }}
                         <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game1Team1Name }}
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         <v-icon :size="15" @click="copyToClipboard(item.game1Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game1Team2Name }}
                     </td>
@@ -43,12 +43,12 @@
                         <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey1 + '.png'">
                     </td>
                     <td>
-                        {{ Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно'}}
+                        <p v-for="time of ( Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно').split('*')">{{ time }}</p>
                     </td>
                     <td style="position: relative; width: 10%; border: 1px solid #000"
                     class="py-1 px-2 text-center text-no-wrap text-caption">
-                        <p>{{Number(item.liveFrom1) ? formatDateFromUnixTimestamp(item.liveFrom1) : 'Неизвестно'}}</p>
-                        <p>{{Number(item.liveFrom1) && Number(item.liveTill1) ? formatDateFromUnixTimestamp(item.liveTill1) : '-'}}</p>
+                        <p>{{Number(item.liveFrom1) ? formatDateFromUnixTimestamp(item.liveFrom1).replace('*', ' ') : 'Неизвестно'}}</p>
+                        <p>{{Number(item.liveFrom1) && Number(item.liveTill1) ? formatDateFromUnixTimestamp(item.liveTill1).replace('*', ' ') : '-'}}</p>
                     </td>
                     <td rowspan="2">
                         {{ Math.floor(item.similarityNames * 100 * 100) / 100 + '%' }}
@@ -72,23 +72,18 @@
                         {{ item.grouped ? 'Да' : 'Нет'}}
                     </td>
                     <td rowspan="2">
-                        <p v-for="time of formatDateFromUnixTimestamp(item.now).split(' ')">{{ time }}</p>
+                        <p v-for="time of formatDateFromUnixTimestamp(item.now).split('*')">{{ time }}</p>
                     </td>
                     <td class="align-center">
-                        <template v-if="Number(item.lastUpdate1)">
-                            <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate1).split(' ')">{{ time }}</p>
-                        </template>
-                        <template v-else>
-                            <p>Неизвестно</p>
-                        </template>
+                        <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
                     </td>
                 </tr>
                 <tr>
-                    <td>
+                    <td style="text-align: left;">
                         <v-icon :size="15" @click="copyToClipboard(item.game2Team1Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game2Team1Name }}
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                         {{ item.game2Team2Name }}
                     </td>
@@ -96,12 +91,11 @@
                         <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
                     </td>
                     <td>
-                        {{ Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно'}}
-                    </td>
+                        <p v-for="time of ( Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно').split('*')">{{ time }}</p>                    </td>
                     <td style="position: relative; width: 10%; border: 1px solid #000"
                     class="py-1 px-2 text-center text-no-wrap text-caption">
-                        <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2) : 'Неизвестно'}}</p>
-                        <p>{{Number(item.liveFrom2) && Number(item.liveTill2) ? formatDateFromUnixTimestamp(item.liveTill2) : '-'}}</p>
+                        <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2).replace('*', ' ') : 'Неизвестно'}}</p>
+                        <p>{{Number(item.liveFrom2) && Number(item.liveTill2) ? formatDateFromUnixTimestamp(item.liveTill2).replace('*', ' ') : '-'}}</p>
                         <template
                             v-if="
                             item.liveFrom1 &&
@@ -119,12 +113,7 @@
                         </template>
                     </td>
                     <td class="align-center">
-                        <template v-if="Number(item.lastUpdate1)">
-                            <p v-for="time of formatDateFromUnixTimestamp(item.lastUpdate2).split(' ')">{{ time }}</p>
-                        </template>
-                        <template v-else>
-                            <p>Неизвестно</p>
-                        </template>
+                        <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
                     </td>
                     
                 </tr>
@@ -136,6 +125,7 @@
   
   <script>
   import html2canvas from 'html2canvas';
+  import moment from 'moment';
   export default {
     props: {
         items: {
@@ -157,8 +147,7 @@
     
     methods: {
         formatDateFromUnixTimestamp(unixTimestamp) {
-            const res = (new Date(Number(unixTimestamp)).toLocaleString()).replace(', ', ' ');
-            return res;
+            return moment(new Date(Number(unixTimestamp))).format(`DD.MM.YYYY*HH:mm:ss`);
         },
 
         getBackgroundColor(row){
@@ -216,13 +205,13 @@
 
     .headers th, td {
       padding: 8px;
-      text-align: left;
+      text-align: center;
       border: 2px solid grey;
     }
 
     .headers td {
       padding: 8px;
-      text-align: left;
+      text-align: center;
       border: 2px solid grey;
     }
 
@@ -318,6 +307,11 @@
         border: 1px solid #000000;
         border-radius: 3px;
         padding: 0 4px;
+    }
+
+    .center {
+        text-align: center; /* Для горизонтального центрирования текста */
+        vertical-align: middle; /* Для вертикального центрирования текста */
     }
 
   </style>

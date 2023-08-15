@@ -21,12 +21,12 @@
         <tr>
             <td style="width: 13%;" v-for="filter in Object.keys(filters).filter(f => filters[f].min !== undefined)" :key="filter">
                 <div class="data-frame">
-                    <v-text-field density="compact" :size="x-learge" v-model="filters[filter].min" style="margin-right: 5px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                    <v-text-field density="compact" v-model="filters[filter].min" style="margin-right: 5px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                     <v-text-field density="compact" v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
                 </div>
             </td>
 
-            <td style="width: 10%;">
+            <td style="width: 8%;">
                 <v-combobox density="compact" class="data-frame"
                     variant="outlined"
                     v-model="filters.groupedNewSystem"
@@ -34,7 +34,7 @@
                 </v-combobox>
             </td>
 
-            <td style="width: 10%;">
+            <td style="width: 8%;">
                 <v-combobox density="compact" class="data-frame"
                     variant="outlined"
                     v-model="filters.groupedOldSystem"
@@ -42,7 +42,7 @@
                 </v-combobox>
             </td>
             
-            <td style="width: 15%;">
+            <td style="width: 12%;">
                 <v-combobox density="compact" class="data-frame"
                     variant="outlined"
                     v-model="filters.sportKey"
@@ -269,15 +269,21 @@ export default {
     }
 
     .filters {
+        border-collapse: collapse;
         font-size: 80%;
         margin: auto;
-        width: 95%;
+        width: 90%;
     }
 
     .filters td {
         /* display: flex; */
         border: 2px solid rgb(255, 255, 255);
         font-size: 1px;
+    }
+
+    .filters th,
+    .filters td {
+        padding: 2px; /* Отступ внутри ячейки */
     }
 
     .data-frame {
