@@ -229,6 +229,7 @@ async function start(sportKey) {
             .groupBy('games.id')
             .orderBy('startExist', 'desc')
         
+            // console.log(games1.length);
         if (games1){
             for (let numId1=0;numId1<games1.length;numId1++){
                 const game1 = games1[numId1];
@@ -315,6 +316,7 @@ async function start(sportKey) {
                     totalSimilarityOutcomesLive = Number(totalSimilarityOutcomesLive.toFixed(4));
                     totalSimilarityOutcomesPre = Number(totalSimilarityOutcomesPre.toFixed(4));
                     totalSimilarityScores = Number(totalSimilarityScores.toFixed(4));
+                    timeDiscrepancy = Number(timeDiscrepancy.toFixed(4));
                     
 
                     var needGroup = false;
