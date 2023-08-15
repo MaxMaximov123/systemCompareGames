@@ -17,6 +17,7 @@
                 <th>Счет</th>
                 <th style="width: 5%;">Новой системой?</th>
                 <th style="width: 5%;">Старой системой?</th>
+                <th>Решения</th>
                 <th>Создана</th>
                 <th>Обновлена</th>
             </thead>
@@ -70,6 +71,9 @@
                     </td>
                     <td rowspan="2">
                         {{ item.grouped ? 'Да' : 'Нет'}}
+                    </td>
+                    <td rowspan="2">
+                        {{ item.decisionsCount }}
                     </td>
                     <td rowspan="2">
                         <p v-for="time of formatDateFromUnixTimestamp(item.now).split('*')">{{ time }}</p>

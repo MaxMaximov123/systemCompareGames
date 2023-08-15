@@ -6,7 +6,7 @@
     <table class="filters">
         <tr style="margin-right: 5%;">
             <th>Сходство названий:</th>
-            <th>Пересечение старта:</th>
+            <th>Сходство начала:</th>
             <th>Сходство пре. кэфов:</th>
             <th>Сходство лайв кэфов:</th>
             <th>Сходство счета:</th>
@@ -137,7 +137,7 @@ export default {
                 "WATER_POLO",
                 ],
 
-            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
+            apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
             currentPage: 1,
             pageCount: 1000,

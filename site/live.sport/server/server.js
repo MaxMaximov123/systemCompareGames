@@ -70,10 +70,12 @@ app.post('/api/pairs', async (req, res) => {
       pairs = await db('pairs')
       .join('games as games1', 'pairs.id1', 'games1.id')
       .join('games as games2', 'pairs.id2', 'games2.id')
-      .offset((requestData.page - 1) * 10).limit(10)
+      // .join('decisions as decisions', 'pairs.id', 'decisions.pairId')
+      // .groupBy('pairs.id', '*')
       .select(
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
+        db.raw('(SELECT COUNT(id) FROM decisions WHERE decisions."pairId" = pairs.id LIMIT 1) as "decisionsCount"', []),
         'pairs.id as id',
         'pairs.now as now',
         'pairs.isLive as isLive',
@@ -100,19 +102,22 @@ app.post('/api/pairs', async (req, res) => {
         'games1.sportKey as sportKey',
         'games2.bookieKey as bookieKey2',
         'games2.startTime as startTime2',)
+        // .count('decisions.id as decisionsCount')
+        // .groupBy('pairs.id')
         .orderBy('pairs.id', 'asc')
-        .where('similarityNames', '>=', requestData.filters.simNames.min)
-        .where('similarityNames', '<=', requestData.filters.simNames.max)
-        .where('timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
-        .where('timeDiscrepancy', '<=', requestData.filters.timeDiscrepancy.max)
-        .where('similarityOutcomesPre', '>=', requestData.filters.simOutcomesPre.min)
-        .where('similarityOutcomesPre', '<=', requestData.filters.simOutcomesPre.max)
-        .where('similarityOutcomesLive', '>=', requestData.filters.simOutcomesLive.min)
-        .where('similarityOutcomesLive', '<=', requestData.filters.simOutcomesLive.max)
-        .where('similarityScores', '>=', requestData.filters.simScores.min)
-        .where('similarityScores', '<=', requestData.filters.simScores.max)
-        .whereIn('needGroup', groupedNewSystem)
-        .whereIn('grouped', groupedOldSystem)
+        .offset((requestData.page - 1) * 10).limit(10)
+        .where('pairs.similarityNames', '>=', requestData.filters.simNames.min)
+        .where('pairs.similarityNames', '<=', requestData.filters.simNames.max)
+        .where('pairs.timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
+        .where('pairs.timeDiscrepancy', '<=', requestData.filters.timeDiscrepancy.max)
+        .where('pairs.similarityOutcomesPre', '>=', requestData.filters.simOutcomesPre.min)
+        .where('pairs.similarityOutcomesPre', '<=', requestData.filters.simOutcomesPre.max)
+        .where('pairs.similarityOutcomesLive', '>=', requestData.filters.simOutcomesLive.min)
+        .where('pairs.similarityOutcomesLive', '<=', requestData.filters.simOutcomesLive.max)
+        .where('pairs.similarityScores', '>=', requestData.filters.simScores.min)
+        .where('pairs.similarityScores', '<=', requestData.filters.simScores.max)
+        .whereIn('pairs.needGroup', groupedNewSystem)
+        .whereIn('pairs.grouped', groupedOldSystem)
         .whereIn('games1.sportKey', sportKey)
       result.pairs = pairs;
       result.pageCount = await db('pairs')
