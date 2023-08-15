@@ -367,7 +367,7 @@ async function start(sportKey) {
                                 'timeDiscrepancy': timeDiscrepancy,
                                 'needGroup': needGroup,
                                 'grouped': game1.globalGameId === game2.globalGameId,
-                                'createdAt': new Date().getTime(),
+                                'createdAt': new Date(),
                             })
                             console.log('decision added');
                         } catch(e) {console.log(e)}
@@ -379,12 +379,14 @@ async function start(sportKey) {
                             'similarityOutcomesLive',
                             'similarityScores',
                             'timeDiscrepancy'
-                            ).where({'id1': game1.id, 'id2': game2.id}))[0].id;
+                            ).where({'id1': game1.id, 'id2': game2.id}))[0];
                         if (pairForUpdate.similarityNames !== totalSimilarityNames ||
                             pairForUpdate.similarityOutcomesPre !== totalSimilarityOutcomesPre ||
                             pairForUpdate.similarityOutcomesLive !== totalSimilarityOutcomesLive ||
                             pairForUpdate.similarityScores !== totalSimilarityScores ||
                             pairForUpdate.timeDiscrepancy !== timeDiscrepancy){
+
+                            console.log(pairForUpdate)
 
                             try {
                                 await db('pairs').where('id', pairForUpdate.id).update({
@@ -407,11 +409,10 @@ async function start(sportKey) {
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                     'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                     'similarityScores': totalSimilarityScores,
-                                    'totalSimilarity': (totalSimilarityOutcomesPre + totalSimilarityOutcomesLive + totalSimilarityScores) / 3,
                                     'timeDiscrepancy': timeDiscrepancy,
                                     'needGroup': needGroup,
                                     'grouped': game1.globalGameId === game2.globalGameId,
-                                    'createdAt': new Date().getTime(),
+                                    'createdAt': new Date(),
                                 })
                                 console.log('decision added');
                             } catch(e) {}
