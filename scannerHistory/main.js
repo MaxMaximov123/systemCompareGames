@@ -136,7 +136,7 @@ socket.on('open', () => {
 	});
 });
 
-socket.on('message', (message) => {
+socket.on('message', async (message) => {
 	message = message.toString();
 	// console.info(`<<`, JSON.parse(message));
 	let requestId, error, responseType, data;
@@ -210,8 +210,8 @@ socket.on('message', (message) => {
 							gameId: game.id,
 							startTime: game.startTime,
 							time: new Date()
-						})
-						console.log('update game');
+						});
+						console.log('update startTime');
 					} catch (error) {console.error(error)}
 				}
 				if (data?.team1?.name || data?.team2?.name){
@@ -221,8 +221,8 @@ socket.on('message', (message) => {
 							team1Name: game.team1?.name,
 							team2Name: game.team2?.name,
 							time: new Date()
-						})
-						console.log('update game');
+						});
+						console.log('update names');
 					} catch (error) {console.error(error)}
 				}
 				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){

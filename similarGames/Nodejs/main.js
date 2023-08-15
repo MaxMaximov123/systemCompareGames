@@ -311,6 +311,10 @@ async function start(sportKey) {
                     }
                     game1DataScores = null;
                     game2DataScores = null;
+
+                    totalSimilarityOutcomesLive = Number(totalSimilarityOutcomesLive.toFixed(4));
+                    totalSimilarityOutcomesPre = Number(totalSimilarityOutcomesPre.toFixed(4));
+                    totalSimilarityScores = Number(totalSimilarityScores.toFixed(4));
                     
 
                     var needGroup = false;
@@ -336,7 +340,7 @@ async function start(sportKey) {
                     });
                     if (pairExist.length === 0){
                         try {
-                            await db('pairs').insert({
+                            db('pairs').insert({
                                 'id1': game1.id,
                                 'id2': game2.id,
                                 'isLive': game1.isLive,
@@ -358,7 +362,7 @@ async function start(sportKey) {
                         } catch(e) {}
                         const pairId = (await db('pairs').select('id').where({'id1': game1.id, 'id2': game2.id}))[0].id;
                         try {
-                            await db('decisions').insert({
+                            db('decisions').insert({
                                 'pairId': pairId,
                                 'similarityNames': totalSimilarityNames,
                                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -386,10 +390,14 @@ async function start(sportKey) {
                             pairForUpdate.similarityScores !== totalSimilarityScores ||
                             pairForUpdate.timeDiscrepancy !== timeDiscrepancy){
 
-                            console.log(pairForUpdate)
+                            // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
+                            // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                            // 'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                            // 'similarityScores': totalSimilarityScores,
+                            // 'timeDiscrepancy': timeDiscrepancy,})
 
                             try {
-                                await db('pairs').where('id', pairForUpdate.id).update({
+                                db('pairs').where('id', pairForUpdate.id).update({
                                     'isLive': game1.isLive,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -403,7 +411,7 @@ async function start(sportKey) {
                                 console.log('update pair');
                             } catch(e) {console.log(e)}
                             try {
-                                await db('decisions').insert({
+                                db('decisions').insert({
                                     'pairId': pairForUpdate.id,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
