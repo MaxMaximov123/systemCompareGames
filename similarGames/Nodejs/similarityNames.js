@@ -69,7 +69,7 @@ const replacements = {
 
     ],
     "VIRGINBET": [
-        [/\s\[W\]\s/g, ' '],
+        [/\s\[W\]\s/gi, ' '],
         [/\sU\d+\s/gi, ' '],
         [/\scf\s/gi, ' '],
         [/\sesports?\s/gi, ' '],
@@ -343,7 +343,7 @@ async function similarityNames(games){
     delete games.game2.name1WordSets;
     delete games.game2.name2WordSets;
 
-    // console.log(similarityNames);
+    console.log(similarityNames);
     return Math.max(
         (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
         (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,
@@ -360,14 +360,14 @@ const example = async () => {
     t = new Date();
     console.log(await similarityNames({
     game1: {
-        name1: 'TSV 1860 Мюнхен II',
-        name2: 'Спартак',
-        bookieKey: 'OLIMP',
+        name1: 'Switzerland Women',
+        name2: 'Bosnia & Herz Women',
+        bookieKey: 'BET365',
     },
     game2: {
-        name1: 'Munich 1860 2',
-        name2: 'Spartak',
-        bookieKey: 'BETRADAR'
+        name1: 'Switzerland [W]',
+        name2: 'Bosnia [W]',
+        bookieKey: 'VIRGINBET'
     }
 }
 ))

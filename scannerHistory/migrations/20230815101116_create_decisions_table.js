@@ -9,9 +9,13 @@ exports.up = function(knex) {
       table.float('timeDiscrepancy');
       table.boolean('needGroup');
       table.timestamp('createdAt');
+      table.timestamp('game1StartTime');
+      table.timestamp('game2StartTime');
       table.boolean('grouped');
 
       table.index('id');
+      table.index('game1StartTime');
+      table.index('game2StartTime');
       table.index('similarityNames');
       table.index('similarityOutcomesPre');
       table.index('similarityOutcomesLive');

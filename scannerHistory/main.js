@@ -208,7 +208,7 @@ socket.on('message', async (message) => {
 					try {
 						db('startTimeUpdates').insert({
 							gameId: game.id,
-							startTime: game.startTime,
+							startTime: new Date(game.startTime),
 							time: new Date()
 						});
 						console.log('update startTime');
@@ -252,7 +252,24 @@ socket.on('message', async (message) => {
 					liveFrom: new Date(game?.liveFrom).getTime(),
 					liveTill: new Date(game?.liveTill).getTime(),
 					lastUpdate: new Date().getTime(),
-				})
+				});
+				try {
+					db('startTimeUpdates').insert({
+						gameId: game.id,
+						startTime: new Date(game.startTime),
+						time: new Date()
+					});
+					console.log('update startTime');
+				} catch (error) {console.error(error)}
+				try {
+					db('teamsNamesUpdates').insert({
+						gameId: game.id,
+						team1Name: game.team1?.name,
+						team2Name: game.team2?.name,
+						time: new Date(),
+					});
+					console.log('update names');
+				} catch (error) {console.error(error)}
 			}
 			
 			if (data.outcomes?.result){

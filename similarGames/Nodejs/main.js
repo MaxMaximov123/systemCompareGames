@@ -388,6 +388,8 @@ async function start(sportKey) {
                                 'needGroup': needGroup,
                                 'grouped': game1.globalGameId === game2.globalGameId,
                                 'createdAt': new Date(),
+                                'game1StartTime': new Date(Number(game1.startTime)),
+                                'game2StartTime': new Date(Number(game2.startTime)),
                             })
                             console.log('decision added');
                         } catch(e) {console.log(e)}
