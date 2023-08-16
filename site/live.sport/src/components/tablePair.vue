@@ -18,7 +18,9 @@
             <tbody v-for="decision in modal.data">
                 <tr>
                     <td rowspan="2">{{ decision.id }}</td>
-                    <td>{{ decision.startTime1 }}</td>
+                    <td>
+                        <p style="font-size: 100%;" v-for="time of formatDateFromUnixTimestampStr(decision.game1StartTime).split('*')">{{ time ? time : 'Неизвестно' }}</p>
+                    </td>
                     <td rowspan="2">{{ round(decision.timeDiscrepancy) }}%</td>
                     <td rowspan="2">{{ round(decision.similarityNames) }}%</td>
                     <td rowspan="2">{{ round(decision.similarityOutcomesPre) }}%</td>
@@ -31,7 +33,11 @@
                         <p v-for="time of formatDateFromUnixTimestampStr(decision.createdAt).split('*')">{{ time }}</p>
                     </td>
                 </tr>
-                <tr><td>{{ decision.startTime1 }}</td></tr>
+                <tr>
+                    <td>
+                        <p style="font-size: 100%;" v-for="time of formatDateFromUnixTimestampStr(decision.game2StartTime).split('*')">{{ time ? time : 'Неизвестно' }}</p>
+                    </td>
+                </tr>
                 
             </tbody>
         </table>
@@ -210,7 +216,8 @@
             return moment(new Date(Number(unixTimestamp))).format(`DD.MM.YYYY*HH:mm:ss`);
         },
         formatDateFromUnixTimestampStr(unixTimestamp) {
-            return moment(new Date(unixTimestamp)).format(`DD.MM.YYYY*HH:mm:ss`);
+            if (unixTimestamp) return moment(new Date(unixTimestamp)).format(`DD.MM.YYYY*HH:mm:ss`);
+            else return '';
         },
 
         getBackgroundColor(row){
