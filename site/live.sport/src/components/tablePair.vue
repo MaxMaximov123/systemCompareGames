@@ -1,5 +1,44 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <v-container>
+      <modal :value="modal.isOpen" :title="modal.title" @closeModal="closeModal" style="width: 70%;">
+        <div>
+        <table style="font-size: 80%; border-collapse: collapse;">
+            <thead class="headers" style="top: 0; position: sticky;">
+                <th>ID</th>
+                <th>Начало</th>
+                <th>Сходство начала</th>
+                <th>Названия</th>
+                <th>Пре-кэфы.</th>
+                <th>Лайв-кэфы.</th>
+                <th>Счет</th>
+                <th style="width: 5%;">Новой системой?</th>
+                <th style="width: 5%;">Старой системой?</th>
+                <th>Создана</th>
+            </thead>
+            <tbody v-for="decision in modal.data">
+                <tr>
+                    <td rowspan="2">{{ decision.id }}</td>
+                    <td>{{ decision.startTime1 }}</td>
+                    <td rowspan="2">{{ round(decision.timeDiscrepancy) }}%</td>
+                    <td rowspan="2">{{ round(decision.similarityNames) }}%</td>
+                    <td rowspan="2">{{ round(decision.similarityOutcomesPre) }}%</td>
+                    <td rowspan="2">{{ round(decision.similarityOutcomesLive) }}%</td>
+                    <td rowspan="2">{{ round(decision.similarityScores) }}%</td>
+                    <td rowspan="2">{{ decision.needGroup ? 'Да' : 'Нет' }}</td>
+                    <td rowspan="2">{{ decision.grouped ? 'Да' : 'Нет' }}</td>
+                    <td rowspan="2">
+                        <!-- {{ new Date(decision.createdAt) }} -->
+                        <p v-for="time of formatDateFromUnixTimestampStr(decision.createdAt).split('*')">{{ time }}</p>
+                    </td>
+                </tr>
+                <tr><td>{{ decision.startTime1 }}</td></tr>
+                
+            </tbody>
+        </table>
+        </div>
+      </modal>
+    </v-container>
     <div>
         <table class="table" ref="table">
             <thead class="headers">
@@ -73,6 +112,7 @@
                         {{ item.grouped ? 'Да' : 'Нет'}}
                     </td>
                     <td rowspan="2">
+                        <v-icon class="copy-name" @click="openModal(item.id)">mdi-history</v-icon>
                         {{ item.decisionsCount }}
                     </td>
                     <td rowspan="2">
@@ -129,6 +169,7 @@
   
   <script>
   import html2canvas from 'html2canvas';
+  import Modal from "@/components/Modal.vue";
   import moment from 'moment';
   export default {
     props: {
@@ -137,12 +178,20 @@
             required: true
         }
     },
+    components: {
+        Modal
+    },
 
     data() {
       return {
         textX: 0,
         textY: 0,
-        isHovered: false
+        isHovered: false,
+        apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
+        modal: {
+            title: '',
+            isOpen: false,
+        }
       };
     },
 
@@ -150,8 +199,22 @@
     },
     
     methods: {
+        round (num){
+            return Math.floor(num * 100 * 100) / 100;
+        },
+        async openModal(pairId) {
+            this.modal.data = (await this.postRequest(`http://${this.apiHost}/api/decisions`, {pairId: pairId})).data;
+            this.modal.isOpen = true;
+            this.modal.title = `Решения ${pairId}`
+        },
+        closeModal() {
+            this.modal.isOpen = false;
+        },
         formatDateFromUnixTimestamp(unixTimestamp) {
             return moment(new Date(Number(unixTimestamp))).format(`DD.MM.YYYY*HH:mm:ss`);
+        },
+        formatDateFromUnixTimestampStr(unixTimestamp) {
+            return moment(new Date(unixTimestamp)).format(`DD.MM.YYYY*HH:mm:ss`);
         },
 
         getBackgroundColor(row){
@@ -192,6 +255,27 @@
               liveTill1 - liveFrom1,
               liveTill2 - liveFrom2
             );
+        },
+
+        postRequest(url, data){
+            return new Promise((resolve, reject) => {
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            };
+            
+            fetch(url, options)
+            .then(response => response.json())
+            .then(result => {
+                resolve(result);
+            })
+            .catch(error => {
+                reject(error);
+            });
+            })
         },
     }
   };

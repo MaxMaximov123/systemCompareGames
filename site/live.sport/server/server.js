@@ -200,6 +200,22 @@ app.post('/api/paths', async (req, res) => {
 });
 
 
+app.post('/api/decisions', async (req, res) => {
+  const stTime = new Date().getTime();
+  const requestData = req.body;
+  console.log(requestData);
+  
+  try{
+    const result = {
+      time: (new Date().getTime()) - stTime,
+      data: await db('decisions').select('*').where('pairId', requestData.pairId)};
+    res.send(JSON.stringify(result));
+  } catch(e){
+    console.log(e);
+    res.send(JSON.stringify({time: (new Date().getTime()) - stTime, data: []}));
+  }
+});
+
 app.post('/api/graphic', async (req, res) => {
   const stTime = new Date().getTime();
   const requestData = req.body;

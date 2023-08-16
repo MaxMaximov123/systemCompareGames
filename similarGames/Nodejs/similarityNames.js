@@ -169,32 +169,43 @@ function clearingName(name, bookieKey){
     return name;
 }
 
-function Transliteration(word){
-    return [...word].reduce((words, char) => {
-        const currentSymbolsTranslations = slolet[char] || [char];
-        const newWords = [];
-    
-        for (let symbol of currentSymbolsTranslations) {
-          for (let existingWord of words) {
-            newWords.push(existingWord + symbol);
-          }
-        }
-    
-        return newWords;
-      }, ['']);
-}
-
-function createSets(options) {
-    return options.reduce((acc, currentOption) => {
-      const newSets = [];
-      for (const someComponent of currentOption) {
-        for (const lastComponent of acc) {
-          newSets.push([...lastComponent, ...someComponent]);
+function Transliteration(word) {
+    let words = [''];
+  
+    for (let indChar = 0; indChar < word.length; indChar++) {
+      const currentSymbolsTranslations = slolet[word[indChar]] || [word[indChar]];
+      let newWords = [];
+  
+      for (let symbol of currentSymbolsTranslations) {
+        for (let existingWord of words) {
+          newWords.push(existingWord + symbol);
         }
       }
-      return newSets;
-    }, [[]]);
+      words = newWords.slice();
+      newWords = [];
+    }
+  
+    return words;
   }
+  
+
+function createSets(options){
+    let nameWordSets = options[0].slice();
+    for (let numComponent=1;numComponent<options.length;numComponent++){
+        let newNameWordSets = [];
+        for (let someComponent of options[numComponent]){
+            for (let lastComponent of nameWordSets){
+                lastComponent = lastComponent.slice();
+                lastComponent.push(...someComponent);
+                newNameWordSets.push(lastComponent.slice());
+                lastComponent = [];
+            }
+        }
+        nameWordSets = newNameWordSets.slice();
+        newNameWordSets = [];
+    }
+    return nameWordSets;
+}
   
 
 async function translate(name){
@@ -218,21 +229,25 @@ async function wordToOptions(name){
     return options;
 }
 
-function getLongestWordSetCombinations(nameWordSet, minimumSetLength) {
-    return [...Array(minimumSetLength)].reduce(longestWordSetCombinations => {
-      const newCombinations = [];
-  
-      for (let word of nameWordSet) {
-        for (let longestWordSetCombination of longestWordSetCombinations) {
-          if (!longestWordSetCombination.includes(word)) {
-            newCombinations.push([...longestWordSetCombination, word]);
-          }
+function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
+    let longestWordSetCombinations = [[]];
+    for (let numWordInWordSet=0;numWordInWordSet<minimumSetLength;numWordInWordSet++){
+        let lastLongestWordSetCombinations = [];
+        for (let word of nameWordSet){
+            for (let longestWordSetCombination of longestWordSetCombinations){
+                longestWordSetCombination = longestWordSetCombination.slice();
+                if (!longestWordSetCombination.includes(word)){
+                    longestWordSetCombination.push(word);
+                    lastLongestWordSetCombinations.push(longestWordSetCombination);
+                }
+                
+            }
         }
-      }
-  
-      return newCombinations;
-    }, [[]]);
-  }
+        longestWordSetCombinations = lastLongestWordSetCombinations.slice();
+        longestWordSetCombinations = [];
+    }
+    return longestWordSetCombinations;
+}
   
 
 function getSameWordsCount(set1Words, set2Words){
@@ -325,10 +340,10 @@ async function similarityNames(games){
         game1Name1game2Name2: findingBestSimilarity(games.game1.name1WordSets, games.game2.name2WordSets),
         game1Name2game2Name1: findingBestSimilarity(games.game1.name2WordSets, games.game2.name1WordSets),
     }
-    delete games.game1.name1Options;
-    delete games.game1.name2Options;
-    delete games.game2.name1Options;
-    delete games.game2.name2Options;
+    delete games.game1.name1WordSets;
+    delete games.game1.name2WordSets;
+    delete games.game2.name1WordSets;
+    delete games.game2.name2WordSets;
 
     // console.log(similarityNames);
     return Math.max(

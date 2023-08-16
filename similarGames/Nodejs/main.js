@@ -330,8 +330,8 @@ async function start(sportKey) {
                     
 
                     var needGroup = false;
-                    if (totalSimilarityNames >= 0.95 && totalSimilarityOutcomesPre >= 0.8) needGroup = true;
-                    else if (totalSimilarityNames >= 0.75 && totalSimilarityOutcomesPre >= 0.9) needGroup = true;
+                    if (totalSimilarityNames >= 0.95 && totalSimilarityOutcomesPre >= 0.75) needGroup = true;
+                    else if (totalSimilarityNames >= 0.75 && totalSimilarityOutcomesPre >= 0.8) needGroup = true;
                     else if (totalSimilarityNames >= 0.95 && (totalSimilarityOutcomesPre >= 0.8 || totalSimilarityOutcomesLive >= 0.75) && totalSimilarityScores >= 0.7) needGroup = true;
                     else if (totalSimilarityNames >= 0.75 && (totalSimilarityOutcomesPre >= 0.9 || totalSimilarityOutcomesLive >= 0.8) && totalSimilarityScores >= 0.75) needGroup = true;
                     console.log('Comparing...', 
