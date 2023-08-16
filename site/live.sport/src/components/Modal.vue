@@ -7,7 +7,9 @@
             <span>{{ title }}</span>
           </v-card-title>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="close">Close</v-btn>
+          <v-btn icon @click="close">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </v-card-actions>
         <v-card-text>
           <slot></slot>

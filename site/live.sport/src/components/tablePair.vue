@@ -2,7 +2,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <v-container>
       <modal :value="modal.isOpen" :title="modal.title" @closeModal="closeModal" style="width: 70%;">
-        <div>
         <table style="font-size: 80%; border-collapse: collapse;">
             <thead class="headers" style="top: 0; position: sticky;">
                 <th>ID</th>
@@ -36,135 +35,132 @@
                 
             </tbody>
         </table>
-        </div>
       </modal>
     </v-container>
-    <div>
-        <table class="table" ref="table">
-            <thead class="headers">
-                <th></th>
-                <th>Команда 1</th>
-                <th>Команда 2</th>
-                <th>Спорт</th>
-                <th>Б.</th>
-                <th>Начало</th>
-                <th>В лайве</th>
-                <th>Названия</th>
-                <th>Сходство начала</th>
-                <th>Пре. кэфы.</th>
-                <th>Лайв кэфы.</th>
-                <th>Счет</th>
-                <th style="width: 5%;">Новой системой?</th>
-                <th style="width: 5%;">Старой системой?</th>
-                <th>Решения</th>
-                <th>Создана</th>
-                <th>Обновлена</th>
-            </thead>
-            <tr class="none-tr"></tr>
-            <tbody v-for="item in items" :key="item.id" class="data" :id="item.id">
-                <tr>
-                    <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
-                        <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
-                        Пара {{ item.id }}
-                        <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
-                    </td>
-                    <td style="text-align: left;">
-                        <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
-                        {{ item.game1Team1Name }}
-                    </td>
-                    <td style="text-align: left;">
-                        <v-icon :size="15" @click="copyToClipboard(item.game1Team2Name)" class="copy-name">mdi-content-copy</v-icon>
-                        {{ item.game1Team2Name }}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.sportKey }}
-                    </td>
-                    <td>
-                        <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey1 + '.png'">
-                    </td>
-                    <td>
-                        <p v-for="time of ( Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно').split('*')">{{ time }}</p>
-                    </td>
-                    <td style="position: relative; width: 10%; border: 1px solid #000"
-                    class="py-1 px-2 text-center text-no-wrap text-caption">
-                        <p>{{Number(item.liveFrom1) ? formatDateFromUnixTimestamp(item.liveFrom1).replace('*', ' ') : 'Неизвестно'}}</p>
-                        <p>{{Number(item.liveFrom1) && Number(item.liveTill1) ? formatDateFromUnixTimestamp(item.liveTill1).replace('*', ' ') : '-'}}</p>
-                    </td>
-                    <td rowspan="2">
-                        {{ Math.floor(item.similarityNames * 100 * 100) / 100 + '%' }}
-                    </td>
-                    <td rowspan="2">
-                        {{ Math.floor(item.timeDiscrepancy * 100 * 100) / 100 + '%' }}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.similarityOutcomesPre ? Math.floor(item.similarityOutcomesPre * 100 * 100) / 100 + '%' : 'Неизвестно' }}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.similarityOutcomesLive ? Math.floor(item.similarityOutcomesLive * 100 * 100) / 100 + '%' : 'Неизвестно' }}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.similarityScores ? Math.floor(item.similarityScores * 100 * 100) / 100 + '%': 'Неизвестно'}}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.needGroup ? 'Да' : 'Нет'}}
-                    </td>
-                    <td rowspan="2">
-                        {{ item.grouped ? 'Да' : 'Нет'}}
-                    </td>
-                    <td rowspan="2">
-                        <v-icon class="copy-name" @click="openModal(item.id)">mdi-history</v-icon>
-                        {{ item.decisionsCount }}
-                    </td>
-                    <td rowspan="2">
-                        <p v-for="time of formatDateFromUnixTimestamp(item.now).split('*')">{{ time }}</p>
-                    </td>
-                    <td class="align-center">
-                        <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: left;">
-                        <v-icon :size="15" @click="copyToClipboard(item.game2Team1Name)" class="copy-name">mdi-content-copy</v-icon>
-                        {{ item.game2Team1Name }}
-                    </td>
-                    <td style="text-align: left;">
-                        <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
-                        {{ item.game2Team2Name }}
-                    </td>
-                    <td>
-                        <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
-                    </td>
-                    <td>
-                        <p v-for="time of ( Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно').split('*')">{{ time }}</p>                    </td>
-                    <td style="position: relative; width: 10%; border: 1px solid #000"
-                    class="py-1 px-2 text-center text-no-wrap text-caption">
-                        <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2).replace('*', ' ') : 'Неизвестно'}}</p>
-                        <p>{{Number(item.liveFrom2) && Number(item.liveTill2) ? formatDateFromUnixTimestamp(item.liveTill2).replace('*', ' ') : '-'}}</p>
-                        <template
-                            v-if="
-                            item.liveFrom1 &&
-                            item.liveTill1 &&
-                            item.liveFrom2 &&
-                            item.liveTill2
-                            ">
-                            <div class="gamePair__timeFrameDifference d-flex align-center">
-                            <template v-if="timeFrameDifference(item.liveFrom1, item.liveTill1, item.liveFrom2, item.liveTill2) > 0">
-                                Пересечение:
-                                {{ Math.floor(timeFrameDifference(item.liveFrom1, item.liveTill1, item.liveFrom2, item.liveTill2) * 100) }}%
-                            </template>
-                            <template v-else>не пересекаются</template>
-                            </div>
+    <table class="pairs">
+        <thead class="headers">
+            <th></th>
+            <th>Команда 1</th>
+            <th>Команда 2</th>
+            <th>Спорт</th>
+            <th>Б.</th>
+            <th>Начало</th>
+            <th>В лайве</th>
+            <th>Названия</th>
+            <th>Сходство начала</th>
+            <th>Пре. кэфы.</th>
+            <th>Лайв кэфы.</th>
+            <th>Счет</th>
+            <th>Новой системой?</th>
+            <th>Старой системой?</th>
+            <th>Решения</th>
+            <th>Создана</th>
+            <th>Обновлена</th>
+        </thead>
+        <tr class="none-tr"></tr>
+        <tbody v-for="item in items" :key="item.id" class="data" :id="item.id">
+            <tr>
+                <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
+                    <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
+                    Пара {{ item.id }}
+                    <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
+                </td>
+                <td style="text-align: left;">
+                    <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
+                    {{ item.game1Team1Name }}
+                </td>
+                <td style="text-align: left;">
+                    <v-icon :size="15" @click="copyToClipboard(item.game1Team2Name)" class="copy-name">mdi-content-copy</v-icon>
+                    {{ item.game1Team2Name }}
+                </td>
+                <td rowspan="2">
+                    {{ item.sportKey }}
+                </td>
+                <td>
+                    <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey1 + '.png'">
+                </td>
+                <td>
+                    <p v-for="time of ( Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно').split('*')">{{ time }}</p>
+                </td>
+                <td style="position: relative; width: 10%; border: 1px solid #000"
+                class="py-1 px-2 text-center text-no-wrap text-caption">
+                    <p>{{Number(item.liveFrom1) ? formatDateFromUnixTimestamp(item.liveFrom1).replace('*', ' ') : 'Неизвестно'}}</p>
+                    <p>{{Number(item.liveFrom1) && Number(item.liveTill1) ? formatDateFromUnixTimestamp(item.liveTill1).replace('*', ' ') : '-'}}</p>
+                </td>
+                <td rowspan="2">
+                    {{ Math.floor(item.similarityNames * 100 * 100) / 100 + '%' }}
+                </td>
+                <td rowspan="2">
+                    {{ Math.floor(item.timeDiscrepancy * 100 * 100) / 100 + '%' }}
+                </td>
+                <td rowspan="2">
+                    {{ item.similarityOutcomesPre ? Math.floor(item.similarityOutcomesPre * 100 * 100) / 100 + '%' : 'Неизвестно' }}
+                </td>
+                <td rowspan="2">
+                    {{ item.similarityOutcomesLive ? Math.floor(item.similarityOutcomesLive * 100 * 100) / 100 + '%' : 'Неизвестно' }}
+                </td>
+                <td rowspan="2">
+                    {{ item.similarityScores ? Math.floor(item.similarityScores * 100 * 100) / 100 + '%': 'Неизвестно'}}
+                </td>
+                <td rowspan="2">
+                    {{ item.needGroup ? 'Да' : 'Нет'}}
+                </td>
+                <td rowspan="2">
+                    {{ item.grouped ? 'Да' : 'Нет'}}
+                </td>
+                <td rowspan="2">
+                    <v-icon class="copy-name" @click="openModal(item.id)">mdi-history</v-icon>
+                    {{ item.decisionsCount }}
+                </td>
+                <td rowspan="2">
+                    <p v-for="time of formatDateFromUnixTimestamp(item.now).split('*')">{{ time }}</p>
+                </td>
+                <td class="align-center">
+                    <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left;">
+                    <v-icon :size="15" @click="copyToClipboard(item.game2Team1Name)" class="copy-name">mdi-content-copy</v-icon>
+                    {{ item.game2Team1Name }}
+                </td>
+                <td style="text-align: left;">
+                    <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
+                    {{ item.game2Team2Name }}
+                </td>
+                <td>
+                    <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
+                </td>
+                <td>
+                    <p v-for="time of ( Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно').split('*')">{{ time }}</p>                    </td>
+                <td style="position: relative; width: 10%; border: 1px solid #000"
+                class="py-1 px-2 text-center text-no-wrap text-caption">
+                    <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2).replace('*', ' ') : 'Неизвестно'}}</p>
+                    <p>{{Number(item.liveFrom2) && Number(item.liveTill2) ? formatDateFromUnixTimestamp(item.liveTill2).replace('*', ' ') : '-'}}</p>
+                    <template
+                        v-if="
+                        item.liveFrom1 &&
+                        item.liveTill1 &&
+                        item.liveFrom2 &&
+                        item.liveTill2
+                        ">
+                        <div class="gamePair__timeFrameDifference d-flex align-center">
+                        <template v-if="timeFrameDifference(item.liveFrom1, item.liveTill1, item.liveFrom2, item.liveTill2) > 0">
+                            Пересечение:
+                            {{ Math.floor(timeFrameDifference(item.liveFrom1, item.liveTill1, item.liveFrom2, item.liveTill2) * 100) }}%
                         </template>
-                    </td>
-                    <td class="align-center">
-                        <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
-                    </td>
-                    
-                </tr>
-                <tr class="none-tr"></tr>
-            </tbody>
-        </table>
-    </div>
+                        <template v-else>не пересекаются</template>
+                        </div>
+                    </template>
+                </td>
+                <td class="align-center">
+                    <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
+                </td>
+                
+            </tr>
+            <tr class="none-tr"></tr>
+        </tbody>
+    </table>
   </template>
   
   <script>
@@ -281,23 +277,19 @@
   };
   </script>
   <style>
-    .table {
-      font-size: 80%;
+    .pairs {
+      font-size: 75%;
       margin-bottom: 20px;
       border-collapse: collapse;
-      width: 95%;
-      margin: 0 auto;
-      margin-left: 3%;
-      margin-right: 3%;
+      /* width: 80%; */
+      /* flex-grow: 1; */
+      /* max-width: 200px; Adjust as needed */
+      /* margin: auto; */
+      margin-left: 1%;
+      margin-right: 1%;
     }
 
     .headers th, td {
-      padding: 8px;
-      text-align: center;
-      border: 2px solid grey;
-    }
-
-    .headers td {
       padding: 8px;
       text-align: center;
       border: 2px solid grey;
@@ -335,9 +327,9 @@
         opacity: 0.3;
     }
 
-    .data {
-        margin-bottom: 10px; /* Расстояние между каждыми двумя строками (можно настроить по своему усмотрению) */
-    }
+    /* .data {
+        margin-bottom: 10px;
+    } */
 
     .num-pair {
         writing-mode: vertical-lr;
@@ -347,12 +339,12 @@
     }
 
 
-    .table td {
+    .pairs td {
         /* background-color: #ffffff; Цвет фона ячеек данных */
         box-shadow: 0 2px 4px rgba(51, 51, 51, 0.1); /* Тень между ячейками */
     }
 
-    .table th:first-child {
+    .pairs th:first-child {
         visibility: hidden;
         opacity: 0;
         border: none;

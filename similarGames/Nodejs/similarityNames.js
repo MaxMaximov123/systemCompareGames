@@ -178,6 +178,7 @@ function Transliteration(word) {
           newWords.push(existingWord + symbol);
         }
       }
+      words = [];
       words = newWords.slice();
       newWords = [];
     }
@@ -219,11 +220,9 @@ async function wordToOptions(name){
     const options = [];
     for (let option of Transliteration(name)) options.push([option]);
     options.push([await translate(name)]);
-
     if (name.length <= 3){
         options.push(name.split(''));
     }
-    
     return options;
 }
 
@@ -344,6 +343,7 @@ async function similarityNames(games){
     delete games.game2.name1WordSets;
     delete games.game2.name2WordSets;
 
+    // console.log(similarityNames);
     return Math.max(
         (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
         (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,

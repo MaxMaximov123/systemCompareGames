@@ -4,7 +4,7 @@
     <h3 class="title">Результаты сравнения игр</h3>
     
     <table class="filters">
-        <tr style="margin-right: 5%;">
+        <tr>
             <th>Сходство названий:</th>
             <th>Сходство начала:</th>
             <th>Сходство пре. кэфов:</th>
@@ -52,9 +52,7 @@
 
         </tr>
     </table>
-    <div id="tables">
-        <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
-    </div>
+    <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
     <v-btn :loading="loadingUpdate" style="margin-left: 5%;" @click="render">
         <v-icon>mdi-refresh</v-icon>
         Обновить
