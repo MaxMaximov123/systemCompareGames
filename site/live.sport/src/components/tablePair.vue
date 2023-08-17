@@ -255,7 +255,7 @@
         textX: 0,
         textY: 0,
         isHovered: false,
-        apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
+        apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
         modalDecisions: {
             title: '',
             isOpen: false,
