@@ -1,7 +1,7 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-    <v-container>
-      <modal :value="modal.isOpen" :title="modal.title" @closeModal="closeModal" style="width: 70%;">
+    <v-container v-if="modalDecisions.isOpen">
+      <modal :value="modalDecisions.isOpen" :title="modalDecisions.title" @closeModal="closeModal" style="width: 70%;">
         <table style="font-size: 80%; border-collapse: collapse;">
             <thead class="headers" style="top: 0; position: sticky;">
                 <th>ID</th>
@@ -15,7 +15,7 @@
                 <th style="width: 5%;">Старой системой?</th>
                 <th>Создана</th>
             </thead>
-            <tbody v-for="decision in modal.data">
+            <tbody v-for="decision in modalDecisions.data">
                 <tr>
                     <td rowspan="2">{{ decision.id }}</td>
                     <td>
@@ -39,6 +39,54 @@
                     </td>
                 </tr>
                 
+            </tbody>
+        </table>
+      </modal>
+    </v-container>
+    <v-container>
+      <modal :value="modalTeamNames.isOpen" :title="modalTeamNames.title" @closeModal="closeModal" style="width: 30%;">
+        <table style="font-size: 80%; border-collapse: collapse; width: 100%;">
+            <thead class="headers" style="top: 0; position: sticky;">
+                <th>ID</th>
+                <th>Команда 1</th>
+                <th>Команда 2</th>
+                <th>Создана</th>
+            </thead>
+            <tbody v-for="teamName in modalTeamNames.data">
+                <tr>
+                    <td>{{ teamName.id }}</td>
+                    <td>
+                        {{ teamName.team1Name }}
+                    </td>
+                    <td>
+                        {{ teamName.team2Name }}
+                    </td>
+                    <td>
+                        <p v-for="time of formatDateFromUnixTimestampStr(teamName.time).split('*')">{{ time }}</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+      </modal>
+    </v-container>
+    <v-container>
+      <modal :value="modalStartTime.isOpen" :title="modalStartTime.title" @closeModal="closeModal" style="width: 30%">
+        <table style="font-size: 80%; border-collapse: collapse; width: 100%;">
+            <thead class="headers" style="top: 0; position: sticky;">
+                <th>ID</th>
+                <th>Начало</th>
+                <th>Создана</th>
+            </thead>
+            <tbody v-for="startTime in modalStartTime.data">
+                <tr>
+                    <td>{{ startTime.id }}</td>
+                    <td>
+                        <p style="font-size: 100%;" v-for="time of formatDateFromUnixTimestampStr(startTime.startTime).split('*')">{{ time ? time : 'Неизвестно' }}</p>
+                    </td>
+                    <td>
+                        <p v-for="time of formatDateFromUnixTimestampStr(startTime.time).split('*')">{{ time }}</p>
+                    </td>
+                </tr>
             </tbody>
         </table>
       </modal>
@@ -87,6 +135,10 @@
                 </td>
                 <td>
                     <p v-for="time of ( Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно').split('*')">{{ time }}</p>
+                    <div v-if="item.game1StartTimeUpdates > 1">
+                        <v-icon class="copy-name" size="medium" @click="openModalStartTime(item.game1Id)">mdi-history</v-icon>
+                        {{ item.game1StartTimeUpdates }}
+                    </div>
                 </td>
                 <td style="position: relative; width: 10%; border: 1px solid #000"
                 class="py-1 px-2 text-center text-no-wrap text-caption">
@@ -115,7 +167,7 @@
                     {{ item.grouped ? 'Да' : 'Нет'}}
                 </td>
                 <td rowspan="2">
-                    <v-icon class="copy-name" @click="openModal(item.id)">mdi-history</v-icon>
+                    <v-icon class="copy-name" @click="openModalDecisions(item.id)">mdi-history</v-icon>
                     {{ item.decisionsCount }}
                 </td>
                 <td rowspan="2">
@@ -126,19 +178,33 @@
                 </td>
             </tr>
             <tr>
-                <td style="text-align: left;">
+                <td style="text-align: left; position: relative; border: 1px solid #000">
                     <v-icon :size="15" @click="copyToClipboard(item.game2Team1Name)" class="copy-name">mdi-content-copy</v-icon>
-                    {{ item.game2Team1Name }}
+                    {{ item.game2Team1Name }}                    
+                    <div class="gamePair__timeFrameDifference d-flex align-center" v-if="item.game1NamesUpdates > 1">
+                        <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game1Id)">mdi-history</v-icon>
+                        {{ item.game1NamesUpdates }}
+                    </div>
                 </td>
-                <td style="text-align: left;">
+                <td style="text-align: left; position: relative; border: 1px solid #000">
                     <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
-                    {{ item.game2Team2Name }}
+                    {{ item.game2Team2Name }}                
+                    <div class="gamePair__timeFrameDifference d-flex align-center" v-if="item.game2NamesUpdates > 1">
+                        <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game2Id)">mdi-history</v-icon>
+                        {{ item.game2NamesUpdates }}
+                    </div>
                 </td>
                 <td>
                     <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
                 </td>
-                <td>
-                    <p v-for="time of ( Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно').split('*')">{{ time }}</p>                    </td>
+                <td style="position: relative; width: 10%; border: 1px solid #000"
+                class="py-1 px-2 text-center text-no-wrap text-caption">
+                    <p v-for="time of ( Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно').split('*')">{{ time }}</p>
+                    <div v-if="item.game2StartTimeUpdates > 1">
+                        <v-icon class="copy-name" size="medium" @click="openModalStartTime(item.game2Id)">mdi-history</v-icon>
+                        {{ item.game2StartTimeUpdates }}
+                    </div>
+                </td>
                 <td style="position: relative; width: 10%; border: 1px solid #000"
                 class="py-1 px-2 text-center text-no-wrap text-caption">
                     <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2).replace('*', ' ') : 'Неизвестно'}}</p>
@@ -189,11 +255,19 @@
         textX: 0,
         textY: 0,
         isHovered: false,
-        apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
-        modal: {
+        apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
+        modalDecisions: {
             title: '',
             isOpen: false,
-        }
+        },
+        modalTeamNames: {
+            title: '',
+            isOpen: false,
+        },
+        modalStartTime: {
+            title: '',
+            isOpen: false,
+        },
       };
     },
 
@@ -204,13 +278,27 @@
         round (num){
             return Math.floor(num * 100 * 100) / 100;
         },
-        async openModal(pairId) {
-            this.modal.data = (await this.postRequest(`http://${this.apiHost}/api/decisions`, {pairId: pairId})).data;
-            this.modal.isOpen = true;
-            this.modal.title = `Решения ${pairId}`
+        async openModalDecisions(pairId) {
+            this.modalDecisions.data = (await this.postRequest(`http://${this.apiHost}/api/decisions`, {pairId: pairId})).data;
+            this.modalDecisions.isOpen = true;
+            this.modalDecisions.title = `Решения ${pairId}`
         },
+        async openModalTeamNames(gameId) {
+            this.modalTeamNames.data = (await this.postRequest(`http://${this.apiHost}/api/teamNames`, {gameId: gameId})).data;
+            this.modalTeamNames.isOpen = true;
+            this.modalTeamNames.title = `Названия ${gameId}`
+        },
+
+        async openModalStartTime(gameId) {
+            this.modalStartTime.data = (await this.postRequest(`http://${this.apiHost}/api/startTime`, {gameId: gameId})).data;
+            this.modalStartTime.isOpen = true;
+            this.modalStartTime.title = `Время начала ${gameId}`
+        },
+
         closeModal() {
-            this.modal.isOpen = false;
+            this.modalDecisions.isOpen = false;
+            this.modalTeamNames.isOpen = false;
+            this.modalStartTime.isOpen = false;
         },
         formatDateFromUnixTimestamp(unixTimestamp) {
             return moment(new Date(Number(unixTimestamp))).format(`DD.MM.YYYY*HH:mm:ss`);
@@ -387,7 +475,7 @@
         top: -6px;
         left: 50%;
         transform: translateX(-50%);
-        height: 12px;
+        height: 16px;
         font-size: 10px;
         background-color: #ffffff;
         transition: background-color 3s;

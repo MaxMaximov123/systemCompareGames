@@ -76,7 +76,13 @@ app.post('/api/pairs', async (req, res) => {
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
         db.raw('(SELECT COUNT(id) FROM decisions WHERE decisions."pairId" = pairs.id LIMIT 1) as "decisionsCount"', []),
+        db.raw('(SELECT COUNT(id) FROM "teamsNamesUpdates" WHERE "teamsNamesUpdates"."gameId" = pairs.id1 LIMIT 1) as "game1NamesUpdates"', []),
+        db.raw('(SELECT COUNT(id) FROM "teamsNamesUpdates" WHERE "teamsNamesUpdates"."gameId" = pairs.id2 LIMIT 1) as "game2NamesUpdates"', []),
+        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id1 LIMIT 1) as "game1StartTimeUpdates"', []),
+        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id2 LIMIT 1) as "game2StartTimeUpdates"', []),
         'pairs.id as id',
+        'pairs.id1 as game1Id',
+        'pairs.id2 as game2Id',
         'pairs.now as now',
         'pairs.isLive as isLive',
         'pairs.game1Team1Name as game1Team1Name',
@@ -207,8 +213,41 @@ app.post('/api/decisions', async (req, res) => {
   
   try{
     const result = {
+      data: await db('decisions').select('*').where('pairId', requestData.pairId).orderBy('id', 'asc'),
+      time: (new Date().getTime()) - stTime,};
+    res.send(JSON.stringify(result));
+  } catch(e){
+    console.log(e);
+    res.send(JSON.stringify({time: (new Date().getTime()) - stTime, data: []}));
+  }
+});
+
+app.post('/api/teamNames', async (req, res) => {
+  const stTime = new Date().getTime();
+  const requestData = req.body;
+  console.log(requestData);
+  
+  try{
+    const result = {
+      data: await db('teamsNamesUpdates').select('*').where('gameId', requestData.gameId).orderBy('id', 'asc'),
+      time: (new Date().getTime()) - stTime,};
+    res.send(JSON.stringify(result));
+  } catch(e){
+    console.log(e);
+    res.send(JSON.stringify({time: (new Date().getTime()) - stTime, data: []}));
+  }
+});
+
+app.post('/api/startTime', async (req, res) => {
+  const stTime = new Date().getTime();
+  const requestData = req.body;
+  console.log(requestData);
+  
+  try{
+    const result = {
+      data: await db('startTimeUpdates').select('*').where('gameId', requestData.gameId).orderBy('id', 'asc'),
       time: (new Date().getTime()) - stTime,
-      data: await db('decisions').select('*').where('pairId', requestData.pairId)};
+    };
     res.send(JSON.stringify(result));
   } catch(e){
     console.log(e);
