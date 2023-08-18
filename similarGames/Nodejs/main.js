@@ -243,7 +243,7 @@ async function start(sportKey) {
                 }
                 gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
-                    console.log('game2', numGame2, '/', games1.length, new Date);
+                    // console.log('game2', numGame2, '/', games1.length, new Date);
                     const game2 = games1[numGame2];
                     // console.log(game1.id, game2.id, game1.sportKey);
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
@@ -456,6 +456,7 @@ async function start(sportKey) {
                 }
             }
         }
+        await new Promise(r => setTimeout(r, 1000 * 60 * 5));
     }
 }
 
