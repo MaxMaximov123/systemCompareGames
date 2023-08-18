@@ -410,14 +410,15 @@ async function start(sportKey) {
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id);
                             }))[0];
+                        let grouped = (game1.globalGameId === game2.globalGameId);
                         if (pairForUpdate.needGroup !== needGroup ||
-                            pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
+                            pairForUpdate.grouped !== grouped){
 
-                            console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
-                            'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                            'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                            'similarityScores': totalSimilarityScores,
-                            'timeDiscrepancy': timeDiscrepancy,})
+                            // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
+                            // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                            // 'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                            // 'similarityScores': totalSimilarityScores,
+                            // 'timeDiscrepancy': timeDiscrepancy,})
 
                             try {
                                 await db('pairs').where('id', pairForUpdate.id).update({

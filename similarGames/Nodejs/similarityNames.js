@@ -34,7 +34,7 @@ const slolet = {
     'ь': [''], 
     'э': ['e', 'ie', 'ye'],
     'ю': ['u', 'iu', 'yu'], 
-    'я': ['ya', 'ia', 'j', 'ya'],
+    'я': ['ya', 'ia', 'j', 'ya', 'a'],
     'y': ['y', 'i'],
     'II': ['2', ],
     'III': ['3', ]
@@ -208,7 +208,7 @@ function createSets(options){
 
 async function translate(name){
     try {
-        return name;
+        // return name;
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0].toLowerCase();
     } catch (e){
         console.log(e);
@@ -219,8 +219,8 @@ async function translate(name){
 // Создаем вариации слова
 async function wordToOptions(name){
     const options = [];
-    for (let option of Transliteration(name)) options.push([option]);
     options.push([await translate(name)]);
+    for (let option of Transliteration(name)) options.push([option]);
     if (name.length <= 3){
         options.push(name.split(''));
     }
@@ -274,6 +274,7 @@ function getSameWordsCount(set1Words, set2Words){
 function pairWithTheBestSimilarity(arr){
     let pair = {set1Words: [], set2Words: [], sameWordsCount: 0};
     for (let obj of arr){
+        if (obj.sameWordsCount === 1) return lodash.cloneDeep(obj);
         if (obj.sameWordsCount >= pair.sameWordsCount){
             pair = lodash.cloneDeep(obj);
         }
@@ -363,13 +364,13 @@ const example = async () => {
     t = new Date();
     const games = {
         game1: {
-            name1: 'Шиншилы',
-            name2: 'Bosnia & Herz Women',
+            name1: 'Poland',
+            name2: 'Slovenia',
             bookieKey: 'BET365',
         },
         game2: {
-            name1: 'салисбери интер',
-            name2: 'аделаида кометс',
+            name1: 'Польша',
+            name2: 'Словения',
             bookieKey: 'OLIMP'
         }
     }
