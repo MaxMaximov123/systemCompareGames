@@ -243,7 +243,7 @@ async function start(sportKey) {
                 }
                 gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
-                    // console.log('game2', numGame2, '/', games1.length, new Date);
+                    console.log('game2', numGame2, '/', games1.length, new Date);
                     const game2 = games1[numGame2];
                     // console.log(game1.id, game2.id, game1.sportKey);
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
@@ -413,11 +413,11 @@ async function start(sportKey) {
                         if (pairForUpdate.needGroup !== needGroup ||
                             pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
 
-                            // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
-                            // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                            // 'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                            // 'similarityScores': totalSimilarityScores,
-                            // 'timeDiscrepancy': timeDiscrepancy,})
+                            console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
+                            'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                            'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                            'similarityScores': totalSimilarityScores,
+                            'timeDiscrepancy': timeDiscrepancy,})
 
                             try {
                                 await db('pairs').where('id', pairForUpdate.id).update({
