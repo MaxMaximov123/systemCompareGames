@@ -13,7 +13,7 @@ const slolet = {
     'з': ['z', 'th'], 
     'и': ['i', 'e', 'y', 'ii', 'ie', 'ea'],
     'й': ['i', 'y', 'j'], 
-    'к': ['k', 'c'], 
+    'к': ['k', 'c', 'kh'], 
     'л': ['l'], 
     'м': ['m'], 
     'н': ['n', 'm'],
@@ -208,6 +208,7 @@ function createSets(options){
 
 async function translate(name){
     try {
+        return name;
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0].toLowerCase();
     } catch (e){
         console.log(e);
@@ -305,45 +306,47 @@ function findingBestSimilarity(name1WordSets, name2WordSets){
     return pairWithTheBestSimilarity(pairsWithTheBestSimilarity);
 }
 
+async function getGameObjectSetsForSimilarity(games, game){
+    games[game].name1 = ' ' + games[game].name1.toLowerCase() + ' ';
+    games[game].name2 = ' ' + games[game].name2.toLowerCase() + ' ';
+
+    games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
+    games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
+
+    games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+    games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+
+    [games[game].name1Options, games[game].name2Options] = await Promise.all([
+        Promise.all(games[game].name1Words.map(word => wordToOptions(word))),
+        Promise.all(games[game].name2Words.map(word => wordToOptions(word)))
+    ]);
+
+    delete games[game].name1Words;
+    delete games[game].name2Words;
+
+    games[game].name1WordSets = createSets(games[game].name1Options);
+    games[game].name2WordSets = createSets(games[game].name2Options);
+
+    delete games[game].name1Options;
+    delete games[game].name2Options;
+
+    return games[game];
+}
+
+
 async function similarityNames(games){
-    for (let game in games){
-        games[game].name1 = ' ' + games[game].name1.toLowerCase() + ' ';
-        games[game].name2 = ' ' + games[game].name2.toLowerCase() + ' ';
-
-        games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
-        games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
-
-        games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
-        games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
-
-        [games[game].name1Options, games[game].name2Options] = await Promise.all([
-            Promise.all(games[game].name1Words.map(word => wordToOptions(word))),
-            Promise.all(games[game].name2Words.map(word => wordToOptions(word)))
-        ]);
-
-        delete games[game].name1Words;
-        delete games[game].name2Words;
-
-        games[game].name1WordSets = createSets(games[game].name1Options);
-        games[game].name2WordSets = createSets(games[game].name2Options);
-
-        delete games[game].name1Options;
-        delete games[game].name2Options;
-    }
-
-
     const similarityNames = {
         game1Name1game2Name1: findingBestSimilarity(games.game1.name1WordSets, games.game2.name1WordSets),
         game1Name2game2Name2: findingBestSimilarity(games.game1.name2WordSets, games.game2.name2WordSets),
         game1Name1game2Name2: findingBestSimilarity(games.game1.name1WordSets, games.game2.name2WordSets),
         game1Name2game2Name1: findingBestSimilarity(games.game1.name2WordSets, games.game2.name1WordSets),
     }
-    delete games.game1.name1WordSets;
-    delete games.game1.name2WordSets;
+    // delete games.game1.name1WordSets;
+    // delete games.game1.name2WordSets;
     delete games.game2.name1WordSets;
     delete games.game2.name2WordSets;
 
-    console.log(similarityNames);
+    // console.log(similarityNames);
     return Math.max(
         (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
         (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,
@@ -358,20 +361,25 @@ async function similarityNames(games){
 
 const example = async () => {
     t = new Date();
-    console.log(await similarityNames({
-    game1: {
-        name1: 'Switzerland Women',
-        name2: 'Bosnia & Herz Women',
-        bookieKey: 'BET365',
-    },
-    game2: {
-        name1: 'Switzerland [W]',
-        name2: 'Bosnia [W]',
-        bookieKey: 'VIRGINBET'
+    const games = {
+        game1: {
+            name1: 'Шиншилы',
+            name2: 'Bosnia & Herz Women',
+            bookieKey: 'BET365',
+        },
+        game2: {
+            name1: 'салисбери интер',
+            name2: 'аделаида кометс',
+            bookieKey: 'OLIMP'
+        }
     }
-}
-))
-console.log(new Date() - t)};
+    games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
+    games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
+    console.log(await similarityNames(games));
+    console.log(games);
+    console.log(new Date() - t);
+};
 
-example();
-module.exports = similarityNames;
+
+// example();
+module.exports = { similarityNames, getGameObjectSetsForSimilarity };

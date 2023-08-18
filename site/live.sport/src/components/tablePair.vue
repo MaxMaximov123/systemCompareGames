@@ -119,13 +119,17 @@
                     Пара {{ item.id }}
                     <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                 </td>
-                <td style="text-align: left;">
+                <td style="text-align: left; position: relative; border: 1px solid #000; padding-right: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
                     {{ item.game1Team1Name }}
                 </td>
-                <td style="text-align: left;">
+                <td style="text-align: left; position: relative; border: 1px solid #000; padding-left: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game1Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                     {{ item.game1Team2Name }}
+                    <div class="gamePair__teamNamesUpdates d-flex align-center" v-if="item.game1NamesUpdates > 1">
+                        <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game1Id)">mdi-history</v-icon>
+                        {{ item.game1NamesUpdates }}
+                    </div>
                 </td>
                 <td rowspan="2">
                     {{ item.sportKey }}
@@ -178,18 +182,14 @@
                 </td>
             </tr>
             <tr>
-                <td style="text-align: left; position: relative; border: 1px solid #000">
+                <td style="text-align: left; position: relative; border: 1px solid #000; padding-right: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game2Team1Name)" class="copy-name">mdi-content-copy</v-icon>
                     {{ item.game2Team1Name }}                    
-                    <div class="gamePair__timeFrameDifference d-flex align-center" v-if="item.game1NamesUpdates > 1">
-                        <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game1Id)">mdi-history</v-icon>
-                        {{ item.game1NamesUpdates }}
-                    </div>
                 </td>
-                <td style="text-align: left; position: relative; border: 1px solid #000">
+                <td style="text-align: left; position: relative; border: 1px solid #000; padding-left: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                     {{ item.game2Team2Name }}                
-                    <div class="gamePair__timeFrameDifference d-flex align-center" v-if="item.game2NamesUpdates > 1">
+                    <div class="gamePair__teamNamesUpdates d-flex align-center" v-if="item.game2NamesUpdates > 1">
                         <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game2Id)">mdi-history</v-icon>
                         {{ item.game2NamesUpdates }}
                     </div>
@@ -474,6 +474,21 @@
         z-index: 1;
         top: -6px;
         left: 50%;
+        transform: translateX(-50%);
+        height: 16px;
+        font-size: 10px;
+        background-color: #ffffff;
+        transition: background-color 3s;
+        border: 1px solid #000000;
+        border-radius: 3px;
+        padding: 0 4px;
+    }
+
+    .gamePair__teamNamesUpdates {
+        position: absolute;
+        z-index: 1;
+        left: -2px;
+        top: 40%;
         transform: translateX(-50%);
         height: 16px;
         font-size: 10px;

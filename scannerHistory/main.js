@@ -262,13 +262,18 @@ socket.on('message', async (message) => {
 					console.log('update startTime');
 				} catch (error) {console.error(error)}
 				try {
-					await db('teamsNamesUpdates').insert({
-						gameId: game.id,
-						team1Name: game.team1?.name,
-						team2Name: game.team2?.name,
-						time: new Date(),
-					});
-					console.log('update names');
+					const lastNamesUpdate = await db('teamsNamesUpdates')
+					.select('team1Name', 'team2Name')
+					.where('gameId', game.id).orderBy('id', 'desc').limit(1);
+					if (lastNamesUpdate[0].team1Name !== game.team1?.name && lastNamesUpdate[0].team2Name !== game.team2?.name){
+						await db('teamsNamesUpdates').insert({
+							gameId: game.id,
+							team1Name: game.team1?.name,
+							team2Name: game.team2?.name,
+							time: new Date(),
+						});
+						console.log('update names');
+					}
 				} catch (error) {console.error(error)}
 			}
 			

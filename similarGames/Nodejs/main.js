@@ -2,7 +2,7 @@ const knex = require('knex');
 const config = require('./knexfile');
 const fs = require('fs')
 // const getRes = require('./names')
-const similarityNames = require('./similarityNames.js');
+const { similarityNames, getGameObjectSetsForSimilarity } = require('./similarityNames.js');
 const lodash = require('lodash');
 
 const db = knex(config.development);
@@ -234,6 +234,14 @@ async function start(sportKey) {
             for (let numGame1=0;numGame1<games1.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games1.length);
                 const game1 = games1[numGame1];
+                const gamesNames = {
+                    game1: {
+                        name1: game1.team1Name,
+                        name2: game1.team2Name,
+                        bookieKey: game1.bookieKey,
+                    },
+                }
+                gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
                     // console.log('game2', numGame2, '/', games1.length, new Date);
                     const game2 = games1[numGame2];
@@ -262,19 +270,15 @@ async function start(sportKey) {
                         timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1.sportKey] * 60 * 1000)));
                     }
                     if (timeDiscrepancy < 0.8 && game1.globalGameId !== game2.globalGameId) continue;
+                    
 
-                    const totalSimilarityNames = await similarityNames({
-                        game1: {
-                            name1: game1.team1Name,
-                            name2: game1.team2Name,
-                            bookieKey: game1.bookieKey,
-                        },
-                        game2: {
-                            name1: game2.team1Name,
-                            name2: game2.team2Name,
-                            bookieKey: game2.bookieKey,
-                        }
-                    });
+                    gamesNames.game2 = {
+                        name1: game2.team1Name,
+                        name2: game2.team2Name,
+                        bookieKey: game2.bookieKey,
+                    };
+                    gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
+                    const totalSimilarityNames = await similarityNames(gamesNames);
                     
                     if (totalSimilarityNames < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
 
@@ -406,11 +410,8 @@ async function start(sportKey) {
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id);
                             }))[0];
-                        if (pairForUpdate.similarityNames !== totalSimilarityNames ||
-                            pairForUpdate.similarityOutcomesPre !== totalSimilarityOutcomesPre ||
-                            pairForUpdate.similarityOutcomesLive !== totalSimilarityOutcomesLive ||
-                            pairForUpdate.similarityScores !== totalSimilarityScores ||
-                            pairForUpdate.timeDiscrepancy !== timeDiscrepancy){
+                        if (pairForUpdate.needGroup !== needGroup ||
+                            pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
 
                             // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
                             // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
