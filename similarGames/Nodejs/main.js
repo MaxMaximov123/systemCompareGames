@@ -411,9 +411,7 @@ async function start(sportKey, params) {
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id);
                             }))[0];
-                        let grouped = (game1.globalGameId === game2.globalGameId);
-                        if (pairForUpdate.needGroup !== needGroup ||
-                            pairForUpdate.grouped !== grouped){
+                        if (pairForUpdate.needGroup !== needGroup){
 
                             // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
                             // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
