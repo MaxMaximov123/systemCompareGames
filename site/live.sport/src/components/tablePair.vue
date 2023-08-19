@@ -108,8 +108,8 @@
             <th>Новой системой?</th>
             <th>Старой системой?</th>
             <th>Решения</th>
-            <th>Создана</th>
-            <th>Обновлена</th>
+            <!-- <th>Создана</th> -->
+            <th colspan="2">Обновлена</th>
         </thead>
         <tr class="none-tr"></tr>
         <tbody v-for="item in items" :key="item.id" class="data" :id="item.id">
