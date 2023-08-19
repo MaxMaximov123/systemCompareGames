@@ -220,7 +220,9 @@ async function translate(name){
 async function wordToOptions(name){
     const options = [];
     options.push([await translate(name)]);
-    for (let option of Transliteration(name)) options.push([option]);
+    for (let option of Transliteration(name)){
+        if (options[0][0] !== option) options.push([option]);
+    }
     if (name.length <= 3){
         options.push(name.split(''));
     }
@@ -327,6 +329,7 @@ async function getGameObjectSetsForSimilarity(games, game){
 
     games[game].name1WordSets = createSets(games[game].name1Options);
     games[game].name2WordSets = createSets(games[game].name2Options);
+
 
     delete games[game].name1Options;
     delete games[game].name2Options;

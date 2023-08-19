@@ -203,7 +203,7 @@ function sum(arr){
 }
 
 
-async function start(sportKey) {
+async function start(sportKey, params) {
     require('dotenv').config();
 
 
@@ -227,13 +227,14 @@ async function start(sportKey) {
             .where('games.sportKey', sportKey)
             .whereNull('games.unavailableAt')
             .groupBy('games.id')
-            .orderBy('startExist', 'desc')
+            .orderBy(params.orderBy.column, params.orderBy.key)
         
         console.log(games1.length);
         if (games1){
             for (let numGame1=0;numGame1<games1.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games1.length);
                 const game1 = games1[numGame1];
+                if (game1.bookieKey === 'OLIMP') continue;
                 const gamesNames = {
                     game1: {
                         name1: game1.team1Name,
@@ -243,8 +244,8 @@ async function start(sportKey) {
                 }
                 gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
-                    console.log(sportKey, 'game2', numGame2, '/', games1.length);
                     const game2 = games1[numGame2];
+                    console.log(sportKey, 'game2', numGame2, '/', games1.length);
                     // console.log(game1.id, game2.id, game1.sportKey);
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                         game1[numKey] = Number(game1[numKey]);
@@ -465,19 +466,20 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
-    // await Promise.all(sportKeys.map(sportKey => start(sportKey)));
-
-    // async.parallel(sportKeys.map(sportKey => async.apply(start, sportKey)), (err, results) => {
-    // if (err) {
-    //     console.error(err);
-    // } else {
-    //     console.log(results);
-    // }
-    // });
-    
     for (let sportKey of sportKeys){
         console.log('START', sportKey);
-        start(sportKey);
+        start(sportKey, {
+            orderBy: {
+                column: 'startExist',
+                key: 'desc'
+            }
+        });
+        start(sportKey, {
+            orderBy: {
+                column: 'startExist',
+                key: 'asc'
+            }
+        });
     }
 }
 
