@@ -405,13 +405,16 @@ async function start(sportKey, params) {
                             'similarityOutcomesPre',
                             'similarityOutcomesLive',
                             'similarityScores',
-                            'timeDiscrepancy'
+                            'timeDiscrepancy',
+                            'needGroup',
+                            'grouped'
                             ).where(function () {
                                 this.where('id1', game1.id).andWhere('id2', game2.id);
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id);
                             }))[0];
-                        if (pairForUpdate.needGroup !== needGroup){
+                        if (pairForUpdate.needGroup !== needGroup || 
+                            pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
 
                             // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
                             // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
