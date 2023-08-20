@@ -338,22 +338,19 @@ async function getGameObjectSetsForSimilarity(games, game){
 }
 
 
-async function similarityNames(games){
+async function getSimilarityNames(games){
     const similarityNames = {
         game1Name1game2Name1: findingBestSimilarity(games.game1.name1WordSets, games.game2.name1WordSets),
         game1Name2game2Name2: findingBestSimilarity(games.game1.name2WordSets, games.game2.name2WordSets),
         game1Name1game2Name2: findingBestSimilarity(games.game1.name1WordSets, games.game2.name2WordSets),
         game1Name2game2Name1: findingBestSimilarity(games.game1.name2WordSets, games.game2.name1WordSets),
     }
-    // delete games.game1.name1WordSets;
-    // delete games.game1.name2WordSets;
     delete games.game2.name1WordSets;
     delete games.game2.name2WordSets;
-
     return [similarityNames, Math.max(
         (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
         (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,
-    )]
+    )];
 }
 
 
@@ -385,4 +382,4 @@ const example = async () => {
 
 
 // example();
-module.exports = { similarityNames, getGameObjectSetsForSimilarity };
+module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
