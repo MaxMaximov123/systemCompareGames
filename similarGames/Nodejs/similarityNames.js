@@ -7,7 +7,7 @@ const slolet = {
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
-    'е': ['e', 'ye', 'ie', 'y'], 
+    'е': ['e', 'ye', 'ie', 'y', 'je'], 
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
     'з': ['z', 'th'], 
@@ -22,12 +22,12 @@ const slolet = {
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
     'т': ['t', 'ch'], 
-    'у': ['u', 'oo', 'o'], 
+    'у': ['u', 'oo', 'o', 'w'], 
     'ф': ['f', 'ph'], 
     'х': ['h', 'ch', 'kh', 'j'],
     'ц': ['c', 'ts'], 
     'ч': ['ch', 'c', 'cz'], 
-    'ш': ['sh', 'sz'], 
+    'ш': ['sh', 'sz', 's'],
     'щ': ['sch', 'shch', 'sh', 'ch', 'szcz'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
@@ -35,7 +35,10 @@ const slolet = {
     'э': ['e', 'ie', 'ye'],
     'ю': ['u', 'iu', 'yu'], 
     'я': ['ya', 'ia', 'j', 'ya', 'a'],
+    // english words
     'y': ['y', 'i'],
+    'c': ['c', 's'],
+    's': ['s', 'c'],
     'II': ['2', ],
     'III': ['3', ]
 }
@@ -287,7 +290,7 @@ function pairWithTheBestSimilarity(arr){
 function searchWordsThatMatch(name1WordOption, name2WordOption){
     for (let word1 of name1WordOption){
         for (let word2 of name2WordOption){
-            if (word1.startsWith(word2) || word2.startsWith(word1)){
+            if (word1 === word2 || word1.startsWith(word2) || word2.startsWith(word1)){
                     return {word1: word1, word2: word2, matched: true};
                 }
         }
@@ -299,8 +302,10 @@ function findingBestSimilarity(name1Options, name2Options){
     const pairsWithTheBestSimilarity = [];
     let sameWordsCount = 0;
     let minimumSetLength = Math.min(name1Options.length, name2Options.length)
-    let maximumSetLength = Math.min(name1Options.length, name2Options.length)
-    [name1Options, name2Options] = name1Options.length === minimumSetLength ? [name1Options, name2Options] : [name2Options, name1Options];
+    let maximumSetLength = Math.max(name1Options.length, name2Options.length)
+    if (name2Options.length === minimumSetLength){
+        [name1Options, name2Options] = [name2Options, name1Options];
+    }
     const namesSets = {
         name1Set: Array(minimumSetLength).fill(''),
         name2Set: Array(minimumSetLength).fill(''),
@@ -336,7 +341,7 @@ function findingBestSimilarity(name1Options, name2Options){
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
         if (namesSets.name1Set[numWord].length >= 3 || namesSets.name2Set[numWord].length >= 3) fullWordExist = true;
         if (namesSets.name1Set[numWord].length >= 3 && namesSets.name2Set[numWord].length >= 3 && 
-            namesSets.name1Set[numWord] === namesSets.name2Set[numWord]) fullWordMatched = true;
+            (namesSets.name1Set[numWord].startsWith(namesSets.name2Set[numWord]) || namesSets.name2Set[numWord].startsWith(namesSets.name1Set[numWord]))  ) fullWordMatched = true;
         namesSets.name1Set[numWord], namesSets.name2Set[numWord]
     }
     // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
@@ -391,22 +396,22 @@ const example = async () => {
     t = new Date();
     let games = {
         game1: {
-            name1: 'Ivanov А',
-            name2: 'Zyuganov O',
+            name1: 'Минда М.',
+            name2: 'Муговский А.',
             bookieKey: 'BET365',
         },
         game2: {
-            name1: 'Зюганов О.',
-            name2: 'Шмаков А.',
+            name1: 'Michal Minda (POL)',
+            name2: 'Arkadiusz Mugowski (POL)',
             bookieKey: 'OLIMP'
         }
     }
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
-    console.log((await getSimilarityNames(games)));
+    console.log((await getSimilarityNames(games))[0]);
     console.log(new Date() - t);
 };
 
 
-// example();
+example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
