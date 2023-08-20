@@ -219,7 +219,7 @@ async function start(sportKey, params) {
         const games1 = await db('games')
             .join('outcomes', 'games.id', 'outcomes.id')
             .select(
-                'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name',
+                'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.team1Id', 'games.team2Id',
                 'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey'
                 )
             .min('outcomes.now as startExist')
@@ -257,6 +257,7 @@ async function start(sportKey, params) {
                     var totalSimilarityOutcomesLive = 0;
                     var totalSimilarityScores = 0;
                     var timeDiscrepancy = 0;
+                    let totalSimilarityNames = 0;
 
                     if ((game1.startTime || game1.liveFrom) && (game2.startTime || game2.liveFrom)){
                         const realStartTimeDistance = Math.min(
@@ -272,14 +273,83 @@ async function start(sportKey, params) {
                     }
                     if (timeDiscrepancy < 0.8 && game1.globalGameId !== game2.globalGameId) continue;
                     
-
                     gamesNames.game2 = {
                         name1: game2.team1Name,
                         name2: game2.team2Name,
                         bookieKey: game2.bookieKey,
                     };
+                    if (game2.bookieKey === 'OLIMP'){
+                        const pairNames = await db('pairsNames')
+                            .select('team1Name', 'team2Name')
+                            .where(function () {
+                                this.where('team1Name', game1.team1Name).andWhere('team2Name', game2.team1Name);
+                            }).orWhere(function (){
+                                this.where('team1Name', game1.team2Name).andWhere('team2Name', game2.team2Name);
+                            }).orWhere(function (){
+                                this.where('team1Name', game1.team1Name).andWhere('team2Name', game2.team2Name);
+                            }).orWhere(function (){
+                                this.where('team1Name', game1.team2Name).andWhere('team2Name', game2.team1Name);
+                            })
+                            .orWhere(function (){
+                                this.where('team1Name', game2.team1Name).andWhere('team2Name', game1.team1Name);
+                            }).orWhere(function (){
+                                this.where('team1Name', game2.team2Name).andWhere('team2Name', game1.team2Name);
+                            }).orWhere(function (){
+                                this.where('team1Name', game2.team1Name).andWhere('team2Name', game1.team2Name);
+                            }).orWhere(function (){
+                                this.where('team1Name', game2.team2Name).andWhere('team2Name', game1.team1Name);
+                            })
+                        if (pairNames.length > 0){
+                            // if pairs are existing, changing sets to cnanging team name
+                        }
+                    }
                     gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
-                    const totalSimilarityNames = await similarityNames(gamesNames);
+                    totalSimilarityNames = await similarityNames(gamesNames);
+                    const pairsNames = [
+                        {
+                            team1Id: game1.team1Id,
+                            team2Id: game2.team1Id,
+                            team1Name: game1.team1Name,
+                            team2Name: game2.team1Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name1.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name1.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name1game2Name1.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                        {
+                            team1Id: game1.team2Id,
+                            team2Id: game2.team2Id,
+                            team1Name: game1.team2Name,
+                            team2Name: game2.team2Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name2.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name2.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name2game2Name2.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                        {
+                            team1Id: game1.team1Id,
+                            team2Id: game2.team2Id,
+                            team1Name: game1.team1Name,
+                            team2Name: game2.team2Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name2.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name2.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name1game2Name2.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                        {
+                            team1Id: game1.team2Id,
+                            team2Id: game2.team1Id,
+                            team1Name: game1.team2Name,
+                            team2Name: game2.team1Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name1.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name1.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name2game2Name1.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                    ]
+                    await db('pairsNames').insert(pairsNames);
+                    console.log(pairsNames);
+                    totalSimilarityNames = totalSimilarityNames[1];
                     
                     if (totalSimilarityNames < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
 

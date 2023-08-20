@@ -350,11 +350,10 @@ async function similarityNames(games){
     delete games.game2.name1WordSets;
     delete games.game2.name2WordSets;
 
-    // console.log(similarityNames);
-    return Math.max(
+    return [similarityNames, Math.max(
         (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
         (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,
-    )
+    )]
 }
 
 
