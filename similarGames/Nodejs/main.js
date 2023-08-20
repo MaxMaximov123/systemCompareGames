@@ -284,53 +284,51 @@ async function start(sportKey, bookieKeys, params) {
                     }).orWhere(function (){
                         this.where('id2', game1.id).andWhere('id1', game2.id);
                     }))[0];
-                    if (Number(pairExist.count) === 0){
-                        gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
-                        totalSimilarityNames = await getSimilarityNames(gamesNames);
-                        const pairsNames = [
-                            {
-                                team1Id: game1.team1Id,
-                                team2Id: game2.team1Id,
-                                team1Name: game1.team1Name,
-                                team2Name: game2.team1Name,
-                                changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name1.set1Words.join(' '),
-                                changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name1.set2Words.join(' '),
-                                similarity: totalSimilarityNames[0].game1Name1game2Name1.sameWordsCount,
-                                createdAt: new Date(),
-                            },
-                            {
-                                team1Id: game1.team2Id,
-                                team2Id: game2.team2Id,
-                                team1Name: game1.team2Name,
-                                team2Name: game2.team2Name,
-                                changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name2.set1Words.join(' '),
-                                changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name2.set2Words.join(' '),
-                                similarity: totalSimilarityNames[0].game1Name2game2Name2.sameWordsCount,
-                                createdAt: new Date(),
-                            },
-                            {
-                                team1Id: game1.team1Id,
-                                team2Id: game2.team2Id,
-                                team1Name: game1.team1Name,
-                                team2Name: game2.team2Name,
-                                changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name2.set1Words.join(' '),
-                                changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name2.set2Words.join(' '),
-                                similarity: totalSimilarityNames[0].game1Name1game2Name2.sameWordsCount,
-                                createdAt: new Date(),
-                            },
-                            {
-                                team1Id: game1.team2Id,
-                                team2Id: game2.team1Id,
-                                team1Name: game1.team2Name,
-                                team2Name: game2.team1Name,
-                                changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name1.set1Words.join(' '),
-                                changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name1.set2Words.join(' '),
-                                similarity: totalSimilarityNames[0].game1Name2game2Name1.sameWordsCount,
-                                createdAt: new Date(),
-                            },
-                        ]
-                        totalSimilarityNames = totalSimilarityNames[1];
-                    }
+                    gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
+                    totalSimilarityNames = await getSimilarityNames(gamesNames);
+                    const pairsNames = [
+                        {
+                            team1Id: game1.team1Id,
+                            team2Id: game2.team1Id,
+                            team1Name: game1.team1Name,
+                            team2Name: game2.team1Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name1.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name1.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name1game2Name1.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                        {
+                            team1Id: game1.team2Id,
+                            team2Id: game2.team2Id,
+                            team1Name: game1.team2Name,
+                            team2Name: game2.team2Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name2.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name2.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name2game2Name2.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                        {
+                            team1Id: game1.team1Id,
+                            team2Id: game2.team2Id,
+                            team1Name: game1.team1Name,
+                            team2Name: game2.team2Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name2.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name2.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name1game2Name2.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                        {
+                            team1Id: game1.team2Id,
+                            team2Id: game2.team1Id,
+                            team1Name: game1.team2Name,
+                            team2Name: game2.team1Name,
+                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name1.set1Words.join(' '),
+                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name1.set2Words.join(' '),
+                            similarity: totalSimilarityNames[0].game1Name2game2Name1.sameWordsCount,
+                            createdAt: new Date(),
+                        },
+                    ]
+                    totalSimilarityNames = totalSimilarityNames[1];
                     
                     
                     
