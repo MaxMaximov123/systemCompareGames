@@ -302,30 +302,39 @@ function findingBestSimilarity(name1Options, name2Options){
     let minimumSetLength = Math.min(name1Options.length, name2Options.length)
     let maximumSetLength = Math.min(name1Options.length, name2Options.length)
     const namesSets = {
-        name1Sets: Array(minimumSetLength).fill(''),
-        name2Sets: Array(minimumSetLength).fill(''),
+        name1Set: Array(minimumSetLength).fill(''),
+        name2Set: Array(minimumSetLength).fill(''),
     }
     for (let numName1Options=0;numName1Options<name1Options.length;numName1Options++){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
-            if (namesSets.name1Sets[numName1Options] || namesSets.name2Sets[numName1Options]) continue;
+            if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) continue;
             for (let name1WordOption of name1WordOptions){
-                if (namesSets.name1Sets[numName1Options] || namesSets.name2Sets[numName1Options]) continue;
+                if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) continue;
                 for (let name2WordOption of name2WordOptions){
-                    if (namesSets.name1Sets[numName1Options] || namesSets.name2Sets[numName1Options]) continue;
+                    if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) continue;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
                     if (wordsThatMatched.matched){
                         sameWordsCount++;
-                        namesSets.name1Sets[numName1Options] = wordsThatMatched.word1;
-                        namesSets.name2Sets[numName1Options] = wordsThatMatched.word2;
+                        namesSets.name1Set[numName1Options] = wordsThatMatched.word1;
+                        namesSets.name2Set[numName1Options] = wordsThatMatched.word2;
                         break;
                     }
                 }
             }
         }    
     }
-    return {name1Sets: namesSets.name1Sets, name2Sets: namesSets.name2Sets, sameWordsCount: sameWordsCount / minimumSetLength};
+    let fullWordExist = false;
+    let fullWordMatched = false;
+    for (let numWord=0;numWord<minimumSetLength;numWord++){
+        if (namesSets.name1Set[numWord].length >= 3 || namesSets.name2Set[numWord].length >= 3) fullWordExist = true;
+        if (namesSets.name1Set[numWord].length >= 3 && namesSets.name2Set[numWord].length >= 3 && 
+            namesSets.name1Set[numWord] === namesSets.name2Set[numWord]) fullWordMatched = true;
+        namesSets.name1Set[numWord], namesSets.name2Set[numWord]
+    }
+    let sameWordsProcent = fullWordMatched || !fullWordExist ? sameWordsCount / minimumSetLength : 0
+    return {name1Set: namesSets.name1Set, name2Set: namesSets.name2Set, sameWordsCount: sameWordsProcent};
 }
 
 async function getGameObjectSetsForSimilarity(games, game){
@@ -375,13 +384,13 @@ const example = async () => {
     t = new Date();
     let games = {
         game1: {
-            name1: 'Combined Campuses & Colleges',
-            name2: 'Gimnasia Mendoza U20',
+            name1: 'Mitchell Krueger',
+            name2: 'Inaki Montes-De La Torre',
             bookieKey: 'BET365',
         },
         game2: {
-            name1: 'Комбайнд Кампусес энд Колледжес',
-            name2: 'Гимназия и Эсгрима де Мендоза (до 20)',
+            name1: 'Буитраго Н.',
+            name2: 'Бусе И.',
             bookieKey: 'OLIMP'
         }
     }
@@ -392,5 +401,5 @@ const example = async () => {
 };
 
 
-// example();
+example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

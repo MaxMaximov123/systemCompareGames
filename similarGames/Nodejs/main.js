@@ -234,7 +234,6 @@ async function start(sportKey, params) {
             for (let numGame1=0;numGame1<games1.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games1.length);
                 const game1 = games1[numGame1];
-                if (game1.bookieKey === 'OLIMP') continue;
                 const gamesNames = {
                     game1: {
                         name1: game1.team1Name,
