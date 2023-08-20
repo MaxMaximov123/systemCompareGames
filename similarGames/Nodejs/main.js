@@ -326,12 +326,12 @@ async function start(sportKey, bookieKeys, params) {
                     //             }
                     //         }
                     // } else {}
-                    const pairExist = await db('pairs').select('id').where(function () {
+                    const pairExist = (await db('pairs').count('id').where(function () {
                         this.where('id1', game1.id).andWhere('id2', game2.id);
                     }).orWhere(function (){
                         this.where('id2', game1.id).andWhere('id1', game2.id);
-                    });
-                    if (pairExist.length === 0){
+                    }))[0];
+                    if (pairExist.count === 0){
                         gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
                         totalSimilarityNames = await getSimilarityNames(gamesNames);
                         const pairsNames = [
@@ -450,7 +450,7 @@ async function start(sportKey, bookieKeys, params) {
                         need: needGroup,
                         timeDiscrepancy: timeDiscrepancy
                     });
-                    if (pairExist.length === 0){
+                    if (pairExist.count === 0){
                         try {
                             await db('pairs').insert({
                                 'id1': game1.id,
