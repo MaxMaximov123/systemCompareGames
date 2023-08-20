@@ -278,60 +278,13 @@ async function start(sportKey, bookieKeys, params) {
                         name2: game2.team2Name,
                         bookieKey: game2.bookieKey,
                     };
-                    // const verifiedPairsNames = await db('pairsNames')
-                    //     .select('team1Name', 'team2Name', 'changedTeam1Name', 'changedTeam2Name', 'similarity')
-                    //     .where(function () {
-                    //         this.where('team1Name', game1.team1Name).andWhere('team2Name', game2.team1Name);
-                    //     }).orWhere(function (){
-                    //         this.where('team1Name', game1.team2Name).andWhere('team2Name', game2.team2Name);
-                    //     }).orWhere(function (){
-                    //         this.where('team1Name', game1.team1Name).andWhere('team2Name', game2.team2Name);
-                    //     }).orWhere(function (){
-                    //         this.where('team1Name', game1.team2Name).andWhere('team2Name', game2.team1Name);
-                    //     })
-                    //     .orWhere(function (){
-                    //         this.where('team1Name', game2.team1Name).andWhere('team2Name', game1.team1Name);
-                    //     }).orWhere(function (){
-                    //         this.where('team1Name', game2.team2Name).andWhere('team2Name', game1.team2Name);
-                    //     }).orWhere(function (){
-                    //         this.where('team1Name', game2.team1Name).andWhere('team2Name', game1.team2Name);
-                    //     }).orWhere(function (){
-                    //         this.where('team1Name', game2.team2Name).andWhere('team2Name', game1.team1Name);
-                    //     });
-                    // if (verifiedPairsNames.length > 0){
-                    //     for (let verifiedPairNames of verifiedPairsNames){
-                    //         const verifiedTeamsNames = {}
-                    //         if (game1.team1Name === verifiedPairNames.team1Name){
-                    //             verifiedTeamsNames.game1 = {
-                    //                 name1WordSets: verifiedPairNames.changedTeam1Name.split(' '),
-                    //                 name2WordSets: [],
-                    //             }
-                    //         }
-                    //         if (game1.team2Name === verifiedPairNames.team1Name){
-                    //             verifiedTeamsNames.game1 = {
-                    //                 name1WordSets: [],
-                    //                 name2WordSets: verifiedPairNames.changedTeam1Name.split(' '),
-                    //             }
-                    //         }
-                    //         if (game2.team1Name === verifiedPairNames.team2Name){
-                    //             verifiedTeamsNames.game2 = {
-                    //                 name1WordSets: verifiedPairNames.changedTeam2Name.split(' '),
-                    //                 name2WordSets: [],
-                    //             }
-                    //         }
-                    //         if (game2.team2Name === verifiedPairNames.team2Name){
-                    //             verifiedTeamsNames.game2 = {
-                    //                 name1WordSets: [],
-                    //                 name2WordSets: verifiedPairNames.changedTeam2Name.split(' '),
-                    //             }
-                    //         }
-                    // } else {}
+
                     const pairExist = (await db('pairs').count('id').where(function () {
                         this.where('id1', game1.id).andWhere('id2', game2.id);
                     }).orWhere(function (){
                         this.where('id2', game1.id).andWhere('id1', game2.id);
                     }))[0];
-                    if (pairExist.count === 0){
+                    if (Number(pairExist.count) === 0){
                         gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
                         totalSimilarityNames = await getSimilarityNames(gamesNames);
                         const pairsNames = [
@@ -450,7 +403,7 @@ async function start(sportKey, bookieKeys, params) {
                         need: needGroup,
                         timeDiscrepancy: timeDiscrepancy
                     });
-                    if (pairExist.count === 0){
+                    if (Number(pairExist.count) === 0){
                         try {
                             await db('pairs').insert({
                                 'id1': game1.id,
@@ -507,7 +460,7 @@ async function start(sportKey, bookieKeys, params) {
                                 this.where('id1', game1.id).andWhere('id2', game2.id);
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id);
-                            }))[0];
+                            }).limit(1))[0];
                         if (pairForUpdate.needGroup !== needGroup || 
                             pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
 
