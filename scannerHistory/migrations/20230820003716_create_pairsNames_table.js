@@ -5,8 +5,8 @@ exports.up = function(knex) {
       table.bigint('team2Id');
       table.string('team1Name');
       table.string('team2Name');
-      table.string('сhangedTeam1Name');
-      table.string('сhangedTeam2Name');
+      table.string('changedTeam1Name');
+      table.string('changedTeam2Name');
       table.float('similarity');
       table.timestamp('createdAt');
 
@@ -15,8 +15,8 @@ exports.up = function(knex) {
       table.index('team2Id');
       table.index('team1Name');
       table.index('team2Name');
-      table.index('сhangedTeam1Name');
-      table.index('сhangedTeam2Name');
+      table.index('changedTeam1Name');
+      table.index('changedTeam2Name');
       table.index('similarity');
       table.index('createdAt');
     });
