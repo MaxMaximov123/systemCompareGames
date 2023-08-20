@@ -287,8 +287,7 @@ function pairWithTheBestSimilarity(arr){
 function searchWordsThatMatch(name1WordOption, name2WordOption){
     for (let word1 of name1WordOption){
         for (let word2 of name2WordOption){
-            if (word1 === word2 ||
-                word1.startsWith(word2) || word2.startsWith(word1)){
+            if (word1.startsWith(word2) || word2.startsWith(word1)){
                     return {word1: word1, word2: word2, matched: true};
                 }
         }
@@ -301,6 +300,7 @@ function findingBestSimilarity(name1Options, name2Options){
     let sameWordsCount = 0;
     let minimumSetLength = Math.min(name1Options.length, name2Options.length)
     let maximumSetLength = Math.min(name1Options.length, name2Options.length)
+    [name1Options, name2Options] = name1Options.length === minimumSetLength ? [name1Options, name2Options] : [name2Options, name1Options];
     const namesSets = {
         name1Set: Array(minimumSetLength).fill(''),
         name2Set: Array(minimumSetLength).fill(''),
@@ -309,11 +309,11 @@ function findingBestSimilarity(name1Options, name2Options){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
-            if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) continue;
+            if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) break;
             for (let name1WordOption of name1WordOptions){
-                if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) continue;
+                if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) break;
                 for (let name2WordOption of name2WordOptions){
-                    if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) continue;
+                    if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
                     if (wordsThatMatched.matched){
                         sameWordsCount++;
@@ -322,18 +322,25 @@ function findingBestSimilarity(name1Options, name2Options){
                         break;
                     }
                 }
-            }
-        }    
+                
+            } 
+        }
+        if (!namesSets.name1Set[numName1Options]){
+            namesSets.name1Set[numName1Options] = name1WordOptions[0][0];
+            namesSets.name2Set[numName1Options] = name2Options[numName1Options][0][0];
+        }
+        
     }
     let fullWordExist = false;
     let fullWordMatched = false;
-    for (let numWord=0;numWord<minimumSetLength;numWord++){
+    for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
         if (namesSets.name1Set[numWord].length >= 3 || namesSets.name2Set[numWord].length >= 3) fullWordExist = true;
         if (namesSets.name1Set[numWord].length >= 3 && namesSets.name2Set[numWord].length >= 3 && 
             namesSets.name1Set[numWord] === namesSets.name2Set[numWord]) fullWordMatched = true;
         namesSets.name1Set[numWord], namesSets.name2Set[numWord]
     }
-    let sameWordsProcent = fullWordMatched || !fullWordExist ? sameWordsCount / minimumSetLength : 0
+    // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
+    let sameWordsProcent = fullWordMatched || !fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0
     return {name1Set: namesSets.name1Set, name2Set: namesSets.name2Set, sameWordsCount: sameWordsProcent};
 }
 
@@ -384,22 +391,22 @@ const example = async () => {
     t = new Date();
     let games = {
         game1: {
-            name1: 'Mitchell Krueger',
-            name2: 'Inaki Montes-De La Torre',
+            name1: 'Ivanov А',
+            name2: 'Zyuganov O',
             bookieKey: 'BET365',
         },
         game2: {
-            name1: 'Буитраго Н.',
-            name2: 'Бусе И.',
+            name1: 'Зюганов О.',
+            name2: 'Шмаков А.',
             bookieKey: 'OLIMP'
         }
     }
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
-    console.log(await getSimilarityNames(games));
+    console.log((await getSimilarityNames(games)));
     console.log(new Date() - t);
 };
 
 
-example();
+// example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
