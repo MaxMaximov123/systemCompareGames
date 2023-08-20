@@ -203,7 +203,7 @@ function sum(arr){
 }
 
 
-async function start(sportKey, bookieKeys, params) {
+async function start(sportKey, params) {
     require('dotenv').config();
 
 
@@ -246,7 +246,6 @@ async function start(sportKey, bookieKeys, params) {
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
                     const game2 = games1[numGame2];
                     console.log(sportKey, 'game2', numGame2, '/', games1.length);
-                    if (!bookieKeys.includes(game2.bookieKey)) continue;
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                         game1[numKey] = Number(game1[numKey]);
                         game2[numKey] = Number(game2[numKey]);
@@ -286,48 +285,6 @@ async function start(sportKey, bookieKeys, params) {
                     }))[0];
                     gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
                     totalSimilarityNames = await getSimilarityNames(gamesNames);
-                    const pairsNames = [
-                        {
-                            team1Id: game1.team1Id,
-                            team2Id: game2.team1Id,
-                            team1Name: game1.team1Name,
-                            team2Name: game2.team1Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name1.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name1.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name1game2Name1.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                        {
-                            team1Id: game1.team2Id,
-                            team2Id: game2.team2Id,
-                            team1Name: game1.team2Name,
-                            team2Name: game2.team2Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name2.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name2.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name2game2Name2.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                        {
-                            team1Id: game1.team1Id,
-                            team2Id: game2.team2Id,
-                            team1Name: game1.team1Name,
-                            team2Name: game2.team2Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name2.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name2.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name1game2Name2.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                        {
-                            team1Id: game1.team2Id,
-                            team2Id: game2.team1Id,
-                            team1Name: game1.team2Name,
-                            team2Name: game2.team1Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name1.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name1.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name2game2Name1.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                    ]
                     totalSimilarityNames = totalSimilarityNames[1];
                     
                     
@@ -513,16 +470,15 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
-    const bookieKeys = process.env.BOOKIEKEYS.split(';');
     for (let sportKey of sportKeys){
         console.log('START', sportKey);
-        start(sportKey, bookieKeys, {
+        start(sportKey, {
             orderBy: {
                 column: 'startExist',
                 key: 'desc'
             }
         });
-        start(sportKey, bookieKeys, {
+        start(sportKey, {
             orderBy: {
                 column: 'startExist',
                 key: 'asc'

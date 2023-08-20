@@ -48,7 +48,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: SOCCER;WATER_POLO
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
+
     depends_on:
       # - python
       - db
@@ -68,7 +68,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: TABLE_TENNIS;AMERICAN_FOOTBALL
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
+
     depends_on:
       # - python
       - db
@@ -88,7 +88,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: TENNIS;SNOOKER
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
+
     depends_on:
       # - python
       - db
@@ -108,7 +108,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: BASKETBALL;FUTSAL
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
+
     depends_on:
       # - python
       - db
@@ -128,7 +128,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: CYBERSPORT;CRICKET
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
+
     depends_on:
       # - python
       - db
@@ -148,7 +148,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: HOCKEY;HANDBALL
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
+
     depends_on:
       # - python
       - db
@@ -168,27 +168,7 @@ services:
       POSTGRES_PORT: 5432
       PYTHON_API_URL: http://python:5000/api/names
       SPORTKEYS: BASEBALL;VOLLEYBALL
-      BOOKIEKEYS: BETMGM;PINNACLE;BETRADAR;BET365;FONBET;VIRGINBET
-    depends_on:
-      # - python
-      - db
-    networks:
-      - mynetwork
-  
-  similarer-all-olimp:
-    restart: always
-    build:
-      context: .
-      dockerfile: similarGames/Nodejs/Dockerfile
-    environment:
-      POSTGRES_USER: max
-      POSTGRES_PASSWORD: jbfgslgsdlfkngd
-      POSTGRES_DB: history
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-      PYTHON_API_URL: http://python:5000/api/names
-      SPORTKEYS: SOCCER;TABLE_TENNIS;TENNIS;BASKETBALL;CYBERSPORT;HOCKEY;BASEBALL;VOLLEYBALL;HANDBALL;CRICKET;FUTSAL;SNOOKER;AMERICAN_FOOTBALL;WATER_POLO
-      BOOKIEKEYS: OLIMP
+
     depends_on:
       # - python
       - db

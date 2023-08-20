@@ -24,7 +24,7 @@ const slolet = {
     'т': ['t', 'ch'], 
     'у': ['u', 'oo', 'o'], 
     'ф': ['f', 'ph'], 
-    'х': ['h', 'ch', 'kh'],
+    'х': ['h', 'ch', 'kh', 'j'],
     'ц': ['c', 'ts'], 
     'ч': ['ch', 'c', 'cz'], 
     'ш': ['sh', 'sz'], 
@@ -169,7 +169,7 @@ function clearingName(name, bookieKey){
 }
 
 function Transliteration(word) {
-    let words = ['']; 
+    let words = [''];
     for (let indChar = 0; indChar < word.length; indChar++) {
       const currentSymbolsTranslations = slolet[word[indChar]] || [word[indChar]];
       let newWords = [];
@@ -284,29 +284,48 @@ function pairWithTheBestSimilarity(arr){
     return pair;
 }
 
-function findingBestSimilarity(name1WordSets, name2WordSets){
-    const pairsWithTheBestSimilarity = [];
-
-    for (let name1WordSet of name1WordSets){
-        for (let name2WordSet of name2WordSets){
-            const minimumSetLength = Math.min(name1WordSet.length, name2WordSet.length);
-            let staticSet = null;
-            let setCombinations = null;
-            if (name1WordSet.length <= name2WordSet.length){
-                staticSet = name1WordSet;
-                setCombinations = name2WordSet;
-            } else {
-                staticSet = name2WordSet;
-                setCombinations = name1WordSet;
-            }
-
-            const longestWordSetCombinations = getLongestWordSetCombinations(setCombinations, minimumSetLength);
-            const nameWordSetPairs = longestWordSetCombinations.map(set => {return {set1Words: set, set2Words: staticSet, sameWordsCount: getSameWordsCount(set, staticSet)}});
-
-            pairsWithTheBestSimilarity.push(pairWithTheBestSimilarity(nameWordSetPairs));
+function searchWordsThatMatch(name1WordOption, name2WordOption){
+    for (let word1 of name1WordOption){
+        for (let word2 of name2WordOption){
+            if (word1 === word2 ||
+                word1.startsWith(word2) || word2.startsWith(word1)){
+                    return {word1: word1, word2: word2, matched: true};
+                }
         }
     }
-    return pairWithTheBestSimilarity(pairsWithTheBestSimilarity);
+    return {word1: '', word2: '', matched: false};
+}
+
+function findingBestSimilarity(name1Options, name2Options){
+    const pairsWithTheBestSimilarity = [];
+    let sameWordsCount = 0;
+    let minimumSetLength = Math.min(name1Options.length, name2Options.length)
+    let maximumSetLength = Math.min(name1Options.length, name2Options.length)
+    const namesSets = {
+        name1Sets: Array(minimumSetLength).fill(''),
+        name2Sets: Array(minimumSetLength).fill(''),
+    }
+    for (let numName1Options=0;numName1Options<name1Options.length;numName1Options++){
+        const name1WordOptions = name1Options[numName1Options];
+        for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
+            const name2WordOptions = name2Options[numName2Options];
+            if (namesSets.name1Sets[numName1Options] || namesSets.name2Sets[numName1Options]) continue;
+            for (let name1WordOption of name1WordOptions){
+                if (namesSets.name1Sets[numName1Options] || namesSets.name2Sets[numName1Options]) continue;
+                for (let name2WordOption of name2WordOptions){
+                    if (namesSets.name1Sets[numName1Options] || namesSets.name2Sets[numName1Options]) continue;
+                    const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
+                    if (wordsThatMatched.matched){
+                        sameWordsCount++;
+                        namesSets.name1Sets[numName1Options] = wordsThatMatched.word1;
+                        namesSets.name2Sets[numName1Options] = wordsThatMatched.word2;
+                        break;
+                    }
+                }
+            }
+        }    
+    }
+    return {name1Sets: namesSets.name1Sets, name2Sets: namesSets.name2Sets, sameWordsCount: sameWordsCount / minimumSetLength};
 }
 
 async function getGameObjectSetsForSimilarity(games, game){
@@ -327,26 +346,19 @@ async function getGameObjectSetsForSimilarity(games, game){
     delete games[game].name1Words;
     delete games[game].name2Words;
 
-    games[game].name1WordSets = createSets(games[game].name1Options);
-    games[game].name2WordSets = createSets(games[game].name2Options);
-
-
-    delete games[game].name1Options;
-    delete games[game].name2Options;
-
     return games[game];
 }
 
 
 async function getSimilarityNames(games){
     const similarityNames = {
-        game1Name1game2Name1: findingBestSimilarity(games.game1.name1WordSets, games.game2.name1WordSets),
-        game1Name2game2Name2: findingBestSimilarity(games.game1.name2WordSets, games.game2.name2WordSets),
-        game1Name1game2Name2: findingBestSimilarity(games.game1.name1WordSets, games.game2.name2WordSets),
-        game1Name2game2Name1: findingBestSimilarity(games.game1.name2WordSets, games.game2.name1WordSets),
+        game1Name1game2Name1: findingBestSimilarity(games.game1.name1Options, games.game2.name1Options),
+        game1Name2game2Name2: findingBestSimilarity(games.game1.name2Options, games.game2.name2Options),
+        game1Name1game2Name2: findingBestSimilarity(games.game1.name1Options, games.game2.name2Options),
+        game1Name2game2Name1: findingBestSimilarity(games.game1.name2Options, games.game2.name1Options),
     }
-    delete games.game2.name1WordSets;
-    delete games.game2.name2WordSets;
+    // delete games.game2.name1WordSets;
+    // delete games.game2.name2WordSets;
     return [similarityNames, Math.max(
         (similarityNames.game1Name1game2Name1.sameWordsCount + similarityNames.game1Name2game2Name2.sameWordsCount) / 2,
         (similarityNames.game1Name1game2Name2.sameWordsCount + similarityNames.game1Name2game2Name1.sameWordsCount) / 2,
@@ -361,22 +373,21 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    const games = {
+    let games = {
         game1: {
-            name1: 'Poland',
-            name2: 'Slovenia',
+            name1: 'Combined Campuses & Colleges',
+            name2: 'Gimnasia Mendoza U20',
             bookieKey: 'BET365',
         },
         game2: {
-            name1: 'Польша',
-            name2: 'Словения',
+            name1: 'Комбайнд Кампусес энд Колледжес',
+            name2: 'Гимназия и Эсгрима де Мендоза (до 20)',
             bookieKey: 'OLIMP'
         }
     }
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
-    console.log(await similarityNames(games));
-    console.log(games);
+    console.log(await getSimilarityNames(games));
     console.log(new Date() - t);
 };
 
