@@ -203,7 +203,7 @@ function sum(arr){
 }
 
 
-async function start(sportKey, params) {
+async function start(sportKey, bookieKeys, params) {
     require('dotenv').config();
 
 
@@ -246,7 +246,7 @@ async function start(sportKey, params) {
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
                     const game2 = games1[numGame2];
                     console.log(sportKey, 'game2', numGame2, '/', games1.length);
-                    // if (game2.bookieKey === 'OLIMP') continue;
+                    if (!bookieKeys.includes(game2.bookieKey)) continue;
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                         game1[numKey] = Number(game1[numKey]);
                         game2[numKey] = Number(game2[numKey]);
@@ -561,15 +561,16 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
+    const bookieKeys = process.env.BOOKIEKEYS.split(';');
     for (let sportKey of sportKeys){
         console.log('START', sportKey);
-        start(sportKey, {
+        start(sportKey, bookieKeys, {
             orderBy: {
                 column: 'startExist',
                 key: 'desc'
             }
         });
-        start(sportKey, {
+        start(sportKey, bookieKeys, {
             orderBy: {
                 column: 'startExist',
                 key: 'asc'
