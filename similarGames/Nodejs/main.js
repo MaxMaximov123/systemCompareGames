@@ -246,7 +246,7 @@ async function start(sportKey, params) {
                 for (let numGame2=numGame1;numGame2<games1.length;numGame2++){
                     const game2 = games1[numGame2];
                     console.log(sportKey, 'game2', numGame2, '/', games1.length);
-                    if (game2.bookieKey === 'OLIMP') continue;
+                    // if (game2.bookieKey === 'OLIMP') continue;
                     for (let numKey of ['startTime', 'liveFrom', 'startExist', 'finExist']){
                         game1[numKey] = Number(game1[numKey]);
                         game2[numKey] = Number(game2[numKey]);
