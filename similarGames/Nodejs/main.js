@@ -326,52 +326,58 @@ async function start(sportKey, bookieKeys, params) {
                     //             }
                     //         }
                     // } else {}
-                    gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
-                    totalSimilarityNames = await getSimilarityNames(gamesNames);
-                    const pairsNames = [
-                        {
-                            team1Id: game1.team1Id,
-                            team2Id: game2.team1Id,
-                            team1Name: game1.team1Name,
-                            team2Name: game2.team1Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name1.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name1.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name1game2Name1.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                        {
-                            team1Id: game1.team2Id,
-                            team2Id: game2.team2Id,
-                            team1Name: game1.team2Name,
-                            team2Name: game2.team2Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name2.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name2.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name2game2Name2.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                        {
-                            team1Id: game1.team1Id,
-                            team2Id: game2.team2Id,
-                            team1Name: game1.team1Name,
-                            team2Name: game2.team2Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name2.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name2.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name1game2Name2.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                        {
-                            team1Id: game1.team2Id,
-                            team2Id: game2.team1Id,
-                            team1Name: game1.team2Name,
-                            team2Name: game2.team1Name,
-                            changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name1.set1Words.join(' '),
-                            changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name1.set2Words.join(' '),
-                            similarity: totalSimilarityNames[0].game1Name2game2Name1.sameWordsCount,
-                            createdAt: new Date(),
-                        },
-                    ]
-                    // await db('pairsNames').insert(pairsNames);
-                    totalSimilarityNames = totalSimilarityNames[1];
+                    const pairExist = await db('pairs').select('id').where(function () {
+                        this.where('id1', game1.id).andWhere('id2', game2.id);
+                    }).orWhere(function (){
+                        this.where('id2', game1.id).andWhere('id1', game2.id);
+                    });
+                    if (pairExist.length === 0){
+                        gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
+                        totalSimilarityNames = await getSimilarityNames(gamesNames);
+                        const pairsNames = [
+                            {
+                                team1Id: game1.team1Id,
+                                team2Id: game2.team1Id,
+                                team1Name: game1.team1Name,
+                                team2Name: game2.team1Name,
+                                changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name1.set1Words.join(' '),
+                                changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name1.set2Words.join(' '),
+                                similarity: totalSimilarityNames[0].game1Name1game2Name1.sameWordsCount,
+                                createdAt: new Date(),
+                            },
+                            {
+                                team1Id: game1.team2Id,
+                                team2Id: game2.team2Id,
+                                team1Name: game1.team2Name,
+                                team2Name: game2.team2Name,
+                                changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name2.set1Words.join(' '),
+                                changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name2.set2Words.join(' '),
+                                similarity: totalSimilarityNames[0].game1Name2game2Name2.sameWordsCount,
+                                createdAt: new Date(),
+                            },
+                            {
+                                team1Id: game1.team1Id,
+                                team2Id: game2.team2Id,
+                                team1Name: game1.team1Name,
+                                team2Name: game2.team2Name,
+                                changedTeam1Name: totalSimilarityNames[0].game1Name1game2Name2.set1Words.join(' '),
+                                changedTeam2Name: totalSimilarityNames[0].game1Name1game2Name2.set2Words.join(' '),
+                                similarity: totalSimilarityNames[0].game1Name1game2Name2.sameWordsCount,
+                                createdAt: new Date(),
+                            },
+                            {
+                                team1Id: game1.team2Id,
+                                team2Id: game2.team1Id,
+                                team1Name: game1.team2Name,
+                                team2Name: game2.team1Name,
+                                changedTeam1Name: totalSimilarityNames[0].game1Name2game2Name1.set1Words.join(' '),
+                                changedTeam2Name: totalSimilarityNames[0].game1Name2game2Name1.set2Words.join(' '),
+                                similarity: totalSimilarityNames[0].game1Name2game2Name1.sameWordsCount,
+                                createdAt: new Date(),
+                            },
+                        ]
+                        totalSimilarityNames = totalSimilarityNames[1];
+                    }
                     
                     
                     
@@ -443,11 +449,6 @@ async function start(sportKey, bookieKeys, params) {
                         names: totalSimilarityNames, 
                         need: needGroup,
                         timeDiscrepancy: timeDiscrepancy
-                    });
-                    const pairExist = await db('pairs').select('id').where(function () {
-                        this.where('id1', game1.id).andWhere('id2', game2.id);
-                    }).orWhere(function (){
-                        this.where('id2', game1.id).andWhere('id1', game2.id);
                     });
                     if (pairExist.length === 0){
                         try {
