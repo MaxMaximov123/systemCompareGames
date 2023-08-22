@@ -1,13 +1,13 @@
 const lodash = require('lodash');
 
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
-const slolet = {
+const dictionary = {
     'а': ['a', 'o'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
-    'е': ['e', 'ye', 'ie', 'y', 'je'], 
+    'е': ['e', 'ye', 'ie', 'y', 'je', 'a'], 
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
     'з': ['z', 'th'], 
@@ -17,7 +17,7 @@ const slolet = {
     'л': ['l'], 
     'м': ['m'], 
     'н': ['n', 'm'],
-    'о': ['o', 'oe'], 
+    'о': ['o', 'oe', 'a'], 
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
@@ -32,17 +32,21 @@ const slolet = {
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
     'ь': [''], 
-    'э': ['e', 'ie', 'ye'],
+    'э': ['e', 'ie', 'ye', 'a', 'he', 'aeu', 'o'],
     'ю': ['u', 'iu', 'yu'], 
-    'я': ['ya', 'ia', 'j', 'ya', 'a'],
+    'я': ['ya', 'ia', 'j', 'a', 'ja'],
+    'ай': ['i'],
+    'ий': ['y'],
+    'дж': ['jo', 'g', 'j'],
     // english words
     'y': ['y', 'i'],
     'c': ['c', 's'],
     's': ['s', 'c'],
+    'e': ['e', ''],
     'II': ['2', ],
     'III': ['3', ]
 }
-
+const maximumLengthKeySlovet = Math.max(...Object.keys(dictionary).map(key => key.length));
 const replacements = {
     "BETRADAR": [
         [/\sesports?\s/gi, ' '],
@@ -172,22 +176,69 @@ function clearingName(name, bookieKey){
 }
 
 function Transliteration(word) {
-    let words = [''];
+    let words = [{str: '', ind: -1}];
+    let wordsDict = {};
     for (let indChar = 0; indChar < word.length; indChar++) {
-      const currentSymbolsTranslations = slolet[word[indChar]] || [word[indChar]];
-      let newWords = [];
-      for (let symbol of currentSymbolsTranslations) {
-        for (let existingWord of words) {
-          newWords.push(existingWord + symbol);
+        let sequenceCharacters = word[indChar]
+        const currentSymbolsTranslations = (dictionary[word[indChar]] || [word[indChar]]).map(char => {return {str: char, ind: indChar}});
+        for (let sequenceCharacterNumber=indChar+1;sequenceCharacterNumber<
+            indChar+maximumLengthKeySlovet;sequenceCharacterNumber++){
+                if (!word[sequenceCharacterNumber]) break;
+            sequenceCharacters += word[sequenceCharacterNumber];
+            if (dictionary[sequenceCharacters]){
+                currentSymbolsTranslations.push(...dictionary[sequenceCharacters].map(char => {return {str: char, ind: sequenceCharacterNumber}}));
+            }    
         }
-      }
-      words = [];
-      words = newWords.slice();
-      newWords = [];
+        let newWords = [];
+        for (let dict of currentSymbolsTranslations) {
+            for (let existingWord of words) {
+                if (dict.ind > existingWord.ind){
+                    newWords.push({str: existingWord.str + dict.str, ind: dict.ind});
+                } else {
+                    newWords.push({str: existingWord.str, ind: existingWord.ind});
+                }
+            }
+        }
+        words = [];
+        words = newWords.slice();
+        newWords = [];
     }
-  
-    return words;
+    return words.map(obj => obj.str);
   }
+
+// function Transliteration(word) {
+//     let words = [''];
+
+//     const transliteration = (word) => {
+//         if (word.length === 1) return dictionary[word[0]] || [word[0]];
+//         let sequenceCharacters = word[0];
+//         const currentSymbolsTranslations = dictionary[word[0]] || [word[0]];
+//         for (let sequenceCharacterNumber=1;sequenceCharacterNumber<maximumLengthKeySlovet;sequenceCharacterNumber++){
+//             if (!word[sequenceCharacterNumber]) break;
+//             sequenceCharacters += word[sequenceCharacterNumber];
+//             if (dictionary[sequenceCharacters]){
+//                 currentSymbolsTranslations.push(...dictionary[sequenceCharacters]);
+//             }    
+//         }
+//         let newWords = [];
+//         for (let symbol of currentSymbolsTranslations) {
+//             if (symbol){+
+//                 for (let char of transliteration(word.slice(symbol.length))){
+//                     console.log(char)
+//                     for (let word_ of words) newWords.push(word_ + char);
+//                     console.log(newWords)
+//                 }
+//             }
+//         }
+//         words = [];
+//         words = newWords.slice();
+//         newWords = [];
+//         return newWords;
+//     }
+
+//     transliteration(word);
+//     return words;
+//   }
   
 
 function createSets(options){
@@ -223,8 +274,9 @@ async function translate(name){
 async function wordToOptions(name){
     const options = [];
     options.push([await translate(name)]);
+    options.push([name]);
     for (let option of Transliteration(name)){
-        if (options[0][0] !== option) options.push([option]);
+        if (!options.map(opt => opt[0]).includes(option)) options.push([option]);
     }
     if (name.length <= 3){
         options.push(name.split(''));
@@ -396,13 +448,13 @@ const example = async () => {
     t = new Date();
     let games = {
         game1: {
-            name1: 'Минда М.',
-            name2: 'Муговский А.',
+            name1: 'Лулео',
+            name2: 'АФК Эскильстуна',
             bookieKey: 'BET365',
         },
         game2: {
-            name1: 'Michal Minda (POL)',
-            name2: 'Arkadiusz Mugowski (POL)',
+            name1: 'Ifk Lulea',
+            name2: 'AFC Eskilstuna',
             bookieKey: 'OLIMP'
         }
     }
