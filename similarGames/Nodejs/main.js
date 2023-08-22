@@ -385,7 +385,7 @@ async function start(sportKey, params) {
                             this.where('id2', game1.id).andWhere('id1', game2.id);
                         }))[0]?.id
                         try {
-                            db('decisions').insert({
+                            await db('decisions').insert({
                                 'pairId': pairId,
                                 'similarityNames': totalSimilarityNames,
                                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -425,7 +425,7 @@ async function start(sportKey, params) {
                             // 'timeDiscrepancy': timeDiscrepancy,})
 
                             try {
-                                db('pairs').where('id', pairForUpdate.id).update({
+                                await db('pairs').where('id', pairForUpdate.id).update({
                                     'isLive': game1.isLive,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -439,7 +439,7 @@ async function start(sportKey, params) {
                                 console.log('update pair');
                             } catch(e) {console.log(e)}
                             try {
-                                db('decisions').insert({
+                                await db('decisions').insert({
                                     'pairId': pairForUpdate.id,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
