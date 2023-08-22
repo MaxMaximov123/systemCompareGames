@@ -44,7 +44,6 @@ const dictionary = {
     's': ['s', 'c'],
     'e': ['e', ''],
     'II': ['2', ],
-    'III': ['3', ]
 }
 const maximumLengthKeySlovet = Math.max(...Object.keys(dictionary).map(key => key.length));
 const replacements = {
@@ -177,7 +176,6 @@ function clearingName(name, bookieKey){
 
 function Transliteration(word) {
     let words = [{str: '', ind: -1}];
-    let wordsDict = {};
     for (let indChar = 0; indChar < word.length; indChar++) {
         let sequenceCharacters = word[indChar]
         const currentSymbolsTranslations = (dictionary[word[indChar]] || [word[indChar]]).map(char => {return {str: char, ind: indChar}});
@@ -465,5 +463,5 @@ const example = async () => {
 };
 
 
-example();
+// example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
