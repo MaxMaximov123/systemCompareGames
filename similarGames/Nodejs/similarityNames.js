@@ -38,7 +38,8 @@ const dictionary = {
     'ай': ['i'],
     'ий': ['y'],
     'дж': ['jo', 'g', 'j'],
-    // english words
+    // other words
+    'ö': ['o'],
     'y': ['y', 'i'],
     'c': ['c', 's'],
     's': ['s', 'c'],
@@ -364,6 +365,7 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
 }
 
 function findingBestSimilarity(name1Options, name2Options){
+    [name1Options, name2Options] = [name1Options.slice(), name2Options.slice()];
     const pairsWithTheBestSimilarity = [];
     let sameWordsCount = 0;
     let minimumSetLength = Math.min(name1Options.length, name2Options.length)
@@ -460,7 +462,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Металлург Нк","name2":"СКА-Нева","bookieKey":"OLIMP"},"game2":{"name1":"Metallurg Novokuzneck","name2":"SKA-Neva","bookieKey":"FONBET"}}
+    let games = {"game1":{"name1":"CSM Sighisoara","name2":"Constanta","bookieKey":"FONBET"},"game2":{"name1":"CSM Sighisoara","name2":"CSM Constanta","bookieKey":"BET365"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log((await getSimilarityNames(games))[0]);

@@ -477,12 +477,12 @@ async function main(){
                 key: 'desc'
             }
         });
-        start(sportKey, {
-            orderBy: {
-                column: 'startExist',
-                key: 'asc'
-            }
-        });
+        // start(sportKey, {
+        //     orderBy: {
+        //         column: 'startExist',
+        //         key: 'asc'
+        //     }
+        // });
     }
 }
 
