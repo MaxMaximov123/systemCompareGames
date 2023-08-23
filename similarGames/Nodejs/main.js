@@ -4,6 +4,7 @@ const fs = require('fs')
 // const getRes = require('./names')
 const { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity } = require('./similarityNames.js');
 const lodash = require('lodash');
+const { exit } = require('process');
 
 const db = knex(config.development);
 
@@ -277,14 +278,19 @@ async function start(sportKey, params) {
                         bookieKey: game2.bookieKey,
                     };
 
-                    const pairExist = (await db('pairs').count('id').where(function () {
+                    const pairExist = (await db('pairs').select('similarityNames').where(function () {
                         this.where('id1', game1.id).andWhere('id2', game2.id);
                     }).orWhere(function (){
                         this.where('id2', game1.id).andWhere('id1', game2.id);
-                    }))[0];
-                    gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
-                    totalSimilarityNames = await getSimilarityNames(gamesNames);
-                    totalSimilarityNames = totalSimilarityNames[1];
+                    }));
+                    if (pairExist.length > 0){
+                        console.log(pairExist);
+                        totalSimilarityNames = pairExist[0].similarityNames;
+                    } else {
+                        gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
+                        totalSimilarityNames = await getSimilarityNames(gamesNames);
+                        totalSimilarityNames = totalSimilarityNames[1];
+                    }
                     
                     
                     
@@ -357,7 +363,7 @@ async function start(sportKey, params) {
                         need: needGroup,
                         timeDiscrepancy: timeDiscrepancy
                     });
-                    if (Number(pairExist.count) === 0){
+                    if (pairExist.length === 0){
                         try {
                             await db('pairs').insert({
                                 'id1': game1.id,
@@ -403,11 +409,6 @@ async function start(sportKey, params) {
                     } else {
                         const pairForUpdate = (await db('pairs').select(
                             'id',
-                            'similarityNames',
-                            'similarityOutcomesPre',
-                            'similarityOutcomesLive',
-                            'similarityScores',
-                            'timeDiscrepancy',
                             'needGroup',
                             'grouped'
                             ).where(function () {
@@ -417,12 +418,6 @@ async function start(sportKey, params) {
                             }).limit(1))[0];
                         if (pairForUpdate.needGroup !== needGroup || 
                             pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
-
-                            // console.log(pairForUpdate, {'similarityNames': totalSimilarityNames,
-                            // 'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                            // 'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                            // 'similarityScores': totalSimilarityScores,
-                            // 'timeDiscrepancy': timeDiscrepancy,})
 
                             try {
                                 await db('pairs').where('id', pairForUpdate.id).update({

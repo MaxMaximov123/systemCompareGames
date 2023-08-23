@@ -7,22 +7,22 @@ const dictionary = {
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
-    'е': ['e', 'ye', 'ie', 'y', 'je', 'a'], 
+    'е': ['e', 'ye', 'ie', 'y', 'je', 'a', 'et'], 
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
     'з': ['z', 'th'], 
     'и': ['i', 'e', 'y', 'ii', 'ie', 'ea'],
     'й': ['i', 'y', 'j'], 
-    'к': ['k', 'c', 'kh'], 
+    'к': ['k', 'c', 'kh', 'qu'], 
     'л': ['l'], 
     'м': ['m'], 
-    'н': ['n', 'm', 'ng'],
-    'о': ['o', 'oe', 'a'], 
+    'н': ['n', 'm', 'ng', 'o'],
+    'о': ['o', 'oe', 'a', 'ou'], 
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
     'т': ['t', 'ch'], 
-    'у': ['u', 'oo', 'o', 'w'], 
+    'у': ['u', 'oo', 'o', 'w', 'ou'], 
     'ф': ['f', 'ph'], 
     'х': ['h', 'ch', 'kh', 'j'],
     'ц': ['c', 'ts'], 
@@ -44,6 +44,7 @@ const dictionary = {
     'c': ['c', 's'],
     's': ['s', 'c'],
     'e': ['e', ''],
+    'i': ['y', 'e', ''],
     'II': ['2', ],
 }
 const maximumLengthKeySlovet = Math.max(...Object.keys(dictionary).map(key => key.length));
@@ -206,40 +207,6 @@ function Transliteration(word) {
     words.sort((a, b) => b.length - a.length);
     return words;
   }
-
-// function Transliteration(word) {
-//     let words = [''];
-
-//     const transliteration = (word) => {
-//         if (word.length === 1) return dictionary[word[0]] || [word[0]];
-//         let sequenceCharacters = word[0];
-//         const currentSymbolsTranslations = dictionary[word[0]] || [word[0]];
-//         for (let sequenceCharacterNumber=1;sequenceCharacterNumber<maximumLengthKeySlovet;sequenceCharacterNumber++){
-//             if (!word[sequenceCharacterNumber]) break;
-//             sequenceCharacters += word[sequenceCharacterNumber];
-//             if (dictionary[sequenceCharacters]){
-//                 currentSymbolsTranslations.push(...dictionary[sequenceCharacters]);
-//             }    
-//         }
-//         let newWords = [];
-//         for (let symbol of currentSymbolsTranslations) {
-//             if (symbol){+
-//                 for (let char of transliteration(word.slice(symbol.length))){
-//                     console.log(char)
-//                     for (let word_ of words) newWords.push(word_ + char);
-//                     console.log(newWords)
-//                 }
-//             }
-//         }
-//         words = [];
-//         words = newWords.slice();
-//         newWords = [];
-//         return newWords;
-//     }
-
-//     transliteration(word);
-//     return words;
-//   }
   
 
 function createSets(options){
@@ -356,20 +323,22 @@ function pairWithTheBestSimilarity(arr){
 function searchWordsThatMatch(name1WordOption, name2WordOption){
     for (let word1 of name1WordOption){
         for (let word2 of name2WordOption){
-            if (word1 === word2 || word1.startsWith(word2) || word2.startsWith(word1)){
-                    return {word1: word1, word2: word2, matched: true};
-                }
+            if (word1 === word2){
+                return {word1: word1, word2: word2, matched: 1};
+            } else if (word1.startsWith(word2) || word2.startsWith(word1)){
+                return {word1: word1, word2: word2, matched: 2};
+            }
         }
     }
-    return {word1: '', word2: '', matched: false};
+    return {word1: '', word2: '', matched: 0};
 }
 
 function findingBestSimilarity(name1Options, name2Options){
     [name1Options, name2Options] = [name1Options.slice(), name2Options.slice()];
     const pairsWithTheBestSimilarity = [];
     let sameWordsCount = 0;
-    let minimumSetLength = Math.min(name1Options.length, name2Options.length)
-    let maximumSetLength = Math.max(name1Options.length, name2Options.length)
+    let minimumSetLength = Math.min(name1Options.length, name2Options.length);
+    let maximumSetLength = Math.max(name1Options.length, name2Options.length);
     if (name2Options.length === minimumSetLength){
         [name1Options, name2Options] = [name2Options, name1Options];
     }
@@ -381,18 +350,24 @@ function findingBestSimilarity(name1Options, name2Options){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
-            if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) break;
+            if (namesSets.name1Set[numName1Options] && namesSets.name1Set[numName1Options] === namesSets.name2Set[numName1Options]) break;
             for (let name1WordOption of name1WordOptions){
-                if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) break;
+                if (namesSets.name1Set[numName1Options] && namesSets.name1Set[numName1Options] === namesSets.name2Set[numName1Options]) break;
                 for (let name2WordOption of name2WordOptions){
-                    if (namesSets.name1Set[numName1Options] || namesSets.name2Set[numName1Options]) break;
+                    if (namesSets.name1Set[numName1Options] && namesSets.name1Set[numName1Options] === namesSets.name2Set[numName1Options]) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
-                    if (wordsThatMatched.matched){
-                        sameWordsCount++;
-                        namesSets.name1Set[numName1Options] = wordsThatMatched.word1;
-                        namesSets.name2Set[numName1Options] = wordsThatMatched.word2;
-                        name2Options.splice(numName2Options, 1);;
-                        break;
+                    if (wordsThatMatched.matched > 0){
+                        if (!namesSets.name1Set[numName1Options] && !namesSets.name2Set[numName1Options]){
+                            sameWordsCount++;
+                            namesSets.name1Set[numName1Options] = wordsThatMatched.word1;
+                            namesSets.name2Set[numName1Options] = wordsThatMatched.word2;
+                        }
+                        if (wordsThatMatched.matched === 1) {
+                            namesSets.name1Set[numName1Options] = wordsThatMatched.word1;
+                            namesSets.name2Set[numName1Options] = wordsThatMatched.word2;
+                            break;
+                        }
+                        // name2Options.splice(numName2Options, 1);
                     }
                 }
                 
@@ -462,7 +437,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"CSM Sighisoara","name2":"Constanta","bookieKey":"FONBET"},"game2":{"name1":"CSM Sighisoara","name2":"CSM Constanta","bookieKey":"BET365"}}
+    let games = {"game1":{"name1":"Ryan Nijboer","name2":"Sergio Callejon Hernando","bookieKey":"BET365"},"game2":{"name1":"Нейбоер Р.","name2":"Каллехон Эрнандо С.","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log((await getSimilarityNames(games))[0]);
