@@ -438,7 +438,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Герасимов Е.","name2":"Мотидзуки С.","bookieKey":"OLIMP"},"game2":{"name1":"Egor Gerasimov","name2":"Shintaro Mochizuki","bookieKey":"BETRADAR"}}
+    let games = {"game1":{"name1":"Табило А.","name2":"Миллман Дж.","bookieKey":"OLIMP"},"game2":{"name1":"Alejandro Tabilo","name2":"John Millman","bookieKey":"PINNACLE"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log((await getSimilarityNames(games))[0]);
@@ -446,5 +446,5 @@ const example = async () => {
 };
 
 
-example();
+// example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
