@@ -2,7 +2,7 @@ const lodash = require('lodash');
 
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
-    'а': ['a', 'o'], 
+    'а': ['a', 'o', 'u'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
@@ -16,7 +16,7 @@ const dictionary = {
     'к': ['k', 'c', 'kh'], 
     'л': ['l'], 
     'м': ['m'], 
-    'н': ['n', 'm'],
+    'н': ['n', 'm', 'ng'],
     'о': ['o', 'oe', 'a'], 
     'п': ['p'], 
     'р': ['r'], 
@@ -26,14 +26,14 @@ const dictionary = {
     'ф': ['f', 'ph'], 
     'х': ['h', 'ch', 'kh', 'j'],
     'ц': ['c', 'ts'], 
-    'ч': ['ch', 'c', 'cz'], 
+    'ч': ['ch', 'c', 'cz', 'j'], 
     'ш': ['sh', 'sz', 's'],
     'щ': ['sch', 'shch', 'sh', 'ch', 'szcz'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
     'ь': [''], 
     'э': ['e', 'ie', 'ye', 'a', 'he', 'aeu', 'o'],
-    'ю': ['u', 'iu', 'yu'], 
+    'ю': ['u', 'iu', 'yu', 'y', 'yu'], 
     'я': ['ya', 'ia', 'j', 'a', 'ja'],
     'ай': ['i'],
     'ий': ['y'],
@@ -201,7 +201,9 @@ function Transliteration(word) {
         words = newWords.slice();
         newWords = [];
     }
-    return words.map(obj => obj.str);
+    words = words.map(obj => obj.str);
+    words.sort((a, b) => b.length - a.length);
+    return words;
   }
 
 // function Transliteration(word) {
@@ -263,7 +265,6 @@ async function translate(name){
         // return name;
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0].toLowerCase();
     } catch (e){
-        console.log(e);
         return name;
     }
 }
@@ -277,7 +278,21 @@ async function wordToOptions(name){
         if (!options.map(opt => opt[0]).includes(option)) options.push([option]);
     }
     if (name.length <= 3){
-        options.push(name.split(''));
+        let abbreviations = [[]];
+        for (let charVariations of name.split('').map(ch => dictionary[ch] || [ch])){
+            const newAbbreviations = [];
+            for (let abbreviationSymbol of abbreviations){
+                const bufferAbbreviations = abbreviationSymbol.slice();
+                for (let charVariation of charVariations){
+                    const copyBufferAbbreviations = bufferAbbreviations.slice();
+                    copyBufferAbbreviations.push(charVariation);
+                    newAbbreviations.push(copyBufferAbbreviations)
+                }
+            
+            }
+        abbreviations = newAbbreviations.slice();
+        }
+        options.push(...abbreviations);
     }
     return options;
 }
@@ -374,6 +389,7 @@ function findingBestSimilarity(name1Options, name2Options){
                         sameWordsCount++;
                         namesSets.name1Set[numName1Options] = wordsThatMatched.word1;
                         namesSets.name2Set[numName1Options] = wordsThatMatched.word2;
+                        name2Options.splice(numName2Options, 1);;
                         break;
                     }
                 }
@@ -381,16 +397,16 @@ function findingBestSimilarity(name1Options, name2Options){
             } 
         }
         if (!namesSets.name1Set[numName1Options]){
-            namesSets.name1Set[numName1Options] = name1WordOptions[0][0];
-            namesSets.name2Set[numName1Options] = name2Options[numName1Options][0][0];
+            namesSets.name1Set[numName1Options] = name1WordOptions?.[0]?.[0];
+            namesSets.name2Set[numName1Options] = name2Options[numName1Options]?.[0]?.[0];
         }
         
     }
     let fullWordExist = false;
     let fullWordMatched = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.name1Set[numWord].length >= 3 || namesSets.name2Set[numWord].length >= 3) fullWordExist = true;
-        if (namesSets.name1Set[numWord].length >= 3 && namesSets.name2Set[numWord].length >= 3 && 
+        if (namesSets.name1Set[numWord]?.length >= 3 || namesSets.name2Set[numWord]?.length >= 3) fullWordExist = true;
+        if (namesSets.name1Set[numWord]?.length >= 3 && namesSets.name2Set[numWord]?.length >= 3 && 
             (namesSets.name1Set[numWord].startsWith(namesSets.name2Set[numWord]) || namesSets.name2Set[numWord].startsWith(namesSets.name1Set[numWord]))  ) fullWordMatched = true;
         namesSets.name1Set[numWord], namesSets.name2Set[numWord]
     }
@@ -444,18 +460,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {
-        game1: {
-            name1: 'Лулео',
-            name2: 'АФК Эскильстуна',
-            bookieKey: 'BET365',
-        },
-        game2: {
-            name1: 'Ifk Lulea',
-            name2: 'AFC Eskilstuna',
-            bookieKey: 'OLIMP'
-        }
-    }
+    let games = {"game1":{"name1":"Металлург Нк","name2":"СКА-Нева","bookieKey":"OLIMP"},"game2":{"name1":"Metallurg Novokuzneck","name2":"SKA-Neva","bookieKey":"FONBET"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log((await getSimilarityNames(games))[0]);
@@ -463,5 +468,5 @@ const example = async () => {
 };
 
 
-// example();
+example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

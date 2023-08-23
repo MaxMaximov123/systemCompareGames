@@ -193,6 +193,19 @@
                         <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game2Id)">mdi-history</v-icon>
                         {{ item.game2NamesUpdates }}
                     </div>
+                    <div class="gamePair__copyNamesObject d-flex align-center" style="">
+                        <v-icon :size="15" @click="copyToClipboard(JSON.stringify({
+                            game1: {
+                                name1: item.game1Team1Name,
+                                name2: item.game1Team2Name,
+                                bookieKey: item.bookieKey1,
+                            },
+                            game2: {
+                                name1: item.game2Team1Name,
+                                name2: item.game2Team2Name,
+                                bookieKey: item.bookieKey2,
+                            }}))" class="copy-name">mdi-content-copy</v-icon>
+                    </div>
                 </td>
                 <td>
                     <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
@@ -480,6 +493,20 @@
         background-color: #ffffff;
         transition: background-color 3s;
         border: 1px solid #000000;
+        border-radius: 3px;
+        padding: 0 4px;
+    }
+
+    .gamePair__copyNamesObject {
+        position: absolute;
+        z-index: 1;
+        top: -6px;
+        left: -2px;
+        transform: translateX(-50%);
+        height: 16px;
+        font-size: 10px;
+        background-color: #ffffff;
+        transition: background-color 3s;
         border-radius: 3px;
         padding: 0 4px;
     }
