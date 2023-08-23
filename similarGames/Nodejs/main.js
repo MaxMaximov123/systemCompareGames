@@ -455,7 +455,6 @@ async function start(sportKey, params) {
                 }
             }
         }
-        await new Promise(r => setTimeout(r, 1000 * 60 * 5));
     }
 }
 
@@ -472,12 +471,12 @@ async function main(){
                 key: 'desc'
             }
         });
-        // start(sportKey, {
-        //     orderBy: {
-        //         column: 'startExist',
-        //         key: 'asc'
-        //     }
-        // });
+        start(sportKey, {
+            orderBy: {
+                column: 'startExist',
+                key: 'asc'
+            }
+        });
     }
 }
 

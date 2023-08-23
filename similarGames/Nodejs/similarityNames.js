@@ -445,5 +445,5 @@ const example = async () => {
 };
 
 
-example();
+// example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
