@@ -2,7 +2,7 @@ const lodash = require('lodash');
 
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
-    'а': ['a', 'o', 'u'], 
+    'а': ['a', 'o', 'u', 'ah'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
@@ -21,7 +21,7 @@ const dictionary = {
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
-    'т': ['t', 'ch'], 
+    'т': ['t', 'ch', 'tt'], 
     'у': ['u', 'oo', 'o', 'w', 'ou'], 
     'ф': ['f', 'ph'], 
     'х': ['h', 'ch', 'kh', 'j'],
@@ -38,6 +38,7 @@ const dictionary = {
     'ай': ['i'],
     'ий': ['y'],
     'дж': ['jo', 'g', 'j'],
+    'дз': ['z'],
     // other words
     'ö': ['o'],
     'y': ['y', 'i'],
@@ -437,7 +438,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Minnesota Twins","name2":"Milwaukee Brewers","bookieKey":"BETMGM"},"game2":{"name1":"Милуоки Брюэрс","name2":"Миннесота Твинс","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Герасимов Е.","name2":"Мотидзуки С.","bookieKey":"OLIMP"},"game2":{"name1":"Egor Gerasimov","name2":"Shintaro Mochizuki","bookieKey":"BETRADAR"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log((await getSimilarityNames(games))[0]);
@@ -445,5 +446,5 @@ const example = async () => {
 };
 
 
-// example();
+example();
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

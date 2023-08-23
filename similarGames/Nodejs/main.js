@@ -228,7 +228,6 @@ async function start(sportKey, params) {
             .groupBy('games.id')
             .orderBy(params.orderBy.column, params.orderBy.key)
         
-        console.log(games1.length);
         if (games1){
             for (let numGame1=0;numGame1<games1.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games1.length);
@@ -395,7 +394,7 @@ async function start(sportKey, params) {
                                 'game2StartTime': new Date(Number(game2.startTime)),
                             })
                             console.log('decision added');
-                        } catch(e) {console.log(e)}
+                        } catch(e) {}
                     } else {
                         const pairForUpdate = (await db('pairs').where(function () {
                             this.where('id1', game1.id).andWhere('id2', game2.id);
@@ -437,6 +436,7 @@ async function start(sportKey, params) {
                 }
             }
         }
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
     }
 }
 
