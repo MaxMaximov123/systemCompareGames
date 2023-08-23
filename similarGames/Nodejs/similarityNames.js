@@ -7,17 +7,17 @@ const dictionary = {
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't', 'th'], 
-    'е': ['e', 'ye', 'ie', 'y', 'je', 'a', 'et'], 
+    'е': ['e', 'ye', 'ie', 'y', 'je', 'a', 'et', 'je'], 
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
-    'з': ['z', 'th'], 
-    'и': ['i', 'e', 'y', 'ii', 'ie', 'ea'],
+    'з': ['z', 'th', 's'], 
+    'и': ['i', 'e', 'y', 'ii', 'ie', 'ea', 'ji', 'ee'],
     'й': ['i', 'y', 'j'], 
     'к': ['k', 'c', 'kh', 'qu'], 
     'л': ['l'], 
     'м': ['m'], 
     'н': ['n', 'm', 'ng', 'o'],
-    'о': ['o', 'oe', 'a', 'ou'], 
+    'о': ['o', 'oe', 'a', 'ou', 'au'], 
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
@@ -33,7 +33,7 @@ const dictionary = {
     'ы': ['y', 's', 'a'], 
     'ь': [''], 
     'э': ['e', 'ie', 'ye', 'a', 'he', 'aeu', 'o'],
-    'ю': ['u', 'iu', 'yu', 'y', 'yu'], 
+    'ю': ['u', 'iu', 'yu', 'y', 'yu', 'ew'], 
     'я': ['ya', 'ia', 'j', 'a', 'ja'],
     'ай': ['i'],
     'ий': ['y'],
@@ -437,7 +437,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Ryan Nijboer","name2":"Sergio Callejon Hernando","bookieKey":"BET365"},"game2":{"name1":"Нейбоер Р.","name2":"Каллехон Эрнандо С.","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Minnesota Twins","name2":"Milwaukee Brewers","bookieKey":"BETMGM"},"game2":{"name1":"Милуоки Брюэрс","name2":"Миннесота Твинс","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log((await getSimilarityNames(games))[0]);
