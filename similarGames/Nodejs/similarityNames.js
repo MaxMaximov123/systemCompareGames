@@ -1,5 +1,6 @@
 const { copyFileSync } = require('fs');
 const lodash = require('lodash');
+const { devNull } = require('os');
 
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
@@ -352,8 +353,8 @@ function findingBestSimilarity(name1Options, name2Options){
         [name1Options, name2Options] = [name2Options, name1Options];
     }
     const namesSets = {
-        name1Set: Array(minimumSetLength).fill(''),
-        name2Set: Array(minimumSetLength).fill(''),
+        name1Set: Array(minimumSetLength).fill('!'),
+        name2Set: Array(minimumSetLength).fill('!'),
     }
     for (let numName1Options=0;numName1Options<name1Options.length;numName1Options++){
         const name1WordOptions = name1Options[numName1Options];
@@ -366,7 +367,7 @@ function findingBestSimilarity(name1Options, name2Options){
                     if (namesSets.name1Set[numName1Options].length >= 3) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
                     if (wordsThatMatched.matched){
-                        if (!namesSets.name1Set[numName1Options] && !namesSets.name2Set[numName1Options]) sameWordsCount++;
+                        if (namesSets.name1Set[numName1Options] === '!' && namesSets.name2Set[numName1Options] === '!') sameWordsCount++;
                         namesSets.name1Set[numName1Options] = wordsThatMatched.word;
                         namesSets.name2Set[numName1Options] = wordsThatMatched.word;
                         break;
@@ -436,7 +437,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Wisla Krakow U19","name2":"Zaglebie Lubin U19","bookieKey":"FONBET"},"game2":{"name1":"Висла Краков (до 19)","name2":"Заглембе Любин (до 19)","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"VPS Vaasa","name2":"KTP Kotka","bookieKey":"FONBET"},"game2":{"name1":"Аль-Фейха","name2":"Аль-Хазм","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -444,6 +445,6 @@ const example = async () => {
 };
 
 
-// example();
+example();
 // console.log(Transliteration('zaglebie')['z']['a']['g']['l']['e'], Transliteration('заглембе ')['z']['a']['g']['l']['e'])
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
