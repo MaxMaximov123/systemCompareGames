@@ -13,13 +13,13 @@ const dictionary = {
     'ё': ['yo', 'io', 'o'],
     'ж': ['zh', 'j', 'g'], 
     'з': ['z', 'th', 's'], 
-    'и': ['i', 'e', 'y', 'ii', 'ie', 'ea', 'ji', 'ee'],
+    'и': ['i', 'e', 'y', 'ie', 'ea', 'ji', 'ee'],
     'й': ['i', 'y', 'j'], 
-    'к': ['k', 'c', 'kh', 'qu'], 
+    'к': ['k', 'c', 'q'], 
     'л': ['l'],
     'м': ['m', ''], 
-    'н': ['n', 'm', 'ng', 'o'],
-    'о': ['o', 'a', 'ou', 'au', 'e'], 
+    'н': ['n', 'm', 'o'],
+    'о': ['o', 'a', 'e'], 
     'п': ['p'], 
     'р': ['r'], 
     'с': ['s', 'c', 'sz', 'z'], 
@@ -39,7 +39,7 @@ const dictionary = {
     'я': ['ya', 'ia', 'j', 'a', 'ja'],
     'ай': ['i'],
     'ий': ['y'],
-    'дж': ['jo', 'g', 'j', 'gu'],
+    'дж': ['g', 'j', 'gu'],
     'дз': ['z'],
     // other words
     'ö': ['o'],
@@ -367,14 +367,18 @@ function findingBestSimilarity(name1Options, name2Options){
                     if (namesSets.name1Set[numName1Options].length >= 3) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
                     if (wordsThatMatched.matched){
-                        if (namesSets.name1Set[numName1Options] === '!' && namesSets.name2Set[numName1Options] === '!') sameWordsCount++;
-                        namesSets.name1Set[numName1Options] = wordsThatMatched.word;
-                        namesSets.name2Set[numName1Options] = wordsThatMatched.word;
+                        if (namesSets.name1Set[numName1Options] === '!') sameWordsCount++;
+                        if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
+                            namesSets.name1Set[numName1Options] = wordsThatMatched.word;
+                            namesSets.name2Set[numName1Options] = wordsThatMatched.word;
+                            
+                        }
                         break;
+                        
                     }
                 }
                 
-            } 
+            }
         }
         // if (!namesSets.name1Set[numName1Options]){
         //     namesSets.name1Set[numName1Options] = name1WordOptions?.[0]?.[0];
@@ -437,7 +441,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"VPS Vaasa","name2":"KTP Kotka","bookieKey":"FONBET"},"game2":{"name1":"Аль-Фейха","name2":"Аль-Хазм","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Liam Broady","name2":"Jesper De Jong","bookieKey":"BETRADAR"},"game2":{"name1":"Broady L","name2":"De Jong J","bookieKey":"FONBET"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -445,6 +449,6 @@ const example = async () => {
 };
 
 
-example();
-// console.log(Transliteration('zaglebie')['z']['a']['g']['l']['e'], Transliteration('заглембе ')['z']['a']['g']['l']['e'])
+// example();
+// console.log(Transliteration('broady'), Transliteration('broady '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
