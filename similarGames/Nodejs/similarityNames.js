@@ -4,16 +4,16 @@ const { devNull } = require('os');
 
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
-    'а': ['a', 'o', 'u', 'ah'], 
+    'а': ['a', 'o', 'u'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
-    'д': ['d', 't', 'th'], 
-    'е': ['e', 'ye', 'ie', 'y', 'je', 'a', 'et', 'je'], 
-    'ё': ['yo', 'io', 'o'],
-    'ж': ['zh', 'j', 'g'], 
-    'з': ['z', 'th', 's'], 
-    'и': ['i', 'e', 'y', 'ie', 'ea', 'ji', 'ee'],
+    'д': ['d', 't'], 
+    'е': ['e', 'y', 'i', 'j', 'a'], 
+    'ё': ['y', 'i', 'o'],
+    'ж': ['z', 'j', 'g'], 
+    'з': ['z', 't', 's', 'e'], 
+    'и': ['i', 'e', 'y', 'j'],
     'й': ['i', 'y', 'j'], 
     'к': ['k', 'c', 'q'], 
     'л': ['l'],
@@ -22,46 +22,45 @@ const dictionary = {
     'о': ['o', 'a', 'e'], 
     'п': ['p'], 
     'р': ['r'], 
-    'с': ['s', 'c', 'sz', 'z'], 
-    'т': ['t', 'ch', 'tt'], 
-    'у': ['u', 'oo', 'o', 'w', 'ou'], 
-    'ф': ['f', 'ph'], 
-    'х': ['h', 'ch', 'kh', 'j'],
-    'ц': ['c', 'ts'], 
-    'ч': ['ch', 'c', 'cz', 'j', 'zsch'], 
-    'ш': ['sh', 'sz', 's', 'sc', 'ch'],
-    'щ': ['sch', 'shch', 'sh', 'ch', 'szcz'], 
+    'с': ['s', 'c', 'z'], 
+    'т': ['t', 'c'], 
+    'у': ['u', 'o', 'w', 'o'], 
+    'ф': ['f'], 
+    'х': ['h', 'k', 'j'],
+    'ц': ['c', 't', 's'], 
+    'ч': ['c', 'z', 'j'], 
+    'ш': ['s', 'h', 'c'],
+    'щ': ['s', 'h', 'c'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
     'ь': [''], 
-    'э': ['e', 'ye', 'a', 'aeu', 'o'],
-    'ю': ['u', 'iu', 'yu', 'y', 'yu', 'ew'], 
-    'я': ['ya', 'ia', 'j', 'a', 'ja'],
+    'э': ['e', 'ye', 'a', 'o'],
+    'ю': ['u', 'i', 'y', 'w'], 
+    'я': ['j', 'a', 'i'],
     'ай': ['i'],
     'ий': ['y'],
-    'дж': ['g', 'j', 'gu'],
+    'дж': ['g', 'j'],
     'дз': ['z'],
+    'ей': ['a'],
+    'из': ['e', 'i'],
     // other words
     'ö': ['o'],
     'y': ['y', 'i'],
     'c': ['c', 's'],
     's': ['s', 'c'],
-    'h': ['h'],
-    'e': ['e'],
     'i': ['y', 'e'],
     'II': ['2', ],
     'ie': ['i', 'e'],
+    'ch': ['c', 'h'],
+    'br': ['b'],
+    'e': ['e', 'a'],
+    'a': ['a', 'e'],
+    'ai': ['e'],
+    'ä': ['a'],
+    'ia': ['a'],
+    'gl': ['l']
 }
 
-for (key in dictionary){
-    for (let charNum=0;charNum<dictionary[key].length;charNum++){
-        if (dictionary[key][charNum].length > 1){
-            dictionary[dictionary[key][charNum]] = [dictionary[key][charNum][0]];
-            dictionary[key][charNum] = dictionary[key][charNum][0];
-        }
-    }
-    dictionary[key] = Array.from(new Set(dictionary[key]));
-}
 const maximumLengthKeySlovet = Math.max(...Object.keys(dictionary).map(key => key.length));
 const replacements = {
     "BETRADAR": [
@@ -441,7 +440,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Liam Broady","name2":"Jesper De Jong","bookieKey":"BETRADAR"},"game2":{"name1":"Broady L","name2":"De Jong J","bookieKey":"FONBET"}}
+    let games = {"game1":{"name1":"John Millman","name2":"Stefano Travaglia","bookieKey":"PINNACLE"},"game2":{"name1":"Миллман Дж.","name2":"Травалья С.","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -449,6 +448,6 @@ const example = async () => {
 };
 
 
-// example();
+example();
 // console.log(Transliteration('broady'), Transliteration('broady '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

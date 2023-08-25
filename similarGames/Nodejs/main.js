@@ -381,7 +381,7 @@ async function start(sportKey, params) {
                             }).returning('id'))[0].id;
                             console.log('pair added');
                             try {
-                                db('decisions').insert({
+                                await db('decisions').insert({
                                     'pairId': pairId,
                                     'similarityNames': totalSimilarityNames,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
@@ -416,7 +416,7 @@ async function start(sportKey, params) {
                             if (pairForUpdate.needGroup !== needGroup || 
                                 pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
                                 try {
-                                    db('decisions').insert({
+                                    await db('decisions').insert({
                                         'pairId': pairForUpdate.id,
                                         'similarityNames': totalSimilarityNames,
                                         'similarityOutcomesPre': totalSimilarityOutcomesPre,
