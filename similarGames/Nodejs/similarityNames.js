@@ -178,9 +178,8 @@ function capitalizeFirstLetter(string) {
     return string[0] + string.charAt(1).toUpperCase() + string.slice(2);
 }
 
-const googleTranslateURL = (from, to, txt) =>
-  `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${from}&tl=${to}&q=${txt}`;
-
+const googleTranslateURL = (from, to, txt) => 
+    `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${encodeURIComponent(from)}&tl=${encodeURIComponent(to)}&q=${encodeURIComponent(txt)}`
 
 function clearingName(name, bookieKey){
     for (let replacement of replacements[bookieKey]){
@@ -440,7 +439,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"John Millman","name2":"Stefano Travaglia","bookieKey":"PINNACLE"},"game2":{"name1":"Миллман Дж.","name2":"Травалья С.","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Третьяков А.","name2":"Сапега С.","bookieKey":"OLIMP"},"game2":{"name1":"Tretyakov A","name2":"Sapega S","bookieKey":"FONBET"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -448,6 +447,6 @@ const example = async () => {
 };
 
 
-example();
+// example();
 // console.log(Transliteration('broady'), Transliteration('broady '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
