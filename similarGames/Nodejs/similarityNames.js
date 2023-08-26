@@ -16,7 +16,7 @@ const dictionary = {
     'з': ['z', 't', 's', 'e'], 
     'и': ['i', 'e', 'y', 'j', 'ee', 'ij'],
     'й': ['i', 'y', 'j'], 
-    'к': ['k', 'c', 'q', 'h'], 
+    'к': ['k', 'c', 'q', 'h', 'ck'], 
     'л': ['l'],
     'м': ['m', ''], 
     'н': ['n', 'm', 'o', 'ng'],
@@ -25,19 +25,19 @@ const dictionary = {
     'р': ['r'], 
     'с': ['s', 'c', 'z', 'ts', 'x'], 
     'т': ['t', 'c', 'th'],
-    'у': ['u', 'o', 'w', 'o'], 
+    'у': ['u', 'o', 'w', 'oo'], 
     'ф': ['f'], 
-    'х': ['h', 'k', 'j'],
+    'х': ['h', 'k', 'j', 'ch'],
     'ц': ['c', 't', 's'], 
     'ч': ['c', 'z', 'j'], 
-    'ш': ['s', 'h', 'c'],
+    'ш': ['s', 'h', 'c', 'sh'],
     'щ': ['s', 'h', 'c'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
     'ь': ['', 'i', 'y'], 
     'э': ['e', 'ye', 'a', 'o'],
     'ю': ['u', 'i', 'y', 'w', 'iu', 'yu'], 
-    'я': ['j', 'a', 'i', 'ia', 'ya', 'y'],
+    'я': ['j', 'a', 'i', 'ia', 'ya', 'y', 'ja'],
 
     'ай': ['ai', 'ay'],
     'ий': ['y', 'ei', 'ey'],
@@ -81,7 +81,10 @@ const dictionary = {
     'ij': ['ij'],
     'ey': ['ey'],
     'iz': ['iz'],
-    'br': ['br']
+    'br': ['br'],
+    'ck': ['ck'],
+    'ch': ['ch'],
+    'ja': ['ja']
 
 }
 
@@ -472,7 +475,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Колодзей К.","name2":"Хжещян Р.","bookieKey":"OLIMP"},"game2":{"name1":"Krystian Kolodziej (POL)","name2":"Radoslaw Chrzescian (POL)","bookieKey":"BETMGM"}}
+    let games = {"game1":{"name1":"Lukasz Jarocki","name2":"Grzegorz Felkel","bookieKey":"BET365"},"game2":{"name1":"Яроцки Л.","name2":"Фелькель Г.","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -480,6 +483,6 @@ const example = async () => {
 };
 
 
-example();
+// example();
 // console.log(Transliteration('пайсанду'))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
