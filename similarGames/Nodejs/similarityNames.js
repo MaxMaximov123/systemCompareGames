@@ -1,7 +1,8 @@
-const { copyFileSync } = require('fs');
+const { copyFileSync, cpSync } = require('fs');
 const lodash = require('lodash');
 const { devNull } = require('os');
 
+const minimumCharCount = 4;
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
     'а': ['a', 'o', 'u'], 
@@ -9,21 +10,21 @@ const dictionary = {
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't'], 
-    'е': ['e', 'y', 'i', 'j', 'a'], 
-    'ё': ['y', 'i', 'o'],
+    'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye'], 
+    'ё': ['y', 'i', 'o', 'io', 'yo'],
     'ж': ['z', 'j', 'g'], 
     'з': ['z', 't', 's', 'e'], 
-    'и': ['i', 'e', 'y', 'j'],
+    'и': ['i', 'e', 'y', 'j', 'ee', 'ij'],
     'й': ['i', 'y', 'j'], 
-    'к': ['k', 'c', 'q'], 
+    'к': ['k', 'c', 'q', 'h'], 
     'л': ['l'],
     'м': ['m', ''], 
-    'н': ['n', 'm', 'o'],
+    'н': ['n', 'm', 'o', 'ng'],
     'о': ['o', 'a', 'e'], 
     'п': ['p'], 
     'р': ['r'], 
-    'с': ['s', 'c', 'z'], 
-    'т': ['t', 'c'], 
+    'с': ['s', 'c', 'z', 'ts', 'x'], 
+    'т': ['t', 'c', 'th'],
     'у': ['u', 'o', 'w', 'o'], 
     'ф': ['f'], 
     'х': ['h', 'k', 'j'],
@@ -33,32 +34,55 @@ const dictionary = {
     'щ': ['s', 'h', 'c'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
-    'ь': [''], 
+    'ь': ['', 'i', 'y'], 
     'э': ['e', 'ye', 'a', 'o'],
-    'ю': ['u', 'i', 'y', 'w'], 
-    'я': ['j', 'a', 'i'],
-    'ай': ['i'],
-    'ий': ['y'],
-    'дж': ['g', 'j'],
-    'дз': ['z'],
-    'ей': ['a'],
-    'из': ['e', 'i'],
+    'ю': ['u', 'i', 'y', 'w', 'iu', 'yu'], 
+    'я': ['j', 'a', 'i', 'ia', 'ya', 'y'],
+
+    'ай': ['ai', 'ay'],
+    'ий': ['y', 'ei', 'ey'],
+    'дж': ['dj', 'dg'],
+    'дз': ['dz'],
+    'ей': ['ey'],
+    'из': ['iz'],
+    'бр': ['br'],
+    'кх': ['kh'],
+    'цз': ['ji'],
     // other words
+    'a': ['a', 'e'],
     'ö': ['o'],
     'y': ['y', 'i'],
     'c': ['c', 's'],
     's': ['s', 'c'],
-    'i': ['y', 'e'],
+    'i': ['y', 'e', 'i'],
     'II': ['2', ],
-    'ie': ['i', 'e'],
-    'ch': ['c', 'h'],
-    'br': ['b'],
+    'ie': ['ie', 'ye'],
+    'ch': ['ch'],
+    'br': ['br'],
     'e': ['e', 'a'],
-    'a': ['a', 'e'],
-    'ai': ['e'],
+    'ai': ['ai'],
+    'ay': ['ay'],
     'ä': ['a'],
-    'ia': ['a'],
-    'gl': ['l']
+    'ia': ['ia'],
+    'gl': ['gl'],
+    'io': ['io'],
+    'kh': ['kh'],
+    'ye': ['ye', 'ie'],
+    'ts': ['ts'],
+    'ya': ['ya'],
+    'yu': ['yu'],
+    'iu': ['iu'],
+    'ge': ['ge'],
+    'th': ['th', 't'],
+    'ee': ['ee'],
+    'dg': ['dg'],
+    'ng': ['ng'],
+    'ji': ['ji'],
+    'ij': ['ij'],
+    'ey': ['ey'],
+    'iz': ['iz'],
+    'br': ['br']
+
 }
 
 const maximumLengthKeySlovet = Math.max(...Object.keys(dictionary).map(key => key.length));
@@ -73,6 +97,7 @@ const replacements = {
         [/\sSve\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\scity\s/gi, ' '],
 
     ],
     "OLIMP": [
@@ -92,6 +117,7 @@ const replacements = {
     ],
     "VIRGINBET": [
         [/\s\[W\]\s/gi, ' '],
+        [/\s\[\w\]\s/gi, ' '],
         [/\sU\d+\s/gi, ' '],
         [/\scf\s/gi, ' '],
         [/\sesports?\s/gi, ' '],
@@ -100,6 +126,7 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\scity\s/gi, ' '],
 
     ],
     "BET365": [
@@ -115,6 +142,7 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\scity\s/gi, ' '],
 
     ],
     "BETMGM": [
@@ -130,6 +158,7 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\scity\s/gi, ' '],
 
 
     ],
@@ -150,6 +179,7 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\scity\s/gi, ' '],
 
 
     ],
@@ -164,6 +194,8 @@ const replacements = {
         [/\sU\d+\s/gi, ' '],
         [/\spro\s/gi, ' '],
         [/\sfv\s/gi, ' '],
+        [/\sfc\s/gi, ' '],
+        [/\scity\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
     ],
@@ -243,7 +275,7 @@ function createSets(options){
 
 async function translate(name){
     try {
-        // return name;
+        return name;
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0].toLowerCase();
     } catch (e){
         return name;
@@ -317,28 +349,28 @@ function pairWithTheBestSimilarity(arr){
 }
 
 function searchWordsThatMatch(name1WordOption, name2WordOption){
-    let name1WordOptionCharsObjectKeys = Object.keys(name1WordOption);
-    let name2WordOptionCharsObjectKeys = Object.keys(name2WordOption);
-    let word = '';
-    
-    while (name1WordOptionCharsObjectKeys.length && name2WordOptionCharsObjectKeys.length){
-        let matched = false;
-        for (let char of name1WordOptionCharsObjectKeys){
-            if (name2WordOptionCharsObjectKeys.includes(char) || char === ''){
-                word += char;
-                name1WordOption = name1WordOption[char];
-                if (char) name2WordOption = name2WordOption[char];
-                name1WordOptionCharsObjectKeys = Object.keys(name1WordOption);
-                name2WordOptionCharsObjectKeys = Object.keys(name2WordOption);
-                matched = true;
-                break;
+    let result = {word: '', matched: false};
+
+    function allVariationword(word, localName1WordOption, localName2WordOption){
+        let name1WordOptionCharsObjectKeys = Object.keys(localName1WordOption);
+        let name2WordOptionCharsObjectKeys = Object.keys(localName2WordOption);
+        if (name1WordOptionCharsObjectKeys.length === 0 || name2WordOptionCharsObjectKeys.length === 0){
+            result = {word: word, matched: true};
+            return;
+        }
+        for (let name1OptionChar of name1WordOptionCharsObjectKeys){
+            for (let name2OptionChar of name2WordOptionCharsObjectKeys){
+                if (name1OptionChar === name2OptionChar){
+                    allVariationword(word + name1OptionChar, localName1WordOption[name1OptionChar], localName2WordOption[name2OptionChar]);
+                    break;
+                }
             }
         }
-        if (!matched){
-            return {word: word, matched: matched};
-        }
+        if (result.word === '') result = {word: word, matched: false};
+        return;
     }
-    return {word: word, matched: true};
+    allVariationword('', name1WordOption, name2WordOption);
+    return result;
 }
 
 function findingBestSimilarity(name1Options, name2Options){
@@ -358,12 +390,13 @@ function findingBestSimilarity(name1Options, name2Options){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
-            if (namesSets.name1Set[numName1Options].length >= 3) break;
+            if (namesSets.name1Set[numName1Options].length >= minimumCharCount) break;
             for (let name1WordOption of name1WordOptions){
-                if (namesSets.name1Set[numName1Options].length >= 3) break;
+                if (namesSets.name1Set[numName1Options].length >= minimumCharCount) break;
                 for (let name2WordOption of name2WordOptions){
-                    if (namesSets.name1Set[numName1Options].length >= 3) break;
+                    if (namesSets.name1Set[numName1Options].length >= minimumCharCount) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
+                    // console.log(wordsThatMatched)
                     if (wordsThatMatched.matched){
                         if (namesSets.name1Set[numName1Options] === '!') sameWordsCount++;
                         if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
@@ -386,7 +419,7 @@ function findingBestSimilarity(name1Options, name2Options){
     }
     let fullWordExist = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.name1Set[numWord]?.length >= 3) fullWordExist = true;
+        if (namesSets.name1Set[numWord]?.length >= minimumCharCount) fullWordExist = true;
     }
     // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
     let sameWordsProcent = namesSets.name2Set.length && fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0;
@@ -439,14 +472,14 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Третьяков А.","name2":"Сапега С.","bookieKey":"OLIMP"},"game2":{"name1":"Tretyakov A","name2":"Sapega S","bookieKey":"FONBET"}}
-    games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
+    let games = {"game1":{"name1":"Конфианса","name2":"Пайсанду","bookieKey":"OLIMP"},"game2":{"name1":"AD Confianca SE","name2":"Paysandu SC","bookieKey":"BETMGM"}}
+     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
     console.log(new Date() - t);
 };
 
 
-// example();
-// console.log(Transliteration('broady'), Transliteration('broady '))
+example();
+// console.log(Transliteration('пайсанду'))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
