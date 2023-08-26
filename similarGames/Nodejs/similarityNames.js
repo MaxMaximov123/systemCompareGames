@@ -10,14 +10,14 @@ const dictionary = {
     'в': ['v', 'w'], 
     'г': ['g', 'h'], 
     'д': ['d', 't'], 
-    'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye'], 
-    'ё': ['y', 'i', 'o', 'io', 'yo'],
+    'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je'], 
+    'ё': ['y', 'i', 'o', 'io', 'yo', 'jo'],
     'ж': ['z', 'j', 'g'], 
     'з': ['z', 't', 's', 'e'], 
-    'и': ['i', 'e', 'y', 'j', 'ee', 'ij'],
+    'и': ['i', 'e', 'y', 'j', 'ee', 'ij', 'ji'],
     'й': ['i', 'y', 'j'], 
     'к': ['k', 'c', 'q', 'h', 'ck'], 
-    'л': ['l'],
+    'л': ['l', 'll', 'gl'],
     'м': ['m', ''], 
     'н': ['n', 'm', 'o', 'ng'],
     'о': ['o', 'a', 'e'], 
@@ -27,11 +27,11 @@ const dictionary = {
     'т': ['t', 'c', 'th'],
     'у': ['u', 'o', 'w', 'oo'], 
     'ф': ['f'], 
-    'х': ['h', 'k', 'j', 'ch'],
+    'х': ['h', 'k', 'j', 'ch', 'kh'],
     'ц': ['c', 't', 's'], 
-    'ч': ['c', 'z', 'j'], 
-    'ш': ['s', 'h', 'c', 'sh'],
-    'щ': ['s', 'h', 'c'], 
+    'ч': ['c', 'z', 'j', 'ch', 'cz'], 
+    'ш': ['s', 'h', 'c', 'sh', 'sz'],
+    'щ': ['s', 'h', 'c', 'szcz'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
     'ь': ['', 'i', 'y'], 
@@ -51,6 +51,7 @@ const dictionary = {
     // other words
     'a': ['a', 'e', 'ey'],
     'ö': ['o'],
+    'ü': ['u'],
     'y': ['y', 'i'],
     'c': ['c', 's'],
     's': ['s', 'c'],
@@ -84,7 +85,11 @@ const dictionary = {
     'br': ['br'],
     'ck': ['ck'],
     'ch': ['ch'],
-    'ja': ['ja']
+    'ja': ['ja'],
+    'cz': ['cz'],
+    'sz': ['sz'],
+    'sh': ['sh'],
+    'szcz': ['szcz']
 
 }
 
@@ -93,6 +98,7 @@ const replacements = {
     "BETRADAR": [
         [/\sesports?\s/gi, ' '],
         [/\sfc\s/gi, ' '],
+        [/\sca\s/gi, ' '],
         [/\scf\s/gi, ' '],
         [/\ssc\s/gi, ' '],
         [/\s\(w\)\s/gi, ' '],
@@ -130,6 +136,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
+        [/\sca\s/gi, ' '],
 
     ],
     "BET365": [
@@ -138,6 +145,7 @@ const replacements = {
         [/\sesports?\s/gi, ' '],
         [/\swomen\s/gi, ' '],
         [/\scf\s/gi, ' '],
+        [/\sfc\s/gi, ' '],
         [/\suniversity\s/gi, ' '],
         [/\s\(women\)\s/gi, ' '],
         [/\sreserves\s/gi, ' '],
@@ -146,6 +154,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
+        [/\sca\s/gi, ' '],
 
     ],
     "BETMGM": [
@@ -162,6 +171,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
+        [/\sca\s/gi, ' '],
 
 
     ],
@@ -183,6 +193,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
+        [/\sca\s/gi, ' '],
 
 
     ],
@@ -201,6 +212,7 @@ const replacements = {
         [/\scity\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\sca\s/gi, ' '],
     ],
 }
 
@@ -352,27 +364,27 @@ function pairWithTheBestSimilarity(arr){
 }
 
 function searchWordsThatMatch(name1WordOption, name2WordOption){
-    let result = {word: '', matched: false};
+    let result = {word: '', matched: false, countChars: 0};
 
-    function allVariationword(word, localName1WordOption, localName2WordOption){
+    function allVariationword(countChars, word, localName1WordOption, localName2WordOption){
         let name1WordOptionCharsObjectKeys = Object.keys(localName1WordOption);
         let name2WordOptionCharsObjectKeys = Object.keys(localName2WordOption);
         if (name1WordOptionCharsObjectKeys.length === 0 || name2WordOptionCharsObjectKeys.length === 0){
-            result = {word: word, matched: true};
+            result = {word: word, matched: true, countChars: countChars};
             return;
         }
         for (let name1OptionChar of name1WordOptionCharsObjectKeys){
             for (let name2OptionChar of name2WordOptionCharsObjectKeys){
                 if (name1OptionChar === name2OptionChar){
-                    allVariationword(word + name1OptionChar, localName1WordOption[name1OptionChar], localName2WordOption[name2OptionChar]);
+                    allVariationword(countChars + 1, word + name1OptionChar, localName1WordOption[name1OptionChar], localName2WordOption[name2OptionChar]);
                     break;
                 }
             }
         }
-        if (result.word === '') result = {word: word, matched: false};
+        if (result.word === '') result = {word: word, matched: false, countChars: countChars};
         return;
     }
-    allVariationword('', name1WordOption, name2WordOption);
+    allVariationword(0, '', name1WordOption, name2WordOption);
     return result;
 }
 
@@ -388,16 +400,17 @@ function findingBestSimilarity(name1Options, name2Options){
     const namesSets = {
         name1Set: Array(minimumSetLength).fill('!'),
         name2Set: Array(minimumSetLength).fill('!'),
+        countChars: Array(minimumSetLength).fill(0),
     }
     for (let numName1Options=0;numName1Options<name1Options.length;numName1Options++){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
-            if (namesSets.name1Set[numName1Options].length >= minimumCharCount) break;
+            if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
             for (let name1WordOption of name1WordOptions){
-                if (namesSets.name1Set[numName1Options].length >= minimumCharCount) break;
+                if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
                 for (let name2WordOption of name2WordOptions){
-                    if (namesSets.name1Set[numName1Options].length >= minimumCharCount) break;
+                    if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
                     // console.log(wordsThatMatched)
                     if (wordsThatMatched.matched){
@@ -405,6 +418,7 @@ function findingBestSimilarity(name1Options, name2Options){
                         if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
                             namesSets.name1Set[numName1Options] = wordsThatMatched.word;
                             namesSets.name2Set[numName1Options] = wordsThatMatched.word;
+                            namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
                             
                         }
                         break;
@@ -422,7 +436,7 @@ function findingBestSimilarity(name1Options, name2Options){
     }
     let fullWordExist = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.name1Set[numWord]?.length >= minimumCharCount) fullWordExist = true;
+        if (namesSets.countChars[numWord] >= minimumCharCount) fullWordExist = true;
     }
     // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
     let sameWordsProcent = namesSets.name2Set.length && fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0;
@@ -475,7 +489,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Lukasz Jarocki","name2":"Grzegorz Felkel","bookieKey":"BET365"},"game2":{"name1":"Яроцки Л.","name2":"Фелькель Г.","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Кутепов С.","name2":"Бухтияров И.","bookieKey":"OLIMP"},"game2":{"name1":"Kutepov S","name2":"Bukhtiiarov I","bookieKey":"FONBET"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -483,6 +497,6 @@ const example = async () => {
 };
 
 
-// example();
+example();
 // console.log(Transliteration('пайсанду'))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
