@@ -49,7 +49,7 @@ const dictionary = {
     'кх': ['kh'],
     'цз': ['ji'],
     // other words
-    'a': ['a', 'e'],
+    'a': ['a', 'e', 'ey'],
     'ö': ['o'],
     'y': ['y', 'i'],
     'c': ['c', 's'],
@@ -275,7 +275,7 @@ function createSets(options){
 
 async function translate(name){
     try {
-        return name;
+        // return name;
         return (await(await fetch(googleTranslateURL('auto', 'en', name))).json())[0][0][0].toLowerCase();
     } catch (e){
         return name;
@@ -472,8 +472,8 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Конфианса","name2":"Пайсанду","bookieKey":"OLIMP"},"game2":{"name1":"AD Confianca SE","name2":"Paysandu SC","bookieKey":"BETMGM"}}
-     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
+    let games = {"game1":{"name1":"Колодзей К.","name2":"Хжещян Р.","bookieKey":"OLIMP"},"game2":{"name1":"Krystian Kolodziej (POL)","name2":"Radoslaw Chrzescian (POL)","bookieKey":"BETMGM"}}
+    games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
     console.log(new Date() - t);
