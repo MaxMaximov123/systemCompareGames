@@ -48,6 +48,7 @@ const dictionary = {
     'бр': ['br'],
     'кх': ['kh'],
     'цз': ['ji'],
+    'жа': ['a'],
     // other words
     'a': ['a', 'e', 'ey'],
     'ö': ['o'],
@@ -306,7 +307,7 @@ async function wordToOption(word){
             options.push(Transliteration(char));
         }
     }
-    return options;
+    return {options: options, lengthWord: word.length};
 }
 
 function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
@@ -381,7 +382,10 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
                 }
             }
         }
-        if (result.word === '') result = {word: word, matched: false, countChars: countChars};
+        
+        if (result.word === '') {
+            result = {word: word, matched: false, countChars: countChars};
+        }
         return;
     }
     allVariationword(0, '', name1WordOption, name2WordOption);
@@ -389,7 +393,10 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
 }
 
 function findingBestSimilarity(name1Options, name2Options){
-    [name1Options, name2Options] = [name1Options.slice(), name2Options.slice()];
+    const namesSets = {
+        countChars: name1Options.map(obj => obj.lengthWord).slice()
+    };
+    [name1Options, name2Options] = [name1Options.map(obj => obj.options).slice(), name2Options.map(obj => obj.options).slice()];
     const pairsWithTheBestSimilarity = [];
     let sameWordsCount = 0;
     let minimumSetLength = Math.min(name1Options.length, name2Options.length);
@@ -397,22 +404,15 @@ function findingBestSimilarity(name1Options, name2Options){
     if (name2Options.length === minimumSetLength){
         [name1Options, name2Options] = [name2Options, name1Options];
     }
-    const namesSets = {
-        name1Set: Array(minimumSetLength).fill('!'),
-        name2Set: Array(minimumSetLength).fill('!'),
-        countChars: Array(minimumSetLength).fill(0),
-    }
+    namesSets.name1Set = Array(minimumSetLength).fill('!');
+    namesSets.name2Set = Array(minimumSetLength).fill('!');
     for (let numName1Options=0;numName1Options<name1Options.length;numName1Options++){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
-            if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
             for (let name1WordOption of name1WordOptions){
-                if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
                 for (let name2WordOption of name2WordOptions){
-                    if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
-                    // console.log(wordsThatMatched)
                     if (wordsThatMatched.matched){
                         if (namesSets.name1Set[numName1Options] === '!') sameWordsCount++;
                         if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
@@ -421,8 +421,9 @@ function findingBestSimilarity(name1Options, name2Options){
                             namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
                             
                         }
-                        break;
-                        
+                        break;   
+                    } else {
+
                     }
                 }
                 
@@ -435,13 +436,15 @@ function findingBestSimilarity(name1Options, name2Options){
         
     }
     let fullWordExist = false;
+    let fullWordMatched = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
         if (namesSets.countChars[numWord] >= minimumCharCount) fullWordExist = true;
+        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord] !== '!') fullWordMatched = true;
     }
     // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
-    let sameWordsProcent = namesSets.name2Set.length && fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0;
+    let sameWordsProcent = !fullWordExist || fullWordMatched? sameWordsCount / namesSets.name2Set.length : 0;
     // if (sameWordsProcent > 0.5) console.log('!!!!!!!!!!!!!!!!!!!!!!', namesSets, sameWordsCount)
-    return {name1Set: namesSets.name1Set, name2Set: namesSets.name2Set, sameWordsCount: sameWordsProcent};
+    return {namesSet: namesSets.name1Set, countChars: namesSets.countChars, sameWordsCount: sameWordsProcent};
 }
 
 async function getGameObjectSetsForSimilarity(games, game){
@@ -489,7 +492,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Кутепов С.","name2":"Бухтияров И.","bookieKey":"OLIMP"},"game2":{"name1":"Kutepov S","name2":"Bukhtiiarov I","bookieKey":"FONBET"}}
+    let games = {"game1":{"name1":"Luis Meneses","name2":"Bhavesh Shah","bookieKey":"BETRADAR"},"game2":{"name1":"Meneses L","name2":"Shah B","bookieKey":"FONBET"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -498,5 +501,5 @@ const example = async () => {
 
 
 example();
-// console.log(Transliteration('пайсанду'))
+// console.log(Transliteration('meneses '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

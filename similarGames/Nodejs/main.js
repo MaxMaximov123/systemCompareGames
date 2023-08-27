@@ -229,6 +229,7 @@ async function start(sportKey, params) {
             .orderBy(params.orderBy.column, params.orderBy.key)
         
         if (games){
+            const findingСoupleToGameFunctions = [];
             for (let numGame1=0;numGame1<games.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games.length);
                 const game1 = games[numGame1];
@@ -239,6 +240,7 @@ async function start(sportKey, params) {
                         bookieKey: game1.bookieKey,
                     },
                 }
+                
                 gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
                 const findingСoupleToGame = async (games, game1, gamesNames, numGame1) => {
                     for (let numGame2=numGame1;numGame2<games.length;numGame2++){
@@ -436,8 +438,9 @@ async function start(sportKey, params) {
                         
                     }
                 }
-                findingСoupleToGame(games, game1, gamesNames, numGame1);
+                findingСoupleToGameFunctions.push(findingСoupleToGame(games, game1, gamesNames, numGame1));
             }
+            await Promise.all(findingСoupleToGameFunctions);
         }
         await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
     }
