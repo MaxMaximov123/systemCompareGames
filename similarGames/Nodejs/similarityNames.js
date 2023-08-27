@@ -418,7 +418,7 @@ function findingBestSimilarity(name1Options, name2Options){
                         if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
                             namesSets.name1Set[numName1Options] = wordsThatMatched.word;
                             namesSets.name2Set[numName1Options] = wordsThatMatched.word;
-                            namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
+                            // namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
                             
                         }
                         break;   
@@ -438,11 +438,11 @@ function findingBestSimilarity(name1Options, name2Options){
     let fullWordExist = false;
     let fullWordMatched = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.countChars[numWord] >= minimumCharCount) fullWordExist = true;
-        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord] !== '!') fullWordMatched = true;
+        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord].length >= minimumCharCount) fullWordExist = true;
+        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord] !== '!' && namesSets.name1Set[numWord].length >= minimumCharCount) fullWordMatched = true;
     }
     // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
-    let sameWordsProcent = !fullWordExist || fullWordMatched? sameWordsCount / namesSets.name2Set.length : 0;
+    let sameWordsProcent = fullWordMatched ? sameWordsCount / namesSets.name2Set.length : 0;
     // if (sameWordsProcent > 0.5) console.log('!!!!!!!!!!!!!!!!!!!!!!', namesSets, sameWordsCount)
     return {namesSet: namesSets.name1Set, countChars: namesSets.countChars, sameWordsCount: sameWordsProcent};
 }
@@ -492,7 +492,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Luis Meneses","name2":"Bhavesh Shah","bookieKey":"BETRADAR"},"game2":{"name1":"Meneses L","name2":"Shah B","bookieKey":"FONBET"}}
+    let games = {"game1":{"name1":"Orca Kamogawa FC [W]","name2":"IGA Kunoichi [W]","bookieKey":"VIRGINBET"},"game2":{"name1":"Олимпик Брисбен (жен)","name2":"Саншайн-Кост Уондерерс (жен)","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -500,6 +500,6 @@ const example = async () => {
 };
 
 
-example();
+// example();
 // console.log(Transliteration('meneses '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
