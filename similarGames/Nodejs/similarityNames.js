@@ -444,6 +444,6 @@ const example = async () => {
 };
 
 
-example();
-console.log(Transliteration('гильермо '))
+// example();
+// console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
