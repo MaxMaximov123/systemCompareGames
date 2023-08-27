@@ -459,12 +459,12 @@ async function main(){
                 key: 'desc'
             }
         });
-        start(sportKey, {
-            orderBy: {
-                column: 'lastUpdate',
-                key: 'asc'
-            }
-        });
+        // start(sportKey, {
+        //     orderBy: {
+        //         column: 'lastUpdate',
+        //         key: 'asc'
+        //     }
+        // });
     }
 }
 
