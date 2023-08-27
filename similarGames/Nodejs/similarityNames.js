@@ -8,7 +8,7 @@ const dictionary = {
     'а': ['a', 'o', 'u'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
-    'г': ['g', 'h', 'q'],
+    'г': ['g', 'h', 'q', 'gu'],
     'д': ['d', 't'], 
     'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je'], 
     'ё': ['y', 'i', 'o', 'io', 'yo', 'jo'],
@@ -20,15 +20,15 @@ const dictionary = {
     'л': ['l', 'll', 'gl'],
     'м': ['m', ''], 
     'н': ['n', 'm', 'o', 'ng', 'gn'],
-    'о': ['o', 'a', 'e', 'u'], 
+    'о': ['o', 'a', 'e', 'u', 'au'], 
     'п': ['p'], 
-    'р': ['r'], 
+    'р': ['r', 'rh'], 
     'с': ['s', 'c', 'z', 'ts', 'x'], 
     'т': ['t', 'c', 'th'],
-    'у': ['u', 'o', 'w', 'oo', 'wu'], 
+    'у': ['u', 'o', 'w', 'oo', 'wu', 'ou'], 
     'ф': ['f'], 
-    'х': ['h', 'k', 'j', 'ch', 'kh'],
-    'ц': ['c', 't', 's', 'z'], 
+    'х': ['h', 'k', 'j', 'ch', 'kh', 'c'],
+    'ц': ['c', 't', 's', 'z', 'ts'], 
     'ч': ['c', 'z', 'j', 'ch', 'cz'], 
     'ш': ['s', 'h', 'c', 'sh', 'sz', 'sch'],
     'щ': ['s', 'h', 'c', 'szcz'], 
@@ -40,7 +40,7 @@ const dictionary = {
     'я': ['j', 'a', 'i', 'ia', 'ya', 'y', 'ja'],
 
     'ай': ['ai', 'ay', 'i'],
-    'ий': ['y', 'ei', 'ey'],
+    'ий': ['y', 'ei', 'ey', 'i'],
     'дж': ['dj', 'dg'],
     'дз': ['dz'],
     'ей': ['ey'],
@@ -51,7 +51,7 @@ const dictionary = {
     'нк': ['nj'],
     'ья': ['a', 'y', 'i'],
     // other words
-    'a': ['a', 'e', 'ey'],
+    'a': ['a', 'e', 'ey', ''],
     'ö': ['o'],
     'ü': ['u', 'o'],
     'y': ['y', 'i'],
@@ -63,12 +63,14 @@ const dictionary = {
     'ie': ['ie', 'ye'],
     'ch': ['ch'],
     'br': ['br'],
-    'e': ['e', 'a', 'ai'],
+    'e': ['e', 'a', 'ai', ''],
     'ai': ['ai'],
     'ay': ['ay'],
+    'au': ['au'],
     'ä': ['a'],
     'ia': ['ia'],
     'gl': ['gl'],
+    'gu': ['gu'],
     'gn': ['gn'],
     'io': ['io'],
     'kh': ['kh'],
@@ -98,7 +100,10 @@ const dictionary = {
     'szcz': ['szcz'],
     'sch': ['sch'],
     'wu': ['wu'],
-    'nj': ['nj']
+    'nj': ['nj'],
+    'rh': ['rh'],
+    'ou': ['ou'],
+    'll': ['ll']
 
 }
 
@@ -371,19 +376,13 @@ function findingBestSimilarity(name1Options, name2Options){
                 
             }
         }
-        // if (!namesSets.name1Set[numName1Options]){
-        //     namesSets.name1Set[numName1Options] = name1WordOptions?.[0]?.[0];
-        //     namesSets.name2Set[numName1Options] = name2Options[numName1Options]?.[0]?.[0];
-        // }
         
     }
     let fullWordExist = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
         if (namesSets.countChars[numWord] >= minimumCharCount) fullWordExist = true;
     }
-    // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
     let sameWordsPercent = namesSets.name2Set.length && fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0;
-    // if (sameWordsProcent > 0.5) console.log('!!!!!!!!!!!!!!!!!!!!!!', namesSets, sameWordsCount)
     return {name1Set: namesSets.name1Set, name2Set: namesSets.name2Set, sameWordsPercent: sameWordsPercent};
 }
 
@@ -432,7 +431,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Rennais","name2":"Le Havre","bookieKey":"FONBET"},"game2":{"name1":"Stade Rennes","name2":"Le Havre AC","bookieKey":"BETMGM"}}
+    let games = {"game1":{"name1":"Strommen","name2":"Tromsdalen","bookieKey":"VIRGINBET"},"game2":{"name1":"Stroemmen IF","name2":"Tromsdalen UIL","bookieKey":"BETMGM"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -441,5 +440,5 @@ const example = async () => {
 
 
 // example();
-// console.log(Transliteration('than'))
+// console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
