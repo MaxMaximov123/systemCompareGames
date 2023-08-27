@@ -385,7 +385,7 @@ function findingBestSimilarity(name1Options, name2Options){
     }
     let fullWordExist = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.countChars[numWord] >= minimumCharCount) fullWordExist = true;
+        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord].length >= minimumCharCount) fullWordExist = true;
     }
     let sameWordsPercent = namesSets.name2Set.length && fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0;
     return {countChars: namesSets.countChars, nameSet: namesSets.name1Set, sameWordsPercent: sameWordsPercent};
@@ -436,14 +436,18 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Милуоки Брюэрс","name2":"Сан-Диего Падрес","bookieKey":"OLIMP"},"game2":{"name1":"DET Tigers","name2":"HOU Astros","bookieKey":"VIRGINBET"}}
+    let games = {"game1":{"name1":"AEL Limassol","name2":"AEZ Zakakiou","bookieKey":"BETMGM"},"game2":{"name1":"Deportes Limache","name2":"Lautaro de Bui­n","bookieKey":"PINNACLE"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
     console.log(new Date() - t);
 };
 
+const { Translator } = require('google-translate-api-x');
+const translator = new Translator({from: 'en', to: 'en', forceBatch: false, tld: 'es'});
 
-// example();
+// const as
+// console.log(await translator.translate(['owl', 'hawk']))
+example();
 // console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
