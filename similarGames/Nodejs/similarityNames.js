@@ -48,7 +48,6 @@ const dictionary = {
     'бр': ['br'],
     'кх': ['kh'],
     'цз': ['ji'],
-    'жа': ['a'],
     // other words
     'a': ['a', 'e', 'ey'],
     'ö': ['o'],
@@ -307,7 +306,7 @@ async function wordToOption(word){
             options.push(Transliteration(char));
         }
     }
-    return {options: options, lengthWord: word.length};
+    return options;
 }
 
 function getLongestWordSetCombinations(nameWordSet, minimumSetLength){
@@ -382,10 +381,7 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
                 }
             }
         }
-        
-        if (result.word === '') {
-            result = {word: word, matched: false, countChars: countChars};
-        }
+        if (result.word === '') result = {word: word, matched: false, countChars: countChars};
         return;
     }
     allVariationword(0, '', name1WordOption, name2WordOption);
@@ -393,10 +389,7 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
 }
 
 function findingBestSimilarity(name1Options, name2Options){
-    const namesSets = {
-        countChars: name1Options.map(obj => obj.lengthWord).slice()
-    };
-    [name1Options, name2Options] = [name1Options.map(obj => obj.options).slice(), name2Options.map(obj => obj.options).slice()];
+    [name1Options, name2Options] = [name1Options.slice(), name2Options.slice()];
     const pairsWithTheBestSimilarity = [];
     let sameWordsCount = 0;
     let minimumSetLength = Math.min(name1Options.length, name2Options.length);
@@ -404,26 +397,32 @@ function findingBestSimilarity(name1Options, name2Options){
     if (name2Options.length === minimumSetLength){
         [name1Options, name2Options] = [name2Options, name1Options];
     }
-    namesSets.name1Set = Array(minimumSetLength).fill('!');
-    namesSets.name2Set = Array(minimumSetLength).fill('!');
+    const namesSets = {
+        name1Set: Array(minimumSetLength).fill('!'),
+        name2Set: Array(minimumSetLength).fill('!'),
+        countChars: Array(minimumSetLength).fill(0),
+    }
     for (let numName1Options=0;numName1Options<name1Options.length;numName1Options++){
         const name1WordOptions = name1Options[numName1Options];
         for (let numName2Options=0;numName2Options<name2Options.length;numName2Options++){
             const name2WordOptions = name2Options[numName2Options];
+            if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
             for (let name1WordOption of name1WordOptions){
+                if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
                 for (let name2WordOption of name2WordOptions){
+                    if (namesSets.countChars[numName1Options] >= minimumCharCount) break;
                     const wordsThatMatched = searchWordsThatMatch(name1WordOption, name2WordOption);
+                    // console.log(wordsThatMatched)
                     if (wordsThatMatched.matched){
                         if (namesSets.name1Set[numName1Options] === '!') sameWordsCount++;
                         if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
                             namesSets.name1Set[numName1Options] = wordsThatMatched.word;
                             namesSets.name2Set[numName1Options] = wordsThatMatched.word;
-                            // namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
+                            namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
                             
                         }
-                        break;   
-                    } else {
-
+                        break;
+                        
                     }
                 }
                 
@@ -436,15 +435,13 @@ function findingBestSimilarity(name1Options, name2Options){
         
     }
     let fullWordExist = false;
-    let fullWordMatched = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord].length >= minimumCharCount) fullWordExist = true;
-        if (namesSets.countChars[numWord] >= minimumCharCount && namesSets.name1Set[numWord] !== '!' && namesSets.name1Set[numWord].length >= minimumCharCount) fullWordMatched = true;
+        if (namesSets.countChars[numWord] >= minimumCharCount) fullWordExist = true;
     }
     // console.log(namesSets.name1Set, namesSets.name2Set, fullWordMatched, fullWordExist)
-    let sameWordsProcent = fullWordMatched ? sameWordsCount / namesSets.name2Set.length : 0;
+    let sameWordsProcent = namesSets.name2Set.length && fullWordExist ? sameWordsCount / namesSets.name2Set.length : 0;
     // if (sameWordsProcent > 0.5) console.log('!!!!!!!!!!!!!!!!!!!!!!', namesSets, sameWordsCount)
-    return {namesSet: namesSets.name1Set, countChars: namesSets.countChars, sameWordsCount: sameWordsProcent};
+    return {name1Set: namesSets.name1Set, name2Set: namesSets.name2Set, sameWordsCount: sameWordsProcent};
 }
 
 async function getGameObjectSetsForSimilarity(games, game){
@@ -492,7 +489,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Orca Kamogawa FC [W]","name2":"IGA Kunoichi [W]","bookieKey":"VIRGINBET"},"game2":{"name1":"Олимпик Брисбен (жен)","name2":"Саншайн-Кост Уондерерс (жен)","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Андре С.","name2":"Покорны Л.","bookieKey":"OLIMP"},"game2":{"name1":"Seydina Andre","name2":"Lukas Pokorny","bookieKey":"VIRGINBET"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -500,6 +497,6 @@ const example = async () => {
 };
 
 
-// example();
-// console.log(Transliteration('meneses '))
+example();
+// console.log(Transliteration('пайсанду'))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
