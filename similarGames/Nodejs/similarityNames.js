@@ -289,7 +289,7 @@ async function translate(word){
     const result = (await db('translations').select('translationWord')
     .where('originalWord', word))[0];
     if (result){
-        return result.translationWord.split(';');
+        return result.translationWord.split(';').slice(0, 2);
     }
     return [];
 }
@@ -469,6 +469,6 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-example();
+// example();
 // console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
