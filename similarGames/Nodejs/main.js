@@ -83,7 +83,7 @@ function formatDataGames(game1, game2, outcomes=true){
         const minInd1 = Math.max(...Object.keys(lastStateGame1).map((key) => {return lastStateGame1[key].ind}));
         const minInd2 = Math.max(...Object.keys(lastStateGame2).map((key) => {return lastStateGame2[key].ind}));
         
-        for (let indGame1=minInd1; indGame1<game1.length-1; indGame1++){
+        for (let indGame1=minInd1; indGame1<game1.length; indGame1++){
             if (Math.floor(game1[indGame1].now / 1000) <= timeStep){
                 lastStateGame1[game1[indGame1].path] = {
                     ind: indGame1,
@@ -93,7 +93,7 @@ function formatDataGames(game1, game2, outcomes=true){
             } else break;
         }
 
-        for (let indGame2=minInd2; indGame2<game2.length-1; indGame2++){
+        for (let indGame2=minInd2; indGame2<game2.length; indGame2++){
             if (Math.floor(game2[indGame2].now / 1000) <= timeStep){
                 lastStateGame2[game2[indGame2].path] = {
                     ind: indGame2,

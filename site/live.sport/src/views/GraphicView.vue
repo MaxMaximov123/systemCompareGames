@@ -273,25 +273,23 @@ export default {
                 const minInd1 = Math.max(...Object.keys(lastStateGame1).map((key) => {return lastStateGame1[key].ind}));
                 const minInd2 = Math.max(...Object.keys(lastStateGame2).map((key) => {return lastStateGame2[key].ind}));
                 
-                for (let indGame1=minInd1; indGame1<game1.length-1; indGame1++){
+                for (let indGame1=minInd1; indGame1<game1.length; indGame1++){
                     if (Math.floor(game1[indGame1].now / 1000) <= timeStep){
                         lastStateGame1[game1[indGame1].path] = {
                             ind: indGame1,
                             time: timeStep,
                             val: this.activeTab.includes('outcomes') ? game1[indGame1].odds : game1[indGame1].score
                         };
-                        if (lastStateGame1[game1[indGame1].path].val === 0) lastStateGame1[game1[indGame1].path].val = 0.2;
                     } else break;
                 }
 
-                for (let indGame2=minInd2; indGame2<game2.length-1; indGame2++){
+                for (let indGame2=minInd2; indGame2<game2.length; indGame2++){
                     if (Math.floor(game2[indGame2].now / 1000) <= timeStep){
                         lastStateGame2[game2[indGame2].path] = {
                             ind: indGame2,
                             time: timeStep,
                             val: this.activeTab.includes('outcomes') ? game2[indGame2].odds : game2[indGame2].score
                         };
-                        if (lastStateGame2[game2[indGame2].path].val === 0) lastStateGame2[game2[indGame2].path].val = 0.2;
                     } else break;
                 }
                 newGame1[timeStep] = this.copy(lastStateGame1);
