@@ -63,7 +63,7 @@ function copy(obj){
 
 function formatDataGames(game1, game2, outcomes=true){
     const minTime = Math.floor(Math.min(game1[0].now, game2[0].now) / 1000);
-    const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);        
+    const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000) + TIK_STEP;        
 
     const newGame1 = {};
     const newGame2 = {};

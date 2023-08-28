@@ -255,7 +255,7 @@ export default {
 
         formatData(game1, game2){
             const minTime = Math.floor(Math.min(game1[0].now, game2[0].now) / 1000);
-            const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
+            const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000) + this.TIK_STEP;
             const newGame1 = {};
             const newGame2 = {};
             
@@ -280,6 +280,7 @@ export default {
                             time: timeStep,
                             val: this.activeTab.includes('outcomes') ? game1[indGame1].odds : game1[indGame1].score
                         };
+                        if (lastStateGame1[game1[indGame1].path].val === 0) lastStateGame1[game1[indGame1].path].val = 0.2;
                     } else break;
                 }
 
@@ -290,6 +291,7 @@ export default {
                             time: timeStep,
                             val: this.activeTab.includes('outcomes') ? game2[indGame2].odds : game2[indGame2].score
                         };
+                        if (lastStateGame2[game2[indGame2].path].val === 0) lastStateGame2[game2[indGame2].path].val = 0.2;
                     } else break;
                 }
                 newGame1[timeStep] = this.copy(lastStateGame1);
