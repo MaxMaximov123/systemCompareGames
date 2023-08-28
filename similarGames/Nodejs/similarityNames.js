@@ -45,7 +45,6 @@ const dictionary = {
     'дз': ['dz'],
     'ей': ['ey'],
     'из': ['iz'],
-    'бр': ['br'],
     'кх': ['kh'],
     'цз': ['ji'],
     'нк': ['nj'],
@@ -407,8 +406,8 @@ function findingBestSimilarity(name1Options, name2Options){
     let fullWordExist = false;
     let fullWordMatched = false;
     for (let numWord=0;numWord<namesSets.name1Set.length;numWord++){
-        if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount) fullWordExist = true;
-        if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount && namesSets.name1Set[numWord].matched) fullWordMatched = true;
+        if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount || namesSets.name2Set[numWord].realWord.length >= minimumCharCount) fullWordExist = true;
+        if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount && namesSets.name2Set[numWord].realWord.length >= minimumCharCount && namesSets.name1Set[numWord].matched) fullWordMatched = true;
     }
     let sameWordsPercent = !fullWordExist || fullWordMatched ? sameWordsCount / namesSets.name1Set.length : 0;
     console.log(namesSets)
@@ -460,7 +459,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Al Seeb","name2":"Al Nasr Salalah","bookieKey":"FONBET"},"game2":{"name1":"Al-Qadisiyah","name2":"Al-Batin","bookieKey":"BETMGM"}}
+    let games = {"game1":{"name1":"Ривера Х.","name2":"Чопра К.","bookieKey":"OLIMP"},"game2":{"name1":"Conrad Brown","name2":"Joseph Corse","bookieKey":"BET365"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -471,6 +470,6 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-// example();
+example();
 // console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
