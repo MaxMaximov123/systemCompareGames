@@ -254,9 +254,8 @@ export default {
 
 
         formatData(game1, game2){
-            const minTime = Math.floor(Math.max(game1[0].now, game2[0].now) / 1000);
-            const maxTime = Math.floor(Math.min(game1.at(-1).now, game2.at(-1).now) / 1000);
-
+            const minTime = Math.floor(Math.min(game1[0].now, game2[0].now) / 1000);
+            const maxTime = Math.floor(Math.max(game1.at(-1).now, game2.at(-1).now) / 1000);
             const newGame1 = {};
             const newGame2 = {};
             
@@ -267,7 +266,6 @@ export default {
             lastStateGame1[path1] = {ind: 0, time: minTime, val: null};
             const lastStateGame2 = {};
             lastStateGame2[path2] = {ind: 0, time: minTime, val: null};
-            
             for (let timeStep=minTime;timeStep<maxTime;timeStep+=this.TIK_STEP){
                 newGame1[timeStep] = {};
                 newGame2[timeStep] = {};
@@ -303,6 +301,7 @@ export default {
             this.game1[this.activeTab] = newGame1;
             this.game2[this.activeTab] = newGame2;
         },
+        
         
         async compareOutcomes(){
             const newGame1 = this.game1[this.activeTab];

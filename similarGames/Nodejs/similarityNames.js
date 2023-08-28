@@ -15,11 +15,11 @@ const dictionary = {
     'в': ['v', 'w'], 
     'г': ['g', 'h', 'q', 'gu'],
     'д': ['d', 't'], 
-    'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je'], 
+    'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je', 'ea'], 
     'ё': ['y', 'i', 'o', 'io', 'yo', 'jo'],
     'ж': ['z', 'j', 'g'], 
     'з': ['z', 't', 's', 'e'], 
-    'и': ['i', 'e', 'y', 'j', 'ee', 'ij', 'ji'],
+    'и': ['i', 'e', 'y', 'j', 'ee', 'ij', 'ji', 'ea'],
     'й': ['i', 'y', 'j'], 
     'к': ['k', 'c', 'q', 'h', 'ck'], 
     'л': ['l', 'll', 'gl'],
@@ -30,7 +30,7 @@ const dictionary = {
     'р': ['r', 'rh'], 
     'с': ['s', 'c', 'z', 'ts', 'x'], 
     'т': ['t', 'c', 'th'],
-    'у': ['u', 'o', 'w', 'oo', 'wu', 'ou'], 
+    'у': ['u', 'o', 'w', 'oo', 'wu', 'ou', 'yu'], 
     'ф': ['f'], 
     'х': ['h', 'k', 'j', 'ch', 'kh', 'c'],
     'ц': ['c', 't', 's', 'z', 'ts'], 
@@ -67,7 +67,7 @@ const dictionary = {
     'ie': ['ie', 'ye'],
     'ch': ['ch'],
     'br': ['br'],
-    'e': ['e', 'a', 'ai'],
+    'e': ['e', 'a', 'ai', ''],
     'ai': ['ai'],
     'ay': ['ay'],
     'au': ['au'],
@@ -107,7 +107,8 @@ const dictionary = {
     'nj': ['nj'],
     'rh': ['rh'],
     'ou': ['ou'],
-    'll': ['ll']
+    'll': ['ll'],
+    'ea': ['ea']
 
 }
 
@@ -289,7 +290,7 @@ async function translate(word){
     const result = (await db('translations').select('translationWord')
     .where('originalWord', word))[0];
     if (result){
-        return result.translationWord.split(';').slice(0, 2);
+        return result.translationWord.split(';');
     }
     return [];
 }
@@ -447,7 +448,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Arena Jogue Facil Esports","name2":"Intense Game","bookieKey":"FONBET"},"game2":{"name1":"AJF Esports","name2":"Intense","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Annecy","name2":"St Etienne","bookieKey":"VIRGINBET"},"game2":{"name1":"Анси","name2":"Сент-Этьен","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
