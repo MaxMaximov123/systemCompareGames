@@ -2,6 +2,11 @@ const { copyFileSync, cpSync, realpath } = require('fs');
 const lodash = require('lodash');
 const { devNull } = require('os');
 
+const knex = require('knex');
+const config = require('./knexfile');
+
+const db = knex(config.development);
+
 const minimumCharCount = 3;
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
@@ -256,7 +261,6 @@ function Transliteration(word) {
     const maxWordLength = word.length;
 
     function backtrack(currentWord, index, wood) {
-        // console.log(999, wood, currentWord)
         wood[currentWord] = {};
         if (index === maxWordLength){
             return;
@@ -281,25 +285,15 @@ function Transliteration(word) {
     return words['1'];
 }
 
-async function translate(name){
-    try {
-        // return name;
-        const response = await fetch(googleTranslateURL('auto', 'en', name));
-        if (response.status !== 200){
-            console.log(await response.text());
-            return name;
-        }
-        return (await response.json())[0][0][0].toLowerCase();
-    } catch (e){
-        console.log('TRANSLATE ERROR', e);
-        return name;
-    }
+async function translate(word){
+    return (await db('translations').select('translationWord')
+    .where('originalWord', word)).split(';');
 }
 
 async function wordToOption(word){
     const options = [];
     options.push(Transliteration(word));
-    options.push(Transliteration(await translate(word)));
+    (await translate(word)).map(translatedWord => options.push(Transliteration(translatedWord)));
     // if (word.length <= 4){
     //     for (let char of word){
     //         options.push(Transliteration(char));

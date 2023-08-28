@@ -13,8 +13,8 @@ async function translteAllWordsOfNames(){
     while (true){
         const games = await db('games')
         .select('id', 'team1Name', 'team2Name')
-        .whereNull('translatedAt');
-        if (games.length === 0) continue;
+        .whereNull('translatedAt').limit(10000);
+        if (games.length === 0) continue
         let wordsForTranslte = [];
         const updatesGames = [];
         for (let game of games){
@@ -22,7 +22,7 @@ async function translteAllWordsOfNames(){
             wordsForTranslte.push(...game.team1Name.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || []);
             wordsForTranslte.push(...game.team2Name.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || []);
         }
-        wordsForTranslte = Array.from(new Set(wordsForTranslte));
+        wordsForTranslte = Array.from(new Set(wordsForTranslte)).map(word => word.toLowerCase());
         const transltedWords = [];
         const resultsTranslteRu = await translatorRu.translate(wordsForTranslte);
         const resultsTranslteDe = await translatorDe.translate(wordsForTranslte);
