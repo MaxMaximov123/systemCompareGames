@@ -399,7 +399,14 @@ async function start(sportKey, params) {
                                 console.log('decision added');
                             } catch(e) {}
                         } else {
-                            const pairForUpdate = (await db('pairs').where(function () {
+                            const pairForUpdate = await db('pairs').where(function () {
+                                this.where('id1', game1.id).andWhere('id2', game2.id);
+                            }).orWhere(function (){
+                                this.where('id2', game1.id).andWhere('id1', game2.id)
+                            }).select('id', 'needGroup','grouped');
+                            
+                            
+                            await db('pairs').where(function () {
                                 this.where('id1', game1.id).andWhere('id2', game2.id);
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id);
@@ -413,7 +420,7 @@ async function start(sportKey, params) {
                                 'needGroup': needGroup,
                                 'grouped': game1.globalGameId === game2.globalGameId,
                                 'now': new Date().getTime(),
-                            }).returning(['id', 'needGroup','grouped']));
+                            });
                             console.log('update pair');
                             if (pairForUpdate.needGroup !== needGroup || 
                                 pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){

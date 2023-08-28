@@ -14,7 +14,7 @@ const dictionary = {
     'б': ['b'], 
     'в': ['v', 'w'], 
     'г': ['g', 'h', 'q', 'gu'],
-    'д': ['d', 't'], 
+    'д': ['d'],
     'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je', 'ea'], 
     'ё': ['y', 'i', 'o', 'io', 'yo', 'jo'],
     'ж': ['z', 'j', 'g', 'zh'], 
@@ -401,7 +401,7 @@ function findingBestSimilarity(name1Options, name2Options){
     }
     let sameWordsPercent = !fullWordExist || fullWordMatched ? sameWordsCount / namesSets.name1Set.length : 0;
     // console.log(namesSets)
-    return {sameWordsPercent: sameWordsPercent};
+    return {namesSets: namesSets, sameWordsPercent: sameWordsPercent};
 }
 
 async function getGameObjectSetsForSimilarity(games, game){
@@ -449,7 +449,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Annecy","name2":"St Etienne","bookieKey":"VIRGINBET"},"game2":{"name1":"Анси","name2":"Сент-Этьен","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Deportivo Cuenca","name2":"Tecnico Univ Ambato","bookieKey":"VIRGINBET"},"game2":{"name1":"CD Cuenca","name2":"CD Tecnico Universitario","bookieKey":"BETMGM"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
