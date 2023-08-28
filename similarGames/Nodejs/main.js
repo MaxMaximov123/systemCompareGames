@@ -57,8 +57,8 @@ const maxSportStartTimeDistance = {
 
 
 function copy(obj){
-    return lodash.cloneDeep(obj);
-    // return JSON.parse(JSON.stringify(obj));
+    // return lodash.cloneDeep(obj);
+    return JSON.parse(JSON.stringify(obj));
 }
 
 function formatDataGames(game1, game2, outcomes=true){
