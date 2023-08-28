@@ -2,7 +2,7 @@ const { copyFileSync, cpSync, realpath } = require('fs');
 const lodash = require('lodash');
 const { devNull } = require('os');
 
-const minimumCharCount = 4;
+const minimumCharCount = 3;
 const russianAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
 const dictionary = {
     'а': ['a', 'o', 'u'], 
@@ -470,6 +470,6 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-example();
+// example();
 // console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
