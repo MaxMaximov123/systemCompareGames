@@ -289,7 +289,7 @@ async function translate(word){
     const result = (await db('translations').select('translationWord')
     .where('originalWord', word))[0];
     if (result){
-        return result.translationWord.split(';');
+        return result.translationWord.split(';').slice(0, 2);
     }
     return [];
 }
@@ -385,20 +385,6 @@ function findingBestSimilarity(name1Options, name2Options){
                         };
                         break;
                     }
-                    
-
-                    // if (wordsThatMatched.matched){
-                        
-                        // if (namesSets.name1Set[numName1Options] === '!') sameWordsCount++;
-                        // if (namesSets.name1Set[numName1Options] === '!' || namesSets.name1Set[numName1Options].length < wordsThatMatched.word.length){
-                        //     namesSets.name1Set[numName1Options] = wordsThatMatched.word;
-                        //     namesSets.name2Set[numName1Options] = wordsThatMatched.word;
-                        //     namesSets.countChars[numName1Options] = wordsThatMatched.countChars;
-                            
-                        // }
-                    //     break;
-                        
-                    // }
                 }
                 
             }
@@ -461,7 +447,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Алмазан Валиенте И.","name2":"Бланч У.","bookieKey":"OLIMP"},"game2":{"name1":"Izan Almazan Valiente (ESP)","name2":"Ulises Blanch (USA)","bookieKey":"BETMGM"}}
+    let games = {"game1":{"name1":"Arena Jogue Facil Esports","name2":"Intense Game","bookieKey":"FONBET"},"game2":{"name1":"AJF Esports","name2":"Intense","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -472,6 +458,6 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-example();
+// example();
 // console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
