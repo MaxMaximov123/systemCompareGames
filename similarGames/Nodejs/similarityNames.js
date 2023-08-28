@@ -245,6 +245,7 @@ function clearingName(name, bookieKey){
     for (let replacement of replacements[bookieKey]){
         name = name.replace(replacement[0], replacement[1]);
     }
+    name = name.replace(/(.)\1+/g, '$1')
     name = name.replace(/\s+/g, ' ');
     return name;
 }
@@ -459,7 +460,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Ривера Х.","name2":"Чопра К.","bookieKey":"OLIMP"},"game2":{"name1":"Conrad Brown","name2":"Joseph Corse","bookieKey":"BET365"}}
+    let games = {"game1":{"name1":"Amaan Siddiqui","name2":"Alejandro Turriziani Alvarez","bookieKey":"VIRGINBET"},"game2":{"name1":"Сиддики А.","name2":"Туррициани Альварес А.","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
