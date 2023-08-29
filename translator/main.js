@@ -55,6 +55,7 @@ async function translteAllWordsOfNames(){
             .update(updateData);
         });
         await Promise.all(query);
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
     }
 }
 

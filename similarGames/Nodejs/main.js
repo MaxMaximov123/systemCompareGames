@@ -422,7 +422,7 @@ async function start(sportKey, params) {
                                 'now': new Date().getTime(),
                             });
                             console.log('update pair');
-                            if (pairForUpdate.needGroup !== needGroup || 
+                            if (pairForUpdate.needGroup !== needGroup ||
                                 pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
                                 try {
                                     await db('decisions').insert({
