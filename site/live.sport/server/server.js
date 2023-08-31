@@ -169,6 +169,7 @@ app.post('/api/paths', async (req, res) => {
       .where('pairs.id', requestData.id)
       .where('outcomes.isLive', isLiveValOnType[requestData.type])
       .distinct('outcomes.path as path1');
+    
 
       pathsList2 = await db('pairs')
       .leftJoin('outcomes', 'pairs.id2', 'outcomes.id')
