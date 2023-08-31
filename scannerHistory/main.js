@@ -172,7 +172,7 @@ socket.on('message', async (message) => {
 			if (game) {
 				merge(game, data);
 				cleanUpDeeply(game);
-				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
+				if (data.isLive, data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
 					await updateGame(gameId, {
 						globalGameId: game.globalGameId,
 						unavailableAt: game.unavailableAt,
@@ -180,6 +180,7 @@ socket.on('message', async (message) => {
 						liveFrom: new Date(game.liveFrom).getTime(),
 						liveTill: new Date(game.liveTill).getTime(),
 						lastUpdate: new Date().getTime(),
+						isLive: Boolean(game?.isLive),
 					});
 				}
 			} else {
@@ -187,7 +188,7 @@ socket.on('message', async (message) => {
 				await addGame({
 					id: game?.id,
 					globalGameId: game?.globalGameId,
-					isLive: game?.isLive,
+					isLive: Boolean(game?.isLive),
 					team1Id: game?.team1?.id,
 					team2Id: game?.team2?.id,
 					team1Name: game?.team1?.name,
@@ -228,7 +229,7 @@ socket.on('message', async (message) => {
 						path: path,
 						odds: paths[path],
 						now: new Date().getTime(),
-						isLive: game?.isLive,
+						isLive: Boolean(game?.isLive),
 					});
 				}
 			}

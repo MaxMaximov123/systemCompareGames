@@ -98,7 +98,7 @@ const dictionary = {
     'br': ['br'],
     'ck': ['ck'],
     'ch': ['ch'],
-    'jo': ['jo', ''],
+    'jo': ['jo'],
     'ja': ['ja'],
     'cz': ['cz'],
     'sz': ['sz'],
@@ -460,7 +460,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"HK Skalica","name2":"Modre Kridla Slovan","bookieKey":"BET365"},"game2":{"name1":"ХК 36 Скалица","name2":"Слован Братислава B","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Jose Garcia","name2":"James Newton","bookieKey":"BET365"},"game2":{"name1":"Дель Пино М./Тенти Ф.","name2":"Сигарран Т./Гальярдо Л.","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -471,6 +471,6 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-// example();
+example();
 // console.log(Transliteration('гильермо '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
