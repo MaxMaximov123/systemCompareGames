@@ -5,6 +5,7 @@ const fs = require('fs')
 const { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity } = require('./similarityNames.js');
 const lodash = require('lodash');
 const { exit } = require('process');
+const { captureRejectionSymbol } = require('events');
 
 const db = knex(config.development);
 
@@ -228,6 +229,12 @@ async function start(sportKey, params) {
             .groupBy('games.id')
             .orderBy(params.orderBy.column, params.orderBy.key)
         
+        let transactionsPairs = [];
+        let insertTransactionsDecisisions = [];
+        setInterval(async function(){
+            await db('decisions').insert(insertTransactionsDecisisions);
+            insertTransactionsDecisisions = [];
+        }, 1000);
         if (games){
             const findingСoupleToGameFunctions = [];
             for (let numGame1=0;numGame1<games.length;numGame1++){
@@ -278,7 +285,7 @@ async function start(sportKey, params) {
                             bookieKey: game2.bookieKey,
                         };
 
-                        const pairExist = (await db('pairs').select('similarityNames').where(function () {
+                        const pairExist = (await db('pairs').select('similarityNames', 'id').where(function () {
                             this.where('id1', game1.id).andWhere('id2', game2.id);
                         }).orWhere(function (){
                             this.where('id2', game1.id).andWhere('id1', game2.id);
@@ -382,28 +389,41 @@ async function start(sportKey, params) {
                                 'now': new Date().getTime(),
                             }).returning('id'))[0].id;
                             console.log('pair added');
-                            try {
-                                await db('decisions').insert({
-                                    'pairId': pairId,
-                                    'similarityNames': totalSimilarityNames,
-                                    'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                    'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                    'similarityScores': totalSimilarityScores,
-                                    'timeDiscrepancy': timeDiscrepancy,
-                                    'needGroup': needGroup,
-                                    'grouped': game1.globalGameId === game2.globalGameId,
-                                    'createdAt': new Date(),
-                                    'game1StartTime': new Date(Number(game1.startTime)),
-                                    'game2StartTime': new Date(Number(game2.startTime)),
-                                })
-                                console.log('decision added');
-                            } catch(e) {}
+                            insertTransactionsDecisisions.push({
+                                'pairId': pairId,
+                                'similarityNames': totalSimilarityNames,
+                                'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                                'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                                'similarityScores': totalSimilarityScores,
+                                'timeDiscrepancy': timeDiscrepancy,
+                                'needGroup': needGroup,
+                                'grouped': game1.globalGameId === game2.globalGameId,
+                                'createdAt': new Date(),
+                                'game1StartTime': new Date(Number(game1.startTime)),
+                                'game2StartTime': new Date(Number(game2.startTime)),
+                            });
+                            // try {
+                            //     await db('decisions').insert({
+                            //         'pairId': pairId,
+                            //         'similarityNames': totalSimilarityNames,
+                            //         'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                            //         'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                            //         'similarityScores': totalSimilarityScores,
+                            //         'timeDiscrepancy': timeDiscrepancy,
+                            //         'needGroup': needGroup,
+                            //         'grouped': game1.globalGameId === game2.globalGameId,
+                            //         'createdAt': new Date(),
+                            //         'game1StartTime': new Date(Number(game1.startTime)),
+                            //         'game2StartTime': new Date(Number(game2.startTime)),
+                            //     })
+                            //     console.log('decision added');
+                            // } catch(e) {}
                         } else {
-                            const pairForUpdate = await db('pairs').where(function () {
+                            const pairForUpdate = (await db('pairs').where(function () {
                                 this.where('id1', game1.id).andWhere('id2', game2.id);
                             }).orWhere(function (){
                                 this.where('id2', game1.id).andWhere('id1', game2.id)
-                            }).select('id', 'needGroup','grouped');
+                            }).select('id', 'needGroup','grouped'))[0];
                             
                             
                             await db('pairs').where(function () {
@@ -424,22 +444,35 @@ async function start(sportKey, params) {
                             console.log('update pair');
                             if (pairForUpdate.needGroup !== needGroup ||
                                 pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
-                                try {
-                                    await db('decisions').insert({
-                                        'pairId': pairForUpdate.id,
-                                        'similarityNames': totalSimilarityNames,
-                                        'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                        'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                        'similarityScores': totalSimilarityScores,
-                                        'timeDiscrepancy': timeDiscrepancy,
-                                        'needGroup': needGroup,
-                                        'grouped': game1.globalGameId === game2.globalGameId,
-                                        'createdAt': new Date(),
-                                        'game1StartTime': new Date(Number(game1.startTime)),
-                                        'game2StartTime': new Date(Number(game2.startTime)),
-                                    })
-                                    console.log('decision added');
-                                } catch(e) {}
+                                insertTransactionsDecisisions.push({
+                                    'pairId': pairForUpdate.id,
+                                    'similarityNames': totalSimilarityNames,
+                                    'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                                    'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                                    'similarityScores': totalSimilarityScores,
+                                    'timeDiscrepancy': timeDiscrepancy,
+                                    'needGroup': needGroup,
+                                    'grouped': game1.globalGameId === game2.globalGameId,
+                                    'createdAt': new Date(),
+                                    'game1StartTime': new Date(Number(game1.startTime)),
+                                    'game2StartTime': new Date(Number(game2.startTime)),
+                                });
+                                // try {
+                                //     await db('decisions').insert({
+                                //         'pairId': pairForUpdate[0].id,
+                                //         'similarityNames': totalSimilarityNames,
+                                //         'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                                //         'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                                //         'similarityScores': totalSimilarityScores,
+                                //         'timeDiscrepancy': timeDiscrepancy,
+                                //         'needGroup': needGroup,
+                                //         'grouped': game1.globalGameId === game2.globalGameId,
+                                //         'createdAt': new Date(),
+                                //         'game1StartTime': new Date(Number(game1.startTime)),
+                                //         'game2StartTime': new Date(Number(game2.startTime)),
+                                //     })
+                                //     console.log('decision added');
+                                // } catch(e) {}
                             }
                         }
                         

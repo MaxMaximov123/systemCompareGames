@@ -291,7 +291,7 @@ async function translate(word){
     const result = (await db('translations').select('translationWord')
     .where('originalWord', word))[0];
     if (result){
-        return result.translationWord.split(';');
+        return Array.from(new Set(result.translationWord.split(';')));
     }
     return [];
 }
