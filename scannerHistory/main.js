@@ -212,11 +212,13 @@ socket.on('message', async (message) => {
 					console.log('update names');
 				} catch (error) {console.error(error)}
 			}
-			updatesStartTime.push({
-				gameId: game.id,
-				startTime: new Date(game.startTime),
-				time: new Date()
-			});
+			if (data?.startTime){
+				updatesStartTime.push({
+					gameId: game.id,
+					startTime: new Date(game.startTime),
+					time: new Date()
+				});
+			}
 			
 			if (data.outcomes?.result){
 				const paths = getAllPathsOutcomes(data.outcomes.result);
