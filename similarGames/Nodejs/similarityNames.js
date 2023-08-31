@@ -13,7 +13,7 @@ const dictionary = {
     'а': ['a', 'o', 'u'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
-    'г': ['g', 'h', 'q', 'gu'],
+    'г': ['g', 'h', 'q', 'gu', 'ghi'],
     'д': ['d'],
     'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je', 'ea'], 
     'ё': ['y', 'i', 'o', 'io', 'yo', 'jo'],
@@ -33,20 +33,20 @@ const dictionary = {
     'у': ['u', 'o', 'w', 'oo', 'wu', 'ou', 'yu'], 
     'ф': ['f'], 
     'х': ['h', 'k', 'j', 'ch', 'kh', 'c'],
-    'ц': ['c', 't', 's', 'z', 'ts'], 
-    'ч': ['c', 'z', 'j', 'ch', 'cz'], 
-    'ш': ['s', 'h', 'c', 'sh', 'sz', 'sch'],
+    'ц': ['c', 't', 's', 'z', 'ts', 'tz'],
+    'ч': ['c', 'z', 'j', 'ch', 'cz'],
+    'ш': ['s', 'h', 'c', 'sh', 'sz', 'sch', 'x'],
     'щ': ['s', 'h', 'c', 'szcz'], 
     'ъ': [''], 
     'ы': ['y', 's', 'a'], 
     'ь': ['', 'i', 'y'],
-    'э': ['e', 'ye', 'a', 'o'],
+    'э': ['e', 'ye', 'a', 'o', 'oe'],
     'ю': ['u', 'i', 'y', 'w', 'iu', 'yu', 'ju'], 
     'я': ['j', 'a', 'i', 'ia', 'ya', 'y', 'ja'],
 
     'ай': ['ai', 'ay', 'i'],
     'ий': ['y', 'ei', 'ey', 'i'],
-    'дж': ['dj', 'dg'],
+    'дж': ['dj', 'dg', 'g', 'j'],
     'дз': ['dz'],
     'ей': ['ey'],
     'из': ['iz'],
@@ -76,10 +76,12 @@ const dictionary = {
     'gl': ['gl'],
     'gu': ['gu'],
     'gn': ['gn'],
+    'ghi': ['ghi'],
     'io': ['io'],
     'kh': ['kh'],
     'ye': ['ye', 'ie'],
     'ts': ['ts'],
+    'tz': ['tz'],
     'ya': ['ya'],
     'yu': ['yu'],
     'iu': ['iu'],
@@ -96,7 +98,7 @@ const dictionary = {
     'br': ['br'],
     'ck': ['ck'],
     'ch': ['ch'],
-    'jo': ['jo'],
+    'jo': ['jo', ''],
     'ja': ['ja'],
     'cz': ['cz'],
     'sz': ['sz'],
@@ -107,8 +109,10 @@ const dictionary = {
     'nj': ['nj'],
     'rh': ['rh'],
     'ou': ['ou'],
+    'oe': ['oe'],
     'll': ['ll'],
     'ea': ['ea'],
+    't': ['t', ''],
     'zh': ['zh']
 
 }
@@ -127,6 +131,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
+        [/\srk\s/gi, ' '],
 
     ],
     "OLIMP": [
@@ -157,6 +162,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/\srk\s/gi, ' '],
 
     ],
     "BET365": [
@@ -175,6 +181,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/\srk\s/gi, ' '],
 
     ],
     "BETMGM": [
@@ -192,6 +199,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/\srk\s/gi, ' '],
 
 
     ],
@@ -214,6 +222,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/\srk\s/gi, ' '],
 
 
     ],
@@ -233,6 +242,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
+        [/\srk\s/gi, ' '],
     ],
 }
 
@@ -288,6 +298,7 @@ function Transliteration(word) {
 }
 
 async function translate(word){
+    // return [word];
     const result = (await db('translations').select('translationWord')
     .where('originalWord', word))[0];
     if (result){
@@ -400,7 +411,7 @@ function findingBestSimilarity(name1Options, name2Options){
         if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount && namesSets.name2Set[numWord].realWord.length >= minimumCharCount && namesSets.name1Set[numWord].matched) fullWordMatched = true;
     }
     let sameWordsPercent = !fullWordExist || fullWordMatched ? sameWordsCount / namesSets.name1Set.length : 0;
-    // console.log(namesSets)
+    console.log(namesSets)
     return {namesSets: namesSets, sameWordsPercent: sameWordsPercent};
 }
 
@@ -449,7 +460,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Deportivo Cuenca","name2":"Tecnico Univ Ambato","bookieKey":"VIRGINBET"},"game2":{"name1":"CD Cuenca","name2":"CD Tecnico Universitario","bookieKey":"BETMGM"}}
+    let games = {"game1":{"name1":"HK Skalica","name2":"Modre Kridla Slovan","bookieKey":"BET365"},"game2":{"name1":"ХК 36 Скалица","name2":"Слован Братислава B","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
