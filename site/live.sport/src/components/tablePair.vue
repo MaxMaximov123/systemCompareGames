@@ -204,7 +204,8 @@
                                 name1: item.game2Team1Name,
                                 name2: item.game2Team2Name,
                                 bookieKey: item.bookieKey2,
-                            }}))" class="copy-name">mdi-content-copy</v-icon>
+                            }
+                        }))" class="copy-name">mdi-content-copy</v-icon>
                     </div>
                 </td>
                 <td>
