@@ -232,8 +232,11 @@ async function start(sportKey, params) {
         let transactionsPairs = [];
         let insertTransactionsDecisisions = [];
         setInterval(async function(){
-            await db('decisions').insert(insertTransactionsDecisisions);
-            insertTransactionsDecisisions = [];
+            if (insertTransactionsDecisisions.length){
+                await db('decisions').insert(insertTransactionsDecisisions);
+                insertTransactionsDecisisions = [];
+            }
+            
         }, 1000);
         if (games){
             const findingСoupleToGameFunctions = [];
