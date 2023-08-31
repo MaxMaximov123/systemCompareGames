@@ -165,16 +165,16 @@ app.post('/api/paths', async (req, res) => {
     var pathsList = [];
     if (requestData.type === 'outcomesPre' || requestData.type === 'outcomesLive'){
       pathsList1 = await db('pairs')
-      .join('outcomes as outcomes1', 'pairs.id1', 'outcomes1.id')
+      .leftJoin('outcomes', 'pairs.id1', 'outcomes.id')
       .where('pairs.id', requestData.id)
-      .where('outcomes1.isLive', isLiveValOnType[requestData.type])
-      .distinct('outcomes1.path as path1');
+      .where('outcomes.isLive', isLiveValOnType[requestData.type])
+      .distinct('outcomes.path as path1');
 
       pathsList2 = await db('pairs')
-      .join('outcomes as outcomes2', 'pairs.id2', 'outcomes2.id')
+      .leftJoin('outcomes', 'pairs.id2', 'outcomes.id')
       .where('pairs.id', requestData.id)
-      .where('outcomes2.isLive', isLiveValOnType[requestData.type])
-      .distinct('outcomes2.path as path2');
+      .where('outcomes.isLive', isLiveValOnType[requestData.type])
+      .distinct('outcomes.path as path2');
 
       pathsList1 = pathsList1.map(obj => obj.path1);
       pathsList2 = pathsList2.map(obj => obj.path2);
