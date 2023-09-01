@@ -13,6 +13,58 @@ const config = require('./knexfile');
 const db = knex(config.development);
 
 
+async function initDB(){
+	const createGamesTable = async () => {
+		try {
+			await db.schema.createTable('games', function(table) {
+			table.bigint('id').primary().unique();
+			table.bigint('globalGameId');
+			table.string('team1Id');
+			table.string('team2Id');
+			table.string('team1Name');
+			table.string('team2Name');
+			table.string('sportKey');
+			table.string('bookieKey');
+			table.bigint('startTime');
+			});
+			console.log('Games table created');
+		} catch (error) {}
+	};
+		
+	createGamesTable();
+
+	const createOutcomesTable = async () => {
+		try {
+			await db.schema.createTable('outcomes', function(table) {
+			table.bigint('id');
+			table.string('path');
+			table.float('odds');
+			table.bigint('now');
+			});
+			console.log('Outcomes table created');
+		} catch (error) {}
+		};
+		
+	createOutcomesTable();
+
+	const createScoresTable = async () => {
+		try {
+			await db.schema.createTable('scores', function(table) {
+			table.bigint('id');
+			table.string('path');
+			table.integer('score');
+			table.bigint('now');
+			});
+			console.log('Outcomes table created');
+		} catch (error) {}
+		};
+		
+	createScoresTable();
+
+}
+
+// initDB();
+
 const addGame = async (data) => {
 	try {
 	  await db('games').insert(data);
@@ -59,30 +111,9 @@ let globalGameList = null;
 let globalGames = {};
 let gameList = null;
 let games = {};
-let insrtsOutcomes = [];
-let insrtsScores = [];
-let updatesStartTime = [];
 // ---------------------------------------------------------------------- //
 
 const socket = new WebSocket('wss://api.livesport.tools/v2?clientKey=mn8W5KhnuwBHdgSJNdUkZbXRC8EFPAfm');
-
-setInterval(async () => {
-	if (insrtsOutcomes.length){
-		try {await db('outcomes').insert(insrtsOutcomes);} catch(e){}
-		insrtsOutcomes.length = 0;
-		console.log('outcomes added');
-	}
-	if (insrtsScores.length){
-		try {await db('scores').insert(insrtsScores);} catch(e){}
-		insrtsScores.length = 0;
-		console.log('scores added');
-	}
-	if (updatesStartTime.length){
-		try {await db('startTimeUpdates').insert(updatesStartTime);} catch(e){}
-		updatesStartTime.length = 0;
-		console.log('updatesStartTime added');
-	}
-}, 1000);
 
 socket.send = ((send) => {
 	return function ({ requestId = null, requestType, data = null }) {
@@ -169,10 +200,32 @@ socket.on('message', async (message) => {
 			delete games[gameId];
 		} else {
 			let game = games[gameId] || null;
+
 			if (game) {
 				merge(game, data);
 				cleanUpDeeply(game);
-				if (data.isLive, data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
+				if (data.startTime){
+					try {
+						await db('startTimeUpdates').insert({
+							gameId: game.id,
+							startTime: new Date(game.startTime),
+							time: new Date()
+						});
+						console.log('update startTime');
+					} catch (error) {console.error(error)}
+				}
+				if (data?.team1?.name || data?.team2?.name){
+					try {
+						await db('teamsNamesUpdates').insert({
+							gameId: game.id,
+							team1Name: game.team1?.name,
+							team2Name: game.team2?.name,
+							time: new Date()
+						});
+						console.log('update names');
+					} catch (error) {console.error(error)}
+				}
+				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
 					await updateGame(gameId, {
 						globalGameId: game.globalGameId,
 						unavailableAt: game.unavailableAt,
@@ -180,7 +233,6 @@ socket.on('message', async (message) => {
 						liveFrom: new Date(game.liveFrom).getTime(),
 						liveTill: new Date(game.liveTill).getTime(),
 						lastUpdate: new Date().getTime(),
-						isLive: Boolean(game?.isLive),
 					});
 				}
 			} else {
@@ -188,7 +240,7 @@ socket.on('message', async (message) => {
 				await addGame({
 					id: game?.id,
 					globalGameId: game?.globalGameId,
-					isLive: Boolean(game?.isLive),
+					isLive: game?.isLive,
 					team1Id: game?.team1?.id,
 					team2Id: game?.team2?.id,
 					team1Name: game?.team1?.name,
@@ -201,48 +253,52 @@ socket.on('message', async (message) => {
 					liveTill: new Date(game?.liveTill).getTime(),
 					lastUpdate: new Date().getTime(),
 				});
-				// if (data?.team1?.name || data?.team2?.name){
-				// 	try {
-				// 		await db('teamsNamesUpdates').insert({
-				// 			gameId: game.id,
-				// 			team1Name: game.team1?.name,
-				// 			team2Name: game.team2?.name,
-				// 			time: new Date()
-				// 		});
-				// 		console.log('update names');
-				// 	} catch (error) {console.error(error)}
-				// }
-			}
-			if (data?.startTime){
-				updatesStartTime.push({
-					gameId: game.id,
-					startTime: new Date(game.startTime),
-					time: new Date()
-				});
+				try {
+					await db('startTimeUpdates').insert({
+						gameId: game.id,
+						startTime: new Date(game.startTime),
+						time: new Date()
+					});
+					console.log('update startTime');
+				} catch (error) {console.error(error)}
+				try {
+					const lastNamesUpdate = await db('teamsNamesUpdates')
+					.select('team1Name', 'team2Name')
+					.where('gameId', game.id).orderBy('id', 'desc').limit(1);
+					if (lastNamesUpdate[0].team1Name !== game.team1?.name && lastNamesUpdate[0].team2Name !== game.team2?.name){
+						await db('teamsNamesUpdates').insert({
+							gameId: game.id,
+							team1Name: game.team1?.name,
+							team2Name: game.team2?.name,
+							time: new Date(),
+						});
+						console.log('update names');
+					}
+				} catch (error) {console.error(error)}
 			}
 			
 			if (data.outcomes?.result){
 				const paths = getAllPathsOutcomes(data.outcomes.result);
 				for (let path in paths){
-					insrtsOutcomes.push({
+					await addOucome({
 						id: gameId,
 						path: path,
 						odds: paths[path],
 						now: new Date().getTime(),
-						isLive: Boolean(game?.isLive),
-					});
+						isLive: game?.isLive,
+					})
 				}
 			}
 
 			if (data.scores?.result){
 				const paths = getAllPathsOutcomes(data.scores.result, false);
-				for (let path in paths){
-					insrtsScores.push({
+				for (let path in paths){	
+					await addScore({
 						id: gameId,
 						path: path,
-						score: Math.floor(paths[path]),
+						score: paths[path],
 						now: new Date().getTime()
-					});
+					})
 				}
 			}
 		}
