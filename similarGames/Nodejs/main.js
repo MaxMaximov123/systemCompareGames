@@ -446,7 +446,7 @@ async function start(sportKey, params) {
                     }
                 }
                 findingСoupleToGameFunctions.push(findingСoupleToGame(games, game1, gamesNames, numGame1));
-                if (findingСoupleToGameFunctions.length === 5){
+                if (findingСoupleToGameFunctions.length === 20){
                     await Promise.all(findingСoupleToGameFunctions);
                     findingСoupleToGameFunctions = [];
                 }
