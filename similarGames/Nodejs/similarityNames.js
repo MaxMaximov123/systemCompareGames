@@ -400,7 +400,7 @@ function findingBestSimilarity(name1Options, name2Options){
         if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount && namesSets.name2Set[numWord].realWord.length >= minimumCharCount && namesSets.name1Set[numWord].matched) fullWordMatched = true;
     }
     let sameWordsPercent = !fullWordExist || fullWordMatched ? sameWordsCount / namesSets.name1Set.length : 0;
-    console.log(namesSets)
+    // console.log(namesSets)
     return {namesSets: namesSets, sameWordsPercent: sameWordsPercent};
 }
 
@@ -460,6 +460,6 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-example();
+// example();
 // console.log(Transliteration('yake  '))
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

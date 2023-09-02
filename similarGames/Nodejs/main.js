@@ -229,7 +229,7 @@ async function start(sportKey, params) {
             .orderBy(params.orderBy.column, params.orderBy.key)
         
         if (games){
-            const findingСoupleToGameFunctions = [];
+            let findingСoupleToGameFunctions = [];
             for (let numGame1=0;numGame1<games.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games.length);
                 const game1 = games[numGame1];
@@ -446,8 +446,12 @@ async function start(sportKey, params) {
                     }
                 }
                 findingСoupleToGameFunctions.push(findingСoupleToGame(games, game1, gamesNames, numGame1));
+                if (findingСoupleToGameFunctions.length === 5){
+                    await Promise.all(findingСoupleToGameFunctions);
+                    findingСoupleToGameFunctions = [];
+                }
             }
-            await Promise.all(findingСoupleToGameFunctions);
+            
         }
         await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
     }
