@@ -118,25 +118,25 @@ let updatesStartTimeTransactions = [];
 // ---------------------------------------------------------------------- //
 
 setInterval(async () => {
-	if (insertOutcomesTransactions.length){
+	if (insertOutcomesTransactions.length > 0){
 		try {
 			await db('outcomes').insert(insertOutcomesTransactions);
 			console.log('outcomes added');
-			insertOutcomesTransactions.length = 0;
+			insertOutcomesTransactions = [];
 		} catch (error) {console.log(error)}
 	}
-	if (insertScoresTransactions.length){
+	if (insertScoresTransactions.length > 0){
 		try {
 			await db('scores').insert(insertScoresTransactions);
 			console.log('scores added');
-			insertScoresTransactions.length = 0;
+			insertScoresTransactions = [];
 		} catch (error) {console.log(error)}
 	}
-	if (updatesStartTimeTransactions.length){
+	if (updatesStartTimeTransactions.length > 0){
 		try {
 			await db('startTimeUpdates').insert(updatesStartTimeTransactions);
 			console.log('startTimeUpdates added');
-			updatesStartTimeTransactions.length = 0;
+			updatesStartTimeTransactions = [];
 		} catch (error) {console.log(error)}
 	}
 }, 1000);
