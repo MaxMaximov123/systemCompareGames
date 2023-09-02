@@ -67,7 +67,7 @@ const dictionary = {
     'ie': ['ie', 'ye'],
     'ch': ['ch'],
     'br': ['br'],
-    'e': ['e', 'a', 'ai', ''],
+    'e': ['e', 'a', 'ai'],
     'ai': ['ai'],
     'ay': ['ay'],
     'au': ['au'],
@@ -449,7 +449,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Hsing-Yin Liu","name2":"Yake Li","bookieKey":"VIRGINBET"},"game2":{"name1":"Лоуда И.","name2":"Юст Ф.","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Ciudad de Bolivar","name2":"CS Estudiantes San Luis","bookieKey":"BETMGM"},"game2":{"name1":"Stade Lavallois","name2":"Caen","bookieKey":"PINNACLE"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
@@ -461,5 +461,5 @@ const example = async () => {
 // await translator.translate(['привет', 'пока']);
 
 // example();
-// console.log(Transliteration('yake  '))
+// console.log(Transliteration('caen')['s'])
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
