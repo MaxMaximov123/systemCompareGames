@@ -155,7 +155,7 @@ services:
     networks:
       - mynetwork
   
-  similarer-basket:
+  similarer-baseball:
     restart: always
     build:
       context: .
