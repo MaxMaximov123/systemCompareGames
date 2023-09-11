@@ -290,7 +290,8 @@ async function start(sportKey, params) {
                             game1[numKey] = Number(game1[numKey]);
                             game2[numKey] = Number(game2[numKey]);
                         }
-                        if (game2.id === game1.id || game2.bookieKey === game1.bookieKey) continue;
+                        if (game2.id === game1.id || game2.bookieKey === game1.bookieKey
+                            || game1.globalGameId === game2.globalGameId) continue;
 
                         var totalSimilarityOutcomesPre = 0;
                         var totalSimilarityOutcomesLive = 0;
@@ -554,7 +555,7 @@ async function start(sportKey, params) {
                     }
                 }
                 findingСoupleToGameFunctions.push(findingСoupleToGame(games, game1, numGame1));
-                if (findingСoupleToGameFunctions.length === 5){
+                if (findingСoupleToGameFunctions.length === 10){
                     await Promise.all(findingСoupleToGameFunctions);
                     findingСoupleToGameFunctions.length = 0;
                 }

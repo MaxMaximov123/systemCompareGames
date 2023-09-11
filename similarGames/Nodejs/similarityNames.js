@@ -468,7 +468,7 @@ const example = async () => {
     let games = {"game1":{"name1":"Red Deer Rebels","name2":"Edmonton Ojl Kingz","bookieKey":"FONBET"},"game2":{"name1":"Ред Дир Ребелс","name2":"Эдмонтон Ойл Кингс","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
-    (await getSimilarityNames(games)).map(val => console.log(val));
+    console.log(await getSimilarityNames(games));
     console.log(new Date() - t);
 };
 
@@ -477,5 +477,6 @@ const example = async () => {
 // await translator.translate(['привет', 'пока']);
 
 // example();
+// setTimeout(example, 5000);
 // console.log(Transliteration('caen')['s'])
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };
