@@ -244,7 +244,7 @@ async function updateTranslations(){
     }
 }
 updateTranslations();
-setInterval(updateTranslations, 10000);
+setInterval(updateTranslations, 1000 * 60 * 10);
 
 const unimportantComponents = [
     '-', ',', ':', '*', '/', '|',

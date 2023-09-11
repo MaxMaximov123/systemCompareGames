@@ -478,20 +478,20 @@ async function start(sportKey, params) {
                                     'game1StartTime': new Date(Number(game1.startTime)),
                                     'game2StartTime': new Date(Number(game2.startTime)),
                                 });
-                                await db('decisions').insert({
-                                    'pairId': pairId,
-                                    'similarityNames': totalSimilarityNames.totalSimilarity,
-                                    'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                    'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                    'similarityScores': totalSimilarityScores,
-                                    'timeDiscrepancy': timeDiscrepancy,
-                                    'needGroup': needGroup,
-                                    'grouped': game1.globalGameId === game2.globalGameId,
-                                    'createdAt': new Date(),
-                                    'game1StartTime': new Date(Number(game1.startTime)),
-                                    'game2StartTime': new Date(Number(game2.startTime)),
-                                })
-                                console.log('decision added');
+                                // await db('decisions').insert({
+                                //     'pairId': pairId,
+                                //     'similarityNames': totalSimilarityNames.totalSimilarity,
+                                //     'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                                //     'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                                //     'similarityScores': totalSimilarityScores,
+                                //     'timeDiscrepancy': timeDiscrepancy,
+                                //     'needGroup': needGroup,
+                                //     'grouped': game1.globalGameId === game2.globalGameId,
+                                //     'createdAt': new Date(),
+                                //     'game1StartTime': new Date(Number(game1.startTime)),
+                                //     'game2StartTime': new Date(Number(game2.startTime)),
+                                // })
+                                // console.log('decision added');
                             } catch(e) {}
                         } else {
                             // console.log('recapitulating a pair')
@@ -533,20 +533,20 @@ async function start(sportKey, params) {
                                         'game1StartTime': new Date(Number(game1.startTime)),
                                         'game2StartTime': new Date(Number(game2.startTime)),
                                     });
-                                    await db('decisions').insert({
-                                        'pairId': pairForUpdate.id,
-                                        'similarityNames': totalSimilarityNames.totalSimilarity,
-                                        'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                        'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                        'similarityScores': totalSimilarityScores,
-                                        'timeDiscrepancy': timeDiscrepancy,
-                                        'needGroup': needGroup,
-                                        'grouped': game1.globalGameId === game2.globalGameId,
-                                        'createdAt': new Date(),
-                                        'game1StartTime': new Date(Number(game1.startTime)),
-                                        'game2StartTime': new Date(Number(game2.startTime)),
-                                    });
-                                    console.log('decision added');
+                                    // await db('decisions').insert({
+                                    //     'pairId': pairForUpdate.id,
+                                    //     'similarityNames': totalSimilarityNames.totalSimilarity,
+                                    //     'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                                    //     'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                                    //     'similarityScores': totalSimilarityScores,
+                                    //     'timeDiscrepancy': timeDiscrepancy,
+                                    //     'needGroup': needGroup,
+                                    //     'grouped': game1.globalGameId === game2.globalGameId,
+                                    //     'createdAt': new Date(),
+                                    //     'game1StartTime': new Date(Number(game1.startTime)),
+                                    //     'game2StartTime': new Date(Number(game2.startTime)),
+                                    // });
+                                    // console.log('decision added');
                                 } catch(e) {}
                             }
                         }
