@@ -73,8 +73,9 @@ app.post('/api/pairs', async (req, res) => {
       .leftJoin('decisions', 'pairs.id', 'decisions.pairId')
       .leftJoin('teamsNamesUpdates as teamsNamesUpdates1', 'pairs.id1', 'teamsNamesUpdates1.gameId')
       .leftJoin('teamsNamesUpdates as teamsNamesUpdates2', 'pairs.id2', 'teamsNamesUpdates2.gameId')
-      .groupBy(
-        'pairs.id', 'games1.lastUpdate', 'games2.lastUpdate', 'games1.bookieKey', 'games2.bookieKey',
+
+      .groupBy('pairs.id',
+        'games1.lastUpdate', 'games2.lastUpdate', 'games1.bookieKey', 'games2.bookieKey',
         'games1.liveFrom', 'games2.liveFrom', 'games1.liveTill', 'games2.liveTill', 'games1.startTime',
         'games2.startTime', 'games1.sportKey', 'games2.sportKey'
         )

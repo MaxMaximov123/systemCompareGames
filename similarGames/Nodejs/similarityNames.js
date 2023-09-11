@@ -236,6 +236,16 @@ const replacements = {
     ],
 }
 
+const allTranslatedWords = {};
+async function updateTranslations(){
+    const result = (await db('translations').select('originalWord', 'translationWord'));
+    for (let wordPair of result){
+        allTranslatedWords[wordPair.originalWord] = Array.from(new Set(wordPair.translationWord.split(';').slice(0, 2)));
+    }
+}
+updateTranslations();
+setInterval(updateTranslations, 10000);
+
 const unimportantComponents = [
     '-', ',', ':', '*', '/', '|',
     '[', ']', '(', ')', '.'
@@ -288,12 +298,7 @@ function Transliteration(word) {
 }
 
 async function translate(word){
-    const result = (await db('translations').select('translationWord')
-    .where('originalWord', word))[0];
-    if (result){
-        return Array.from(new Set(result.translationWord.split(';').slice(0, 2)));
-    }
-    return [];
+    return allTranslatedWords[word] || [];
 }
 
 async function wordToOption(word){
