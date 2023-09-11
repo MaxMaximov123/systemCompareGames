@@ -450,7 +450,11 @@ async function getSimilarityNames(games){
         totalSimilarity = (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2;
     }
     games.game2 = {};
-    return [Object.values(similarityNames).map(obj => obj.namesSets), totalSimilarity, isInverted];
+    return {
+        obj: Object.values(similarityNames).map(obj => obj.namesSets), 
+        totalSimilarity: totalSimilarity,
+        isInverted: isInverted
+    };
 }
 
 

@@ -203,6 +203,27 @@ function sum(arr){
     return sum_;
 }
 
+function postRequest(url, data){
+    return new Promise((resolve, reject) => {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    };
+    
+    fetch(url, options)
+    .then(response => response.json())
+    .then(result => {
+        resolve(result);
+    })
+    .catch(error => {
+        reject(error);
+    });
+    })
+}
+
 
 async function delay(ms) {
     return await new Promise(resolve => setTimeout(resolve, ms));
@@ -240,7 +261,8 @@ async function start(sportKey, params) {
             .join('outcomes', 'games.id', 'outcomes.id')
             .select(
                 'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.team1Id', 'games.team2Id',
-                'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey'
+                'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey', 'leagueId',
+                'team1Id', 'team2Id'
                 )
             .where('games.sportKey', sportKey)
             .whereNull('games.unavailableAt')
@@ -301,17 +323,12 @@ async function start(sportKey, params) {
                         }).orWhere(function (){
                             this.where('id2', game1.id).andWhere('id1', game2.id);
                         }));
-                        if (pairExist.length > 0){
-                            totalSimilarityNames = pairExist[0].similarityNames;
-                        } else {
-                            gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
-                            totalSimilarityNames = await getSimilarityNames(gamesNames);
-                            totalSimilarityNames = totalSimilarityNames[1];
-                        }
+                        gamesNames.game2 = await getGameObjectSetsForSimilarity(gamesNames, 'game2');
+                        totalSimilarityNames = await getSimilarityNames(gamesNames);
                         
                         
                         
-                        if (totalSimilarityNames < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
+                        if (totalSimilarityNames.totalSimilarity < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
 
                         if (game1.isLive === true || game2.isLive === true){
                             var game1DataOutcomesLive = [];
@@ -365,22 +382,48 @@ async function start(sportKey, params) {
                         
 
                         var needGroup = false;
-                        if (totalSimilarityNames >= 0.95 && totalSimilarityOutcomesPre >= 0.75) needGroup = true;
-                        else if (totalSimilarityNames >= 0.75 && (totalSimilarityOutcomesPre >= 0.8)) needGroup = true;
-                        else if (totalSimilarityNames >= 0.95 && (totalSimilarityOutcomesPre >= 0.8 || totalSimilarityOutcomesLive >= 0.75) && (totalSimilarityScores >= 0.7 || totalSimilarityScores === 0)) needGroup = true;
-                        else if (totalSimilarityNames >= 0.75 && (totalSimilarityOutcomesPre >= 0.9 || totalSimilarityOutcomesLive >= 0.8) && (totalSimilarityScores >= 0.75 || totalSimilarityScores === 0)) needGroup = true;
-                        console.log('Comparing...', 
-                        {
-                            id1: game1.id, 
-                            id2: game2.id, 
-                            outcPre: totalSimilarityOutcomesPre, 
-                            outcLive: totalSimilarityOutcomesLive,
-                            scores: totalSimilarityScores, 
-                            names: totalSimilarityNames, 
-                            need: needGroup,
-                            grouped: game1.globalGameId === game2.globalGameId,
-                            timeDiscrepancy: timeDiscrepancy
-                        });
+                        if (totalSimilarityNames.totalSimilarity >= 0.95 && totalSimilarityOutcomesPre >= 0.75) needGroup = true;
+                        else if (totalSimilarityNames.totalSimilarity >= 0.75 && (totalSimilarityOutcomesPre >= 0.8)) needGroup = true;
+                        else if (totalSimilarityNames.totalSimilarity >= 0.95 && (totalSimilarityOutcomesPre >= 0.8 || totalSimilarityOutcomesLive >= 0.75) && (totalSimilarityScores >= 0.7 || totalSimilarityScores === 0)) needGroup = true;
+                        else if (totalSimilarityNames.totalSimilarity >= 0.75 && (totalSimilarityOutcomesPre >= 0.9 || totalSimilarityOutcomesLive >= 0.8) && (totalSimilarityScores >= 0.75 || totalSimilarityScores === 0)) needGroup = true;
+                        // console.log('Comparing...', 
+                        // {
+                        //     id1: game1.id, 
+                        //     id2: game2.id,
+                        //     game1LeagueId: game1.leagueId,
+                        //     game2LeagueId: game2.leagueId,
+                        //     outcPre: totalSimilarityOutcomesPre, 
+                        //     outcLive: totalSimilarityOutcomesLive,
+                        //     scores: totalSimilarityScores, 
+                        //     names: totalSimilarityNames, 
+                        //     need: needGroup,
+                        //     grouped: game1.globalGameId === game2.globalGameId,
+                        //     timeDiscrepancy: timeDiscrepancy
+                        // });
+                        if (needGroup && !(game1.globalGameId === game2.globalGameId)){
+                            let dataForAddingInCore = {
+                                games: {
+                                    [game1.id]: {
+                                        leagueId: game1.leagueId,
+                                        team1Id: game1.team1Id,
+                                        team2Id: game1.team2Id
+                                    },
+                                    [game2.id]: {
+                                        leagueId: game2.leagueId,
+                                        team1Id: totalSimilarityNames.isInverted ? game2.team2Id : game2.team1Id,
+                                        team2Id: totalSimilarityNames.isInverted ? game2.team1Id : game2.team2Id
+                                    }
+                                },
+                                "extend": true,
+                                "makingType": "EXTENSION"
+                            };
+                            console.log(dataForAddingInCore);
+                            console.log((await postRequest(
+                                'https://sm.livesport.tools/api/game-manager/games/group',
+                                dataForAddingInCore
+                                )).invalidFields
+                            );
+                        }
                         if (pairExist.length === 0){
                             newPairsTransactions.push({
                                 'id1': game1.id,
@@ -390,7 +433,7 @@ async function start(sportKey, params) {
                                 'game2Team1Name': game2?.team1Name,
                                 'game1Team2Name': game1?.team2Name,
                                 'game2Team2Name': game2?.team2Name,
-                                'similarityNames': totalSimilarityNames,
+                                'similarityNames': totalSimilarityNames.totalSimilarity,
                                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                 'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                 'similarityScores': totalSimilarityScores,
@@ -408,7 +451,7 @@ async function start(sportKey, params) {
                                 'game2Team1Name': game2?.team1Name,
                                 'game1Team2Name': game1?.team2Name,
                                 'game2Team2Name': game2?.team2Name,
-                                'similarityNames': totalSimilarityNames,
+                                'similarityNames': totalSimilarityNames.totalSimilarity,
                                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                 'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                 'similarityScores': totalSimilarityScores,
@@ -422,7 +465,7 @@ async function start(sportKey, params) {
                             try {
                                 newDecisionsTransactions.push({
                                     'pairId': pairId,
-                                    'similarityNames': totalSimilarityNames,
+                                    'similarityNames': totalSimilarityNames.totalSimilarity,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                     'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                     'similarityScores': totalSimilarityScores,
@@ -435,7 +478,7 @@ async function start(sportKey, params) {
                                 });
                                 await db('decisions').insert({
                                     'pairId': pairId,
-                                    'similarityNames': totalSimilarityNames,
+                                    'similarityNames': totalSimilarityNames.totalSimilarity,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                     'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                     'similarityScores': totalSimilarityScores,
@@ -449,7 +492,7 @@ async function start(sportKey, params) {
                                 console.log('decision added');
                             } catch(e) {}
                         } else {
-                            console.log('recapitulating a pair')
+                            // console.log('recapitulating a pair')
                             const pairForUpdate = (await db('pairs').where(function () {
                                 this.where('id1', game1.id).andWhere('id2', game2.id);
                             }).orWhere(function (){
@@ -464,7 +507,7 @@ async function start(sportKey, params) {
                                     this.where('id2', game1.id).andWhere('id1', game2.id);
                                 }).update({
                                     'isLive': game1.isLive,
-                                    'similarityNames': totalSimilarityNames,
+                                    'similarityNames': totalSimilarityNames.totalSimilarity,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                     'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                     'similarityScores': totalSimilarityScores,
@@ -477,7 +520,7 @@ async function start(sportKey, params) {
                                 try {
                                     newDecisionsTransactions.push({
                                         'pairId': pairForUpdate.id,
-                                        'similarityNames': totalSimilarityNames,
+                                        'similarityNames': totalSimilarityNames.totalSimilarity,
                                         'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                         'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                         'similarityScores': totalSimilarityScores,
@@ -490,7 +533,7 @@ async function start(sportKey, params) {
                                     });
                                     await db('decisions').insert({
                                         'pairId': pairForUpdate.id,
-                                        'similarityNames': totalSimilarityNames,
+                                        'similarityNames': totalSimilarityNames.totalSimilarity,
                                         'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                         'similarityOutcomesLive': totalSimilarityOutcomesLive,
                                         'similarityScores': totalSimilarityScores,
