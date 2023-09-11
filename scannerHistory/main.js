@@ -116,8 +116,8 @@ let games = {};
 const socket = new WebSocket('wss://api.livesport.tools/v2?clientKey=mn8W5KhnuwBHdgSJNdUkZbXRC8EFPAfm');
 
 socket.send = ((send) => {
-	return function ({ requestId = null, requestType, data = null }) {
-		let message = JSON.stringify([requestId, requestType, data]);
+	return function ({ id = null, type, data = null , relatedId}) {
+		let message = JSON.stringify([type, data, id, relatedId]);
 		// console.info(`>> ${message}`);
 		return send.call(this, message);
 	};
@@ -128,21 +128,22 @@ socket.on('open', () => {
 	console.info(`WebSocket: open.`);
 
 	socket.send({
-		requestId: socket.nextRequestId++,
-		requestType: 'authorize',
+		id: socket.nextRequestId++,
+		type: 'authorize',
 		data: {
 			secretKey: 'Y%7tRIA8hlgH8#nk60x&4W$CPJh^%x99',
 		},
+		relatedId: 1,
 	});
 });
 
 socket.on('message', async (message) => {
 	message = message.toString();
 	// console.info(`<<`, JSON.parse(message));
-	let requestId, error, responseType, data;
+	let type, data, id, relatedId, error;
 
 	try {
-		[requestId, error, responseType, data] = JSON.parse(message);
+		[type, data, id, relatedId, error] = JSON.parse(message);
 	} catch (error) {
 		console.error(error);
 		return;
@@ -153,14 +154,14 @@ socket.on('message', async (message) => {
 		return;
 	}
 
-	let responseTypeMatch = null;
+	let typeMatch = null;
 
-	if (responseType === 'authorized') {
+	if (type === 'authorized') {
 		// Subscribing to GameList
 
 		socket.send({
-			requestId: socket.nextRequestId++,
-			requestType: 'gameList/subscribe',
+			id: socket.nextRequestId++,
+			type: 'gameList/subscribe',
 			data: {},
 		});
 
@@ -170,12 +171,12 @@ socket.on('message', async (message) => {
 	// GameList
 	// ----------------------------------------------------------------------
 
-	if (responseType === 'gameList/subscribed') {
+	if (type === 'gameList/subscribed') {
 		// console.info(`Subscribed to GameList.`);
 		return;
 	}
 
-	if (responseTypeMatch = responseType.match(/^gameList\/(created|updated|deleted)$/)) {
+	if (typeMatch = type.match(/^gameList\/(created|updated|deleted)$/)) {
 		if (data === '\x00') {
 			gameList = null;
 		} else {
@@ -191,8 +192,8 @@ socket.on('message', async (message) => {
 		return;
 	}
 
-	if (responseTypeMatch = responseType.match(/^game:([0-9]+)\/(created|updated|deleted)/)) {
-		let gameId = Number(responseTypeMatch[1]);
+	if (typeMatch = type.match(/^game:([0-9]+)\/(created|updated|deleted)/)) {
+		let gameId = Number(typeMatch[1]);
 
 		
 
@@ -285,12 +286,12 @@ socket.on('message', async (message) => {
 	// GlobalGameList
 	// ----------------------------------------------------------------------
 
-	if (responseType === 'globalGameList/subscribed') {
+	if (type === 'globalGameList/subscribed') {
 		console.info(`Successfuly subscribed to GlobalGameList.`);
 		return;
 	}
 
-	if (responseTypeMatch = responseType.match(/^globalGameList\/(created|updated|deleted)$/)) {
+	if (typeMatch = type.match(/^globalGameList\/(created|updated|deleted)$/)) {
 		if (data === '\x00') {
 			globalGameList = null;
 		} else {
@@ -306,8 +307,8 @@ socket.on('message', async (message) => {
 		return;
 	}
 
-	if (responseTypeMatch = responseType.match(/^globalGame:([0-9]+)\/(created|updated|deleted)/)) {
-		let globalGameId = Number(responseTypeMatch[1]);
+	if (typeMatch = type.match(/^globalGame:([0-9]+)\/(created|updated|deleted)/)) {
+		let globalGameId = Number(typeMatch[1]);
 
 		if (data === '\x00') {
 			delete globalGames[globalGameId];
@@ -341,8 +342,8 @@ function syncGlobalGameSubscriptions() {
 			globalGames[globalGameId] = null;
 
 			socket.send({
-				requestId: socket.nextRequestId++,
-				requestType: `globalGame:${globalGameId}/subscribe`,
+				id: socket.nextRequestId++,
+				type: `globalGame:${globalGameId}/subscribe`,
 			});
 		}
 	}
@@ -354,8 +355,8 @@ function syncGameSubscriptions() {
 			games[gameId] = null;
 
 			socket.send({
-				requestId: socket.nextRequestId++,
-				requestType: `game:${gameId}/subscribe`,
+				id: socket.nextRequestId++,
+				type: `game:${gameId}/subscribe`,
 			});
 		}
 	}

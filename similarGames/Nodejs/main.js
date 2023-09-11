@@ -369,17 +369,18 @@ async function start(sportKey, params) {
                         else if (totalSimilarityNames >= 0.75 && (totalSimilarityOutcomesPre >= 0.8)) needGroup = true;
                         else if (totalSimilarityNames >= 0.95 && (totalSimilarityOutcomesPre >= 0.8 || totalSimilarityOutcomesLive >= 0.75) && (totalSimilarityScores >= 0.7 || totalSimilarityScores === 0)) needGroup = true;
                         else if (totalSimilarityNames >= 0.75 && (totalSimilarityOutcomesPre >= 0.9 || totalSimilarityOutcomesLive >= 0.8) && (totalSimilarityScores >= 0.75 || totalSimilarityScores === 0)) needGroup = true;
-                        // console.log('Comparing...', 
-                        // {
-                        //     id1: game1.id, 
-                        //     id2: game2.id, 
-                        //     outcPre: totalSimilarityOutcomesPre, 
-                        //     outcLive: totalSimilarityOutcomesLive,
-                        //     scores: totalSimilarityScores, 
-                        //     names: totalSimilarityNames, 
-                        //     need: needGroup,
-                        //     timeDiscrepancy: timeDiscrepancy
-                        // });
+                        console.log('Comparing...', 
+                        {
+                            id1: game1.id, 
+                            id2: game2.id, 
+                            outcPre: totalSimilarityOutcomesPre, 
+                            outcLive: totalSimilarityOutcomesLive,
+                            scores: totalSimilarityScores, 
+                            names: totalSimilarityNames, 
+                            need: needGroup,
+                            grouped: game1.globalGameId === game2.globalGameId,
+                            timeDiscrepancy: timeDiscrepancy
+                        });
                         if (pairExist.length === 0){
                             newPairsTransactions.push({
                                 'id1': game1.id,
@@ -448,6 +449,7 @@ async function start(sportKey, params) {
                                 console.log('decision added');
                             } catch(e) {}
                         } else {
+                            console.log('recapitulating a pair')
                             const pairForUpdate = (await db('pairs').where(function () {
                                 this.where('id1', game1.id).andWhere('id2', game2.id);
                             }).orWhere(function (){
@@ -515,7 +517,7 @@ async function start(sportKey, params) {
             await Promise.all(findingСoupleToGameFunctions);
             
         }
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
+        // await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
     }
 }
 

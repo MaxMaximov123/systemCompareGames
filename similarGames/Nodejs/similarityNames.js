@@ -441,13 +441,13 @@ async function getSimilarityNames(games){
     // delete games.game2.name1WordSets;
     // delete games.game2.name2WordSets;
     let isInverted = false;
-    let totalSimilarity = (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2;
+    let totalSimilarity = (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2;
     if (
-        (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2 > 
+        (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2 <
         (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2
     ){
         isInverted = true;
-        totalSimilarity = (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2;
+        totalSimilarity = (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2;
     }
     games.game2 = {};
     return [Object.values(similarityNames).map(obj => obj.namesSets), totalSimilarity, isInverted];
@@ -461,7 +461,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Ciudad de Bolivar","name2":"CS Estudiantes San Luis","bookieKey":"BETMGM"},"game2":{"name1":"Stade Lavallois","name2":"Caen","bookieKey":"PINNACLE"}}
+    let games = {"game1":{"name1":"Red Deer Rebels","name2":"Edmonton Ojl Kingz","bookieKey":"FONBET"},"game2":{"name1":"Ред Дир Ребелс","name2":"Эдмонтон Ойл Кингс","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     (await getSimilarityNames(games)).map(val => console.log(val));
