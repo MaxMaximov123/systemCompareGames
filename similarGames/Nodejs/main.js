@@ -403,26 +403,28 @@ async function start(sportKey, params) {
                         if (needGroup && !(game1.globalGameId === game2.globalGameId)){
                             let dataForAddingInCore = {
                                 games: {
-                                    [game1.id]: {
-                                        leagueId: game1.leagueId,
-                                        team1Id: game1.team1Id,
-                                        team2Id: game1.team2Id
+                                    [Number(game1.id)]: {
+                                        leagueId: Number(game1.leagueId),
+                                        team1Id: Number(game1.team1Id),
+                                        team2Id: Number(game1.team2Id)
                                     },
-                                    [game2.id]: {
-                                        leagueId: game2.leagueId,
-                                        team1Id: totalSimilarityNames.isInverted ? game2.team2Id : game2.team1Id,
-                                        team2Id: totalSimilarityNames.isInverted ? game2.team1Id : game2.team2Id
+                                    [Number(game2.id)]: {
+                                        leagueId: Number(game2.leagueId),
+                                        team1Id: totalSimilarityNames.isInverted ? Number(game2.team2Id) : Number(game2.team1Id),
+                                        team2Id: totalSimilarityNames.isInverted ? Number(game2.team1Id) : Number(game2.team2Id)
                                     }
                                 },
                                 "extend": true,
                                 "makingType": "EXTENSION"
                             };
                             console.log(dataForAddingInCore);
-                            console.log((await postRequest(
+                            let response = (await postRequest(
                                 'https://sm.livesport.tools/api/game-manager/games/group',
                                 dataForAddingInCore
-                                )).invalidFields
-                            );
+                                ));
+                            if (response){
+                                console.log(response)
+                            }
                         }
                         if (pairExist.length === 0){
                             newPairsTransactions.push({
