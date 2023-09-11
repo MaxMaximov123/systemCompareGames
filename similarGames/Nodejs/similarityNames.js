@@ -440,10 +440,17 @@ async function getSimilarityNames(games){
     }
     // delete games.game2.name1WordSets;
     // delete games.game2.name2WordSets;
-    return [Object.values(similarityNames), Math.max(
-        (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2,
-        (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2,
-    )];
+    let isInverted = false;
+    let totalSimilarity = (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2;
+    if (
+        (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2 > 
+        (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2
+    ){
+        isInverted = true;
+        totalSimilarity = (similarityNames.game1Name1game2Name1.sameWordsPercent + similarityNames.game1Name2game2Name2.sameWordsPercent) / 2;
+    }
+    games.game2 = {};
+    return [Object.values(similarityNames).map(obj => obj.namesSets), totalSimilarity, isInverted];
 }
 
 

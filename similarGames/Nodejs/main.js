@@ -252,19 +252,18 @@ async function start(sportKey, params) {
             for (let numGame1=0;numGame1<games.length;numGame1++){
                 console.log(sportKey, 'game1', numGame1, '/', games.length);
                 const game1 = games[numGame1];
-                const gamesNames = {
-                    game1: {
-                        name1: game1.team1Name,
-                        name2: game1.team2Name,
-                        bookieKey: game1.bookieKey,
-                    },
-                }
-                
-                gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
-                const findingСoupleToGame = async (games, game1, gamesNames, numGame1) => {
+                const findingСoupleToGame = async (games, game1, numGame1) => {
+                    let gamesNames = {
+                        game1: {
+                            name1: game1.team1Name,
+                            name2: game1.team2Name,
+                            bookieKey: game1.bookieKey,
+                        },
+                    }
+                    gamesNames.game1 = await getGameObjectSetsForSimilarity(gamesNames, 'game1');
                     for (let numGame2=numGame1;numGame2<games.length;numGame2++){
                         const game2 = games[numGame2];
-                        // console.log(sportKey, 'game2', numGame2, '/', games.length);
+                        // console.log(sportKey, 'game1', numGame1, 'game2', numGame2, '/', games.length);
                         for (let numKey of ['startTime', 'liveFrom']){
                             game1[numKey] = Number(game1[numKey]);
                             game2[numKey] = Number(game2[numKey]);
@@ -507,8 +506,8 @@ async function start(sportKey, params) {
                         
                     }
                 }
-                findingСoupleToGameFunctions.push(findingСoupleToGame(games, game1, gamesNames, numGame1));
-                if (findingСoupleToGameFunctions.length === 3){
+                findingСoupleToGameFunctions.push(findingСoupleToGame(games, game1, numGame1));
+                if (findingСoupleToGameFunctions.length === 5){
                     await Promise.all(findingСoupleToGameFunctions);
                     findingСoupleToGameFunctions.length = 0;
                 }
