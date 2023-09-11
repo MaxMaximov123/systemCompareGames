@@ -253,6 +253,7 @@ socket.on('message', async (message) => {
 					liveFrom: new Date(game?.liveFrom).getTime(),
 					liveTill: new Date(game?.liveTill).getTime(),
 					lastUpdate: new Date().getTime(),
+					leagueId: game?.league?.id
 				});
 			}
 			
