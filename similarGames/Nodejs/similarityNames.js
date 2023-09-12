@@ -13,7 +13,7 @@ const dictionary = {
     'а': ['a', 'o', 'u'], 
     'б': ['b'], 
     'в': ['v', 'w'], 
-    'г': ['g', 'h', 'q', 'gu'],
+    'г': ['g', 'h', 'q', 'gu', 'gh'],
     'д': ['d'],
     'е': ['e', 'y', 'i', 'j', 'a', 'ie', 'ye', 'io', 'je', 'ea'], 
     'ё': ['y', 'i', 'o', 'io', 'yo', 'jo'],
@@ -76,6 +76,7 @@ const dictionary = {
     'gl': ['gl'],
     'gu': ['gu'],
     'gn': ['gn'],
+    'gh': ['gh'],
     'io': ['io'],
     'kh': ['kh'],
     'ye': ['ye', 'ie'],
@@ -266,13 +267,11 @@ const googleTranslateURL = (from, to, txt) =>
     `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${encodeURIComponent(from)}&tl=${encodeURIComponent(to)}&q=${encodeURIComponent(txt)}`
 
 function clearingName(name, bookieKey){
-    console.log(name);
     for (let replacement of replacements[bookieKey]){
         name = name.replace(replacement[0], replacement[1]);
     }
     name = name.replace(/(.)\1+/g, '$1')
     name = name.replace(/\s+/g, ' ');
-    console.log(name);
     return name;
 }
 
@@ -286,8 +285,7 @@ function Transliteration(word) {
         if (index === maxWordLength){
             return;
         }
-        
-        // console.log(wood, currentWord, index, maxWordLength);
+
         let sequenceCharacters = word[index]
         const currentSymbolsTranslations = (dictionary[word[index]] || [word[index]]).map(char => {return {str: char, ind: index}});
         for (let sequenceCharacterNumber=index+1;sequenceCharacterNumber<
@@ -306,14 +304,16 @@ function Transliteration(word) {
     return words['1'];
 }
 
-async function translate(word){
+function translate(word){
     return allTranslatedWords[word] || [];
 }
 
-async function wordToOption(word){
+function wordToOption(word){
     const options = [];
     options.push(Transliteration(word));
-    (await translate(word)).map(translatedWord => options.push(Transliteration(translatedWord.toLowerCase())));
+    for (let translatedWord of translate(word)){
+        options.push(Transliteration(translatedWord.toLowerCase()));
+    }
     // if (word.length <= 4){
     //     for (let char of word){
     //         options.push(Transliteration(char));
@@ -326,14 +326,17 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
     let result = {word: '', matched: false, countChars: 0};
 
     function allVariationword(countChars, word, localName1WordOption, localName2WordOption){
-        let name1WordOptionCharsObjectKeys = Object.keys(localName1WordOption);
-        let name2WordOptionCharsObjectKeys = Object.keys(localName2WordOption);
-        if (name1WordOptionCharsObjectKeys.length === 0 || name2WordOptionCharsObjectKeys.length === 0){
-            result = {word: word, matched: true, countChars: countChars};
+        if (result.matched) return;
+        if (Object.keys(localName1WordOption).length === 0 || Object.keys(localName2WordOption).length === 0){
+            result.word = word;
+            result.matched = true;
+            result.countChars = countChars;
             return;
         }
-        for (let name1OptionChar of name1WordOptionCharsObjectKeys){
-            for (let name2OptionChar of name2WordOptionCharsObjectKeys){
+        for (let name1OptionChar of Object.keys(localName1WordOption)){
+            if (result.matched) return;
+            for (let name2OptionChar of Object.keys(localName2WordOption)){
+                if (result.matched) return;
                 if (name1OptionChar === name2OptionChar){
                     allVariationword(countChars + 1, word + name1OptionChar, localName1WordOption[name1OptionChar], localName2WordOption[name2OptionChar]);
                     break;
@@ -354,6 +357,7 @@ function searchWordsThatMatch(name1WordOption, name2WordOption){
 }
 
 function findingBestSimilarity(name1Options, name2Options){
+    [name1Options, name2Options] = [name1Options, name2Options].slice();
     const pairsWithTheBestSimilarity = [];
     let sameWordsCount = 0;
     let minimumSetLength = Math.min(name1Options.length, name2Options.length);
@@ -418,28 +422,25 @@ function findingBestSimilarity(name1Options, name2Options){
     return {namesSets: namesSets, sameWordsPercent: sameWordsPercent};
 }
 
-async function getGameObjectSetsForSimilarity(games, game){
-    games[game].name1 = ' ' + games[game].name1 + ' ';
-    games[game].name2 = ' ' + games[game].name2 + ' ';
+async function getGameObjectSetsForSimilarity(games){
+    for (let game in games){
+        games[game].name1 = ' ' + games[game].name1 + ' ';
+        games[game].name2 = ' ' + games[game].name2 + ' ';
 
-    games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
-    games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
+        games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
+        games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
 
-    games[game].name1 = games[game].name1.toLowerCase();
-    games[game].name2 = games[game].name2.toLowerCase();
+        games[game].name1 = games[game].name1.toLowerCase();
+        games[game].name2 = games[game].name2.toLowerCase();
 
-    games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
-    games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+        games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+        games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
 
-    [games[game].name1Options, games[game].name2Options] = await Promise.all([
-        Promise.all(games[game].name1Words.map(word => wordToOption(word))),
-        Promise.all(games[game].name2Words.map(word => wordToOption(word)))
-    ]);
+        games[game].name1Options = games[game].name1Words.map(word => wordToOption(word));
+        games[game].name2Options = games[game].name2Words.map(word => wordToOption(word));
+    }
 
-    delete games[game].name1Words;
-    delete games[game].name2Words;
-
-    return games[game];
+    return games;
 }
 
 
@@ -461,7 +462,7 @@ async function getSimilarityNames(games){
         isInverted = true;
         totalSimilarity = (similarityNames.game1Name1game2Name2.sameWordsPercent + similarityNames.game1Name2game2Name1.sameWordsPercent) / 2;
     }
-    games.game2 = {};
+    games = {};
     return {
         obj: Object.values(similarityNames).map(obj => obj.namesSets), 
         totalSimilarity: totalSimilarity,
@@ -477,9 +478,8 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Liu (w)","name2":"Italy (w)","bookieKey":"FONBET"},"game2":{"name1":"Лин Yilmaz (TUR)","name2":"Giorgia Piccolin (ITA)","bookieKey":"BETMGM"}}
-    games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
-    games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
+    let games = {"game1":{"name1":"Hong Kong U23","name2":"Afghanistan U23","bookieKey":"BET365"},"game2":{"name1":"Гонконг (до 23)","name2":"Афганистан (до 23)","bookieKey":"OLIMP"}}
+    games = await getGameObjectSetsForSimilarity(games);
     console.log(await getSimilarityNames(games));
     console.log(new Date() - t);
 };
