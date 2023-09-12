@@ -268,12 +268,12 @@ async function start(sportKey, params) {
         if (games){
             let findingСoupleToGameFunctions = [];
             for (let numGame1=0;numGame1<games.length;numGame1++){
-                console.log(sportKey, 'game1', numGame1, '/', games.length);
+                // console.log(sportKey, 'game1', numGame1, '/', games.length);
                 const game1 = games[numGame1];
                 const findingСoupleToGame = async (games, game1, numGame1) => {
                     for (let numGame2=numGame1;numGame2<games.length;numGame2++){
                         const game2 = games[numGame2];
-                        // console.log(sportKey, 'game1', numGame1, 'game2', numGame2, '/', games.length);
+                        console.log(sportKey, 'game1', numGame1, 'game2', numGame2, '/', games.length);
                         for (let numKey of ['startTime', 'liveFrom']){
                             game1[numKey] = Number(game1[numKey]);
                             game2[numKey] = Number(game2[numKey]);
@@ -560,7 +560,7 @@ async function start(sportKey, params) {
             await Promise.all(findingСoupleToGameFunctions);
             
         }
-        // await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60));
     }
 }
 
