@@ -430,24 +430,28 @@ async function start(sportKey, params) {
                             }
                         }
                         if (pairExist.length === 0){
-                            newPairsTransactions.push({
-                                'id1': game1.id,
-                                'id2': game2.id,
-                                'isLive': game1.isLive,
-                                'game1Team1Name': game1?.team1Name,
-                                'game2Team1Name': game2?.team1Name,
-                                'game1Team2Name': game1?.team2Name,
-                                'game2Team2Name': game2?.team2Name,
-                                'similarityNames': totalSimilarityNames.totalSimilarity,
-                                'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                'similarityScores': totalSimilarityScores,
-                                'totalSimilarity': (totalSimilarityOutcomesPre + totalSimilarityOutcomesLive + totalSimilarityScores) / 3,
-                                'timeDiscrepancy': timeDiscrepancy,
-                                'needGroup': needGroup,
-                                'grouped': game1.globalGameId === game2.globalGameId,
-                                'now': new Date().getTime(),
-                            });
+                            if (
+                                ((game1.globalGameId === game2.globalGameId) && !needGroup) || 
+                                (!(game1.globalGameId === game2.globalGameId) && needGroup)){
+                                    newPairsTransactions.push({
+                                        'id1': game1.id,
+                                        'id2': game2.id,
+                                        'isLive': game1.isLive,
+                                        'game1Team1Name': game1?.team1Name,
+                                        'game2Team1Name': game2?.team1Name,
+                                        'game1Team2Name': game1?.team2Name,
+                                        'game2Team2Name': game2?.team2Name,
+                                        'similarityNames': totalSimilarityNames.totalSimilarity,
+                                        'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                                        'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                                        'similarityScores': totalSimilarityScores,
+                                        'totalSimilarity': (totalSimilarityOutcomesPre + totalSimilarityOutcomesLive + totalSimilarityScores) / 3,
+                                        'timeDiscrepancy': timeDiscrepancy,
+                                        'needGroup': needGroup,
+                                        'grouped': game1.globalGameId === game2.globalGameId,
+                                        'now': new Date().getTime(),
+                                    });
+                                }
                             try {
                                 newDecisionsTransactions.push({
                                     'pairId': 1,
