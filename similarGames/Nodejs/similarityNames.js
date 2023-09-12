@@ -423,22 +423,20 @@ function findingBestSimilarity(name1Options, name2Options){
 }
 
 async function getGameObjectSetsForSimilarity(games){
-    for (let game in games){
-        games[game].name1 = ' ' + games[game].name1 + ' ';
-        games[game].name2 = ' ' + games[game].name2 + ' ';
+    games.name1 = ' ' + games.name1 + ' ';
+    games.name2 = ' ' + games.name2 + ' ';
 
-        games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
-        games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
+    games.name1 = clearingName(games.name1, games.bookieKey);
+    games.name2 = clearingName(games.name2, games.bookieKey);
 
-        games[game].name1 = games[game].name1.toLowerCase();
-        games[game].name2 = games[game].name2.toLowerCase();
+    games.name1 = games.name1.toLowerCase();
+    games.name2 = games.name2.toLowerCase();
 
-        games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
-        games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+    games.name1Words = games.name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
+    games.name2Words = games.name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
 
-        games[game].name1Options = games[game].name1Words.map(word => wordToOption(word));
-        games[game].name2Options = games[game].name2Words.map(word => wordToOption(word));
-    }
+    games.name1Options = games.name1Words.map(word => wordToOption(word));
+    games.name2Options = games.name2Words.map(word => wordToOption(word));
 
     return games;
 }
@@ -479,7 +477,8 @@ async function getSimilarityNames(games){
 const example = async () => {
     t = new Date();
     let games = {"game1":{"name1":"Hong Kong U23","name2":"Afghanistan U23","bookieKey":"BET365"},"game2":{"name1":"Гонконг (до 23)","name2":"Афганистан (до 23)","bookieKey":"OLIMP"}}
-    games = await getGameObjectSetsForSimilarity(games);
+    games.game1 = await getGameObjectSetsForSimilarity(games.game1);
+    games.game2 = await getGameObjectSetsForSimilarity(games.game2);
     console.log(await getSimilarityNames(games));
     console.log(new Date() - t);
 };
