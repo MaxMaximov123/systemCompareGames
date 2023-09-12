@@ -247,9 +247,13 @@ async function start(sportKey, params) {
         let newPairsTransactionsForAdding = newPairsTransactions.slice();
         newPairsTransactions.length = 0;
         // console.log(newPairsTransactionsForAdding, 'pairs');
+        if (newPairsTransactionsForAdding.length > 0){
+            const pairId = (await db('pairs').insert(newPairsTransactionsForAdding).returning('id'))[0].id;
+            console.log('pairs added');
+        }
 
 
-    }, 1000);
+    }, 5000);
 
 
     while (true){
@@ -288,8 +292,7 @@ async function start(sportKey, params) {
                             game1[numKey] = Number(game1[numKey]);
                             game2[numKey] = Number(game2[numKey]);
                         }
-                        if (game2.id === game1.id || game2.bookieKey === game1.bookieKey
-                            || game1.globalGameId === game2.globalGameId) continue;
+                        if (game2.id === game1.id || game2.bookieKey === game1.bookieKey) continue;
 
                         let totalSimilarityOutcomesPre = 0;
                         let totalSimilarityOutcomesLive = 0;
@@ -445,28 +448,9 @@ async function start(sportKey, params) {
                                 'grouped': game1.globalGameId === game2.globalGameId,
                                 'now': new Date().getTime(),
                             });
-                            const pairId = (await db('pairs').insert({
-                                'id1': game1.id,
-                                'id2': game2.id,
-                                'isLive': game1.isLive,
-                                'game1Team1Name': game1?.team1Name,
-                                'game2Team1Name': game2?.team1Name,
-                                'game1Team2Name': game1?.team2Name,
-                                'game2Team2Name': game2?.team2Name,
-                                'similarityNames': totalSimilarityNames.totalSimilarity,
-                                'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                'similarityScores': totalSimilarityScores,
-                                'totalSimilarity': (totalSimilarityOutcomesPre + totalSimilarityOutcomesLive + totalSimilarityScores) / 3,
-                                'timeDiscrepancy': timeDiscrepancy,
-                                'needGroup': needGroup,
-                                'grouped': game1.globalGameId === game2.globalGameId,
-                                'now': new Date().getTime(),
-                            }).returning('id'))[0].id;
-                            console.log('pair added');
                             try {
                                 newDecisionsTransactions.push({
-                                    'pairId': pairId,
+                                    'pairId': 1,
                                     'similarityNames': totalSimilarityNames.totalSimilarity,
                                     'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                     'similarityOutcomesLive': totalSimilarityOutcomesLive,
