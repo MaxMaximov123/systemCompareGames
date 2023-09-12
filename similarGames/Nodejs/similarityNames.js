@@ -127,6 +127,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
+        [/-pro\s/gi, ' '],
 
     ],
     "OLIMP": [
@@ -142,6 +143,7 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
+        [/\s-про\s/gi, ' '],
 
     ],
     "VIRGINBET": [
@@ -157,6 +159,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/-pro\s/gi, ' '],
 
     ],
     "BET365": [
@@ -175,6 +178,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/-pro\s/gi, ' '],
 
     ],
     "BETMGM": [
@@ -192,6 +196,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/-pro\s/gi, ' '],
 
 
     ],
@@ -214,6 +219,7 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
+        [/-pro\s/gi, ' '],
 
 
     ],
@@ -233,6 +239,7 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
+        [/-pro\s/gi, ' '],
     ],
 }
 
@@ -259,11 +266,13 @@ const googleTranslateURL = (from, to, txt) =>
     `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${encodeURIComponent(from)}&tl=${encodeURIComponent(to)}&q=${encodeURIComponent(txt)}`
 
 function clearingName(name, bookieKey){
+    console.log(name);
     for (let replacement of replacements[bookieKey]){
         name = name.replace(replacement[0], replacement[1]);
     }
     name = name.replace(/(.)\1+/g, '$1')
     name = name.replace(/\s+/g, ' ');
+    console.log(name);
     return name;
 }
 
@@ -405,16 +414,19 @@ function findingBestSimilarity(name1Options, name2Options){
         if (namesSets.name1Set[numWord].realWord.length >= minimumCharCount && namesSets.name2Set[numWord].realWord.length >= minimumCharCount && namesSets.name1Set[numWord].matched) fullWordMatched = true;
     }
     let sameWordsPercent = !fullWordExist || fullWordMatched ? sameWordsCount / namesSets.name1Set.length : 0;
-    // console.log(namesSets)
+    console.log(namesSets)
     return {namesSets: namesSets, sameWordsPercent: sameWordsPercent};
 }
 
 async function getGameObjectSetsForSimilarity(games, game){
-    games[game].name1 = ' ' + games[game].name1.toLowerCase() + ' ';
-    games[game].name2 = ' ' + games[game].name2.toLowerCase() + ' ';
+    games[game].name1 = ' ' + games[game].name1 + ' ';
+    games[game].name2 = ' ' + games[game].name2 + ' ';
 
     games[game].name1 = clearingName(games[game].name1, games[game].bookieKey);
     games[game].name2 = clearingName(games[game].name2, games[game].bookieKey);
+
+    games[game].name1 = games[game].name1.toLowerCase();
+    games[game].name2 = games[game].name2.toLowerCase();
 
     games[game].name1Words = games[game].name1.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
     games[game].name2Words = games[game].name2.match(/[\p{Letter}\p{Mark}\p{Number}]+/ug) || [];
@@ -465,7 +477,7 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Red Deer Rebels","name2":"Edmonton Ojl Kingz","bookieKey":"FONBET"},"game2":{"name1":"Ред Дир Ребелс","name2":"Эдмонтон Ойл Кингс","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Turkey (w)","name2":"Italy (w)","bookieKey":"FONBET"},"game2":{"name1":"Ozge Yilmaz (TUR)","name2":"Giorgia Piccolin (ITA)","bookieKey":"BETMGM"}}
     games.game1 = await getGameObjectSetsForSimilarity(games, 'game1');
     games.game2 = await getGameObjectSetsForSimilarity(games, 'game2');
     console.log(await getSimilarityNames(games));
