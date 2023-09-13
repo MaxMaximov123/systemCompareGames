@@ -264,7 +264,6 @@ async function start(sportKey, params) {
             )
         .where('games.sportKey', sportKey)
         .whereNull('games.unavailableAt')
-        .groupBy('games.id')
         .orderBy(params.orderBy.column, params.orderBy.key);
     
     let countGames = 0;
@@ -289,7 +288,7 @@ async function start(sportKey, params) {
                 for (let numGame2=numGame1;numGame2<gamesForComparison.length;numGame2++){
                     const game2 = gamesForComparison[numGame2];
                     console.log(sportKey, 'game1', numGame1, 'game2', numGame2, '/', gamesForComparison.length);
-                    for (let numKey of ['startTime', 'liveFrom']){
+                    for (let numKey of ['startTime', 'liveFrom', 'leagueId', 'team1Id', 'team2Id', 'id']){
                         game1[numKey] = Number(game1[numKey]);
                         game2[numKey] = Number(game2[numKey]);
                     }
@@ -346,8 +345,6 @@ async function start(sportKey, params) {
                     }
                     game1DataScores = null;
                     game2DataScores = null;
-
-                    if (totalSimilarityScores >= 0 && totalSimilarityScores < 0.7) continue;
                     
                     if (game1.isLive === true || game2.isLive === true){
                         let game1DataOutcomesLive = [];
@@ -558,7 +555,6 @@ async function start(sportKey, params) {
                 )
             .where('games.sportKey', sportKey)
             .whereNull('games.unavailableAt')
-            .groupBy('games.id')
             .orderBy(params.orderBy.column, params.orderBy.key);
 
         let countGames = 0;
