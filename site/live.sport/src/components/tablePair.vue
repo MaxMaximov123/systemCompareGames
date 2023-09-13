@@ -43,7 +43,7 @@
         </table>
       </modal>
     </v-container>
-    <v-container>
+    <v-container v-if="modalTeamNames.isOpen">
       <modal :value="modalTeamNames.isOpen" :title="modalTeamNames.title" @closeModal="closeModal" style="width: 30%;">
         <table style="font-size: 80%; border-collapse: collapse; width: 100%;">
             <thead class="headers" style="top: 0; position: sticky;">

@@ -52,6 +52,18 @@
 
         </tr>
     </table>
+    <v-text-field
+        v-model="filters.teamName"
+        :loading="loadingUpdate"
+        density="compact"
+        variant="solo"
+        label="Поиск по названию"
+        append-inner-icon="mdi-magnify"
+        single-line
+        hide-details
+        @click:append-inner="searchByNames"
+        style="width: 15%; margin-left: auto; margin-right: 2%;"
+    ></v-text-field>
     <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
     <v-btn :loading="loadingUpdate" style="margin-left: 5%;" @click="render">
         <v-icon>mdi-refresh</v-icon>
@@ -113,6 +125,7 @@ export default {
                 sportKey: 'Все',
                 groupedNewSystem: 'Все',
                 groupedOldSystem: 'Все',
+                teamName: '',
             },
 
             loadingUpdate: false,
@@ -172,6 +185,7 @@ export default {
                 groupedNewSystem: this.queryParams.groupedNewSystem ? this.queryParams.groupedNewSystem : 'Все',
                 groupedOldSystem: this.queryParams.groupedOldSystem ? this.queryParams.groupedOldSystem : 'Все',
                 sportKey: this.queryParams.sportKey ? this.queryParams.sportKey : 'Все',
+                teamName: this.queryParams.teamName ? this.queryParams.teamName : '',
             },
         this.currentPage = Number(this.$route.params.page);
         this.render();
@@ -199,6 +213,7 @@ export default {
                 simOutcomesLiveMax: this.filters.simOutcomesLive.max,
                 simScoresMin: this.filters.simScores.min,
                 simScoresMax: this.filters.simScores.max,
+                teamName: this.filters.teamName,
             };
         },
 
@@ -220,6 +235,12 @@ export default {
 
         async updatePage(e){
             router.push({path: `/pairs/${this.currentPage}`, query: this.getURLParams()});
+            await this.render();
+        },
+
+        async searchByNames(e){
+            router.push({path: `/pairs/1`, query: this.getURLParams()});
+            this.currentPage = 1;
             await this.render();
         },
 

@@ -130,6 +130,12 @@ app.post('/api/pairs', async (req, res) => {
         .whereIn('pairs.needGroup', groupedNewSystem)
         .whereIn('pairs.grouped', groupedOldSystem)
         .whereIn('games1.sportKey', sportKey)
+        .where(function() {
+          this.where('game1Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
+            .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
+            .orWhere('game2Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
+            .orWhere('game2Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
+        });
       result.pairs = pairs;
       result.pageCount = await db('pairs')
       .join('games as games1', 'pairs.id1', 'games1.id')
@@ -146,6 +152,12 @@ app.post('/api/pairs', async (req, res) => {
       .whereIn('needGroup', groupedNewSystem)
       .whereIn('grouped', groupedOldSystem)
       .whereIn('games1.sportKey', sportKey)
+      .where(function() {
+        this.where('game1Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
+          .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
+          .orWhere('game2Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
+          .orWhere('game2Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
+      })
       .count('pairs.id');
       result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));

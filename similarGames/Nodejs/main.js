@@ -431,8 +431,7 @@ async function start(sportKey, params) {
                         }
                         if (pairExist.length === 0){
                             if (
-                                ((game1.globalGameId === game2.globalGameId) && !needGroup) || 
-                                (!(game1.globalGameId === game2.globalGameId) && needGroup)){
+                                ((game1.globalGameId === game2.globalGameId) !== needGroup)){
                                     newPairsTransactions.push({
                                         'id1': game1.id,
                                         'id2': game2.id,
