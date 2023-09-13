@@ -274,6 +274,7 @@ async function start(sportKey, params) {
             name2: game.team2Name,
             bookieKey: game.bookieKey,
         };
+        console.log(allGames[game.id].gameNames);
         allGames[game.id].gameNames = await getGameObjectSetsForSimilarity(allGames[game.id].gameNames);                
         console.log(countGames, '/', newGames.length);
         countGames++;
