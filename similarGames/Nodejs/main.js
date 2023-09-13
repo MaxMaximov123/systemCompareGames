@@ -257,7 +257,6 @@ async function start(sportKey, params) {
 
     let allGames = {};
     let newGames = await db('games')
-        .join('outcomes', 'games.id', 'outcomes.id')
         .select(
             'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.team1Id', 'games.team2Id',
             'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey', 'leagueId',
@@ -552,7 +551,6 @@ async function start(sportKey, params) {
         
         gamesForComparison = [];
         let newGames = await db('games')
-            .join('outcomes', 'games.id', 'outcomes.id')
             .select(
                 'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.team1Id', 'games.team2Id',
                 'games.isLive', 'games.globalGameId', 'games.startTime', 'games.liveFrom', 'games.sportKey', 'leagueId',
