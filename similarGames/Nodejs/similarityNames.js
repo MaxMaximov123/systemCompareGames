@@ -287,17 +287,17 @@ function Transliteration(word) {
         }
 
         let sequenceCharacters = word[index]
-        const currentSymbolsTranslations = (dictionary[word[index]] || [word[index]]).map(char => {return {str: char, ind: index}});
+        let currentSymbolsTranslations = (dictionary[sequenceCharacters] || [sequenceCharacters]).map(char => [char, index]);
         for (let sequenceCharacterNumber=index+1;sequenceCharacterNumber<
             index+maximumLengthKeySlovet;sequenceCharacterNumber++){
                 if (!word[sequenceCharacterNumber]) break;
             sequenceCharacters += word[sequenceCharacterNumber];
             if (dictionary[sequenceCharacters]){
-                currentSymbolsTranslations.push(...dictionary[sequenceCharacters].map(char => {return {str: char, ind: sequenceCharacterNumber}}));
+                currentSymbolsTranslations.push(...dictionary[sequenceCharacters].map(char => [char, sequenceCharacterNumber]));
             }    
         }
         for (let dict of currentSymbolsTranslations) {
-            backtrack(dict.str, dict.ind+1, wood[currentWord]);
+            backtrack(dict[0], dict[1]+1, wood[currentWord]);
         }
     }
     backtrack('1', 0, words);
@@ -476,10 +476,11 @@ async function getSimilarityNames(games){
 
 const example = async () => {
     t = new Date();
-    let games = {"game1":{"name1":"Hong Kong U23","name2":"Afghanistan U23","bookieKey":"BET365"},"game2":{"name1":"Гонконг (до 23)","name2":"Афганистан (до 23)","bookieKey":"OLIMP"}}
+    let games = {"game1":{"name1":"Индепендиенте Чивилькой","name2":"Унион Де Санчалес","bookieKey":"OLIMP"},"game2":{"name1":"Гонконг (до 23)","name2":"Афганистан (до 23)","bookieKey":"OLIMP"}}
     games.game1 = await getGameObjectSetsForSimilarity(games.game1);
-    games.game2 = await getGameObjectSetsForSimilarity(games.game2);
-    console.log(await getSimilarityNames(games));
+    // games.game2 = await getGameObjectSetsForSimilarity(games.game2);
+    console.log(games.game1);
+    // console.log(await getSimilarityNames(games));
     console.log(new Date() - t);
 };
 
@@ -487,7 +488,7 @@ const example = async () => {
 // const translator = new Translator({from: 'auto', to: 'en', forceBatch: false, tld: 'es'});
 // await translator.translate(['привет', 'пока']);
 
-// example();
+example();
 // setTimeout(example, 5000);
 // console.log(Transliteration('caen')['s'])
 module.exports = { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity };

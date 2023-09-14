@@ -2,11 +2,13 @@ const knex = require('knex');
 const config = require('./knexfile');
 const fs = require('fs')
 // const getRes = require('./names')
-const { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity } = require('./similarityNames.js');
+// const { getSimilarityNames, getGameObjectSetsForSimilarity, findingBestSimilarity } = require('./similarityNames.js');
 const lodash = require('lodash');
 const { exit } = require('process');
 
 const db = knex(config.development);
+
+const {compareAllNames, formatGameNames} = require('./compareNames');
 
 const TIK_STEP = 3;
 
@@ -275,7 +277,7 @@ async function start(sportKey, params) {
             bookieKey: game.bookieKey,
         };
         console.log(allGames[game.id].gameNames);
-        allGames[game.id].gameNames = await getGameObjectSetsForSimilarity(allGames[game.id].gameNames);                
+        allGames[game.id].gameNames = formatGameNames(allGames[game.id].gameNames);
         console.log(countGames, '/', newGames.length);
         countGames++;
     }
@@ -320,7 +322,7 @@ async function start(sportKey, params) {
                         game2: game2.gameNames
                     }
                     // gamesNames = await getGameObjectSetsForSimilarity(gamesNames);
-                    totalSimilarityNames = await getSimilarityNames(gamesNames);
+                    totalSimilarityNames = compareAllNames(gamesNames);
                     // console.log(totalSimilarityNames);
                     if (totalSimilarityNames.totalSimilarity < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
 
@@ -538,7 +540,7 @@ async function start(sportKey, params) {
                 }
             }
             findingСoupleToGameFunctions.push(findingСoupleToGame(gamesForComparison, game1, numGame1));
-            if (findingСoupleToGameFunctions.length === 1){
+            if (findingСoupleToGameFunctions.length === 5){
                 await Promise.all(findingСoupleToGameFunctions);
                 findingСoupleToGameFunctions.length = 0;
             }
@@ -570,7 +572,7 @@ async function start(sportKey, params) {
                     name2: game.team2Name,
                     bookieKey: game.bookieKey,
                 };
-                game.gameNames = await getGameObjectSetsForSimilarity(game.gameNames);
+                game.gameNames = formatGameNames(game.gameNames);
                 gamesForComparison.push(game);
             }
         }

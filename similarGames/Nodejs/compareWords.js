@@ -1,4 +1,4 @@
-intersection = require('lodash/intersection.js');
+const intersection = require('lodash/intersection.js');
 
 // ----------------------------------------------------------------------
 
@@ -112,22 +112,90 @@ const MAX_SLICE_LENGTH = Math.max(
 
 // ----------------------------------------------------------------------
 
-let word1 = 'Индепендиенте';
-let word2 = 'Independiente';
+let wordComparisonCache = {
+    results: {},
 
-word1 = word1.toLowerCase();
-word2 = word2.toLowerCase();
-let startedAt = performance.now();
+    getResultKeyByWords(word1, word2) {
+        return word1 < word2 ? `${word1}:${word2}` : `${word2}:${word1}`;
+    },
 
-console.log(compareWords({ word1, word2 }));
-// for (let i = 0; i < 1000000; ++i) {
-//     let areWordsSimilar = compareWords({ word1, word2 });
+    renewDestoryingTimeout(result) {
+        clearTimeout(result.destroyingTimeout);
+
+        result.destroyingTimeout = setTimeout(() => {
+            delete this.results[result.key];
+            // console.info(`WordComparisonResult "${result.key}" was destroyed.`);
+        }, 60 * 1000);
+    },
+
+    getResult(word1, word2) {
+        let resultKey = this.getResultKeyByWords(word1, word2);
+        let result = this.results[resultKey] || null;
+
+        if (!result) {
+            return null;
+        }
+        
+        this.renewDestoryingTimeout(result);
+        return result;
+    },
+
+    setResult(word1, word2, value) {
+        let resultKey = this.getResultKeyByWords(word1, word2);
+        let result = this.results[resultKey] || null;
+
+        if (result) {
+            throw new Error(`WordComparisonResult "${resultKey}" already exists.`);
+        }
+
+        result = this.results[resultKey] = {
+            value,
+            destroyingTimeout: null,
+        };
+
+        this.renewDestoryingTimeout(result);
+        // console.info(`WordComparisonResult "${resultKey}" was stored with value "${value}".`);
+    },
+};
+
+// ----------------------------------------------------------------------
+
+
+function compareNamesWithCash(word1, word2){
+    let wordComparisonResult = wordComparisonCache.getResult(word1, word2);
+
+    if (wordComparisonResult) {
+        return wordComparisonResult.value;
+    } else {
+        let areWordsSimilar = compareWords({ word1, word2 });
+        wordComparisonCache.setResult(word1, word2, areWordsSimilar);
+        return areWordsSimilar;
+    }
+}
+// let word1 = 'bokelj';
+// let word2 = 'беране';
+
+// word1 = word1.toLowerCase();
+// word2 = word2.toLowerCase();
+
+// console.info(`Comparing "${word1}" with "${word2}"...`);
+// let startedAt = performance.now();
+
+// for (let iteration = 0; iteration < 5; ++iteration) {
+//     let wordComparisonResult = wordComparisonCache.getResult(word1, word2);
+
+//     if (wordComparisonResult) {
+//         // console.info('Are words similar? (from cache)', wordComparisonResult.value);
+//     } else {
+//         let areWordsSimilar = compareWords({ word1, word2 });
+//         wordComparisonCache.setResult(word1, word2, areWordsSimilar);
+//         console.info('Are words similar?', areWordsSimilar);
+//     }
 // }
 
-let finishedAt = performance.now();
-let totalTime = finishedAt - startedAt;
-console.info(totalTime);
-// console.info('Are words similar?', areWordsSimilar);
+// let finishedAt = performance.now();
+// let totalTime = finishedAt - startedAt;
+// console.info('Total time:', totalTime);
 
 // ----------------------------------------------------------------------
 
@@ -188,8 +256,10 @@ function compareWords({
         offset: word1Offset,
     });
 
+    // console.info(level, 'word1PieceOptions', word1PieceOptions);
+
     if (word1PieceOptions['']) {
-        return compare({
+        return compareWords({
             word1,
             word2,
             word1Offset: word1Offset + Math.max(...word1PieceOptions['']),
@@ -202,8 +272,10 @@ function compareWords({
         offset: word2Offset,
     });
 
+    // console.info(level, 'word2PieceOptions', word2PieceOptions);
+
     if (word2PieceOptions['']) {
-        return compare({
+        return compareWords({
             word1,
             word2,
             word1Offset,
@@ -215,6 +287,8 @@ function compareWords({
         Object.keys(word1PieceOptions),
         Object.keys(word2PieceOptions)
     ).reverse();
+
+    // console.info(level, 'commonWordPieceOptionKeys', commonWordPieceOptionKeys);
 
     for (let commonWordPieceOptionKey of commonWordPieceOptionKeys) {
         let word1PieceOptionLengths = word1PieceOptions[commonWordPieceOptionKey];
@@ -241,3 +315,6 @@ function compareWords({
 
     return false;
 }
+
+
+module.exports = compareNamesWithCash;
