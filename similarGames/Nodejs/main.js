@@ -422,13 +422,13 @@ async function start(sportKey, params) {
                             "makingType": "EXTENSION"
                         };
                         console.log(dataForAddingInCore);
-                        // let response = (await postRequest(
-                        //     'https://sm.livesport.tools/api/game-manager/games/group',
-                        //     dataForAddingInCore
-                        //     ));
-                        // if (response){
-                        //     console.log(response)
-                        // }
+                        let response = (await postRequest(
+                            'https://sm.livesport.tools/api/game-manager/games/group',
+                            dataForAddingInCore
+                            ));
+                        if (response){
+                            console.log(response)
+                        }
                     }
                     if (pairExist.length === 0){
                         newPairsTransactions.push({
