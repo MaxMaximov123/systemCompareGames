@@ -143,10 +143,10 @@ async function updateTranslations(){
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"Янг М.","name2":"Анзо Дж.","bookieKey":"OLIMP"},"game2":{"name1":"W. Koolhof/M. Middelkoop","name2":"A. Krajicek/R. Ram","bookieKey":"BETMGM"}}
-// gamesNames.game1 = formatGameNames(gamesNames.game1);
-// gamesNames.game2 = formatGameNames(gamesNames.game2);
-// console.log(compareAllNames(gamesNames));
+gamesNames = {"game1":{"name1":"Fiklik O","name2":"Kulisek M","bookieKey":"FONBET"},"game2":{"name1":"Фиклик О.","name2":"Кулисек М.","bookieKey":"OLIMP"}}
+gamesNames.game1 = formatGameNames(gamesNames.game1);
+gamesNames.game2 = formatGameNames(gamesNames.game2);
+console.log(compareAllNames(gamesNames));
 
 
 // ---------------------------------- //
@@ -184,8 +184,8 @@ function comparePairNames(name1Words, name2Words){
     result.sameWordsPercent = result.sameWordsCount / result.minLengthName;
 
     let fullWordExist = false;
-    for (let numWord=0;numWord<name1Words.length;numWord++){
-        if (name1Words[numWord].length >= MINIMUM_CHAR_COUNT && name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
+    for (let numWord=0;numWord<result.name1Words.length;numWord++){
+        if (result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
     // console.log(namesSets)
