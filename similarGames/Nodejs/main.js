@@ -276,7 +276,6 @@ async function start(sportKey, params) {
             name2: game.team2Name,
             bookieKey: game.bookieKey,
         };
-        console.log(allGames[game.id].gameNames);
         allGames[game.id].gameNames = formatGameNames(allGames[game.id].gameNames);
         console.log(countGames, '/', newGames.length);
         countGames++;
@@ -423,13 +422,13 @@ async function start(sportKey, params) {
                             "makingType": "EXTENSION"
                         };
                         console.log(dataForAddingInCore);
-                        let response = (await postRequest(
-                            'https://sm.livesport.tools/api/game-manager/games/group',
-                            dataForAddingInCore
-                            ));
-                        if (response){
-                            console.log(response)
-                        }
+                        // let response = (await postRequest(
+                        //     'https://sm.livesport.tools/api/game-manager/games/group',
+                        //     dataForAddingInCore
+                        //     ));
+                        // if (response){
+                        //     console.log(response)
+                        // }
                     }
                     if (pairExist.length === 0){
                         newPairsTransactions.push({
@@ -540,7 +539,7 @@ async function start(sportKey, params) {
                 }
             }
             findingСoupleToGameFunctions.push(findingСoupleToGame(gamesForComparison, game1, numGame1));
-            if (findingСoupleToGameFunctions.length === 5){
+            if (findingСoupleToGameFunctions.length === 10){
                 await Promise.all(findingСoupleToGameFunctions);
                 findingСoupleToGameFunctions.length = 0;
             }

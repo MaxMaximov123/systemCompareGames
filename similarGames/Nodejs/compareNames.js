@@ -4,7 +4,7 @@ const config = require('./knexfile');
 const db = knex(config.development);
 
 const compareNamesWithCash = require('./compareWords');
-
+const MINIMUM_CHAR_COUNT = 3;
 const replacements = {
     "BETRADAR": [
         [/\sesports?\s/gi, ' '],
@@ -143,11 +143,10 @@ async function updateTranslations(){
 
 // ---------------------------------- //
 
-gamesNames = {"game1":{"name1":"Los Chancas","name2":"Comerciantes","bookieKey":"FONBET"},"game2":{"name1":"Los Chankas","name2":"Comerciantes FC","bookieKey":"BETMGM"}}
-gamesNames.game1 = formatGameNames(gamesNames.game1);
-gamesNames.game2 = formatGameNames(gamesNames.game2);
-
-console.log(compareAllNames(gamesNames));
+// gamesNames = {"game1":{"name1":"Янг М.","name2":"Анзо Дж.","bookieKey":"OLIMP"},"game2":{"name1":"W. Koolhof/M. Middelkoop","name2":"A. Krajicek/R. Ram","bookieKey":"BETMGM"}}
+// gamesNames.game1 = formatGameNames(gamesNames.game1);
+// gamesNames.game2 = formatGameNames(gamesNames.game2);
+// console.log(compareAllNames(gamesNames));
 
 
 // ---------------------------------- //
@@ -183,6 +182,13 @@ function comparePairNames(name1Words, name2Words){
         }
     }
     result.sameWordsPercent = result.sameWordsCount / result.minLengthName;
+
+    let fullWordExist = false;
+    for (let numWord=0;numWord<name1Words.length;numWord++){
+        if (name1Words[numWord].length >= MINIMUM_CHAR_COUNT && name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
+    }
+    result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
+    // console.log(namesSets)
     return result;
 }
 
