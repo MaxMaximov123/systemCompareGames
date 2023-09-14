@@ -143,7 +143,7 @@ async function updateTranslations(){
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"Basket Roma (w)","name2":"Oxygen Roma Basket (w)","bookieKey":"FONBET"},"game2":{"name1":"Баскет Рома (жен)","name2":"Оксиген Рома (жен)","bookieKey":"OLIMP"}}
+// gamesNames = {"game1":{"name1":"Thai-Son Kwiatkowski","name2":"Tennys Sandgren","bookieKey":"BETRADAR"},"game2":{"name1":"Чантава Т.","name2":"Костаче С.-М.","bookieKey":"OLIMP"}}
 // gamesNames.game1 = formatGameNames(gamesNames.game1);
 // gamesNames.game2 = formatGameNames(gamesNames.game2);
 // console.log(gamesNames.game1);
@@ -170,8 +170,11 @@ function comparePairNames(name1Words, name2Words){
         for (let word2Options of name2Words){
             let resultCompareWords = false;
             for (let word1Option of word1Options){
-                if (resultCompareWords) break;
+                if (resultCompareWords || result.name1Words.includes(word1Option) || 
+                result.name2Words.includes(word1Option)) break;
                 for (let word2Option of word2Options){
+                    if (resultCompareWords || result.name1Words.includes(word2Option) || 
+                    result.name2Words.includes(word2Option)) break;
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
                         result.name1Words.push(word1Option);
@@ -201,6 +204,7 @@ function compareAllNames(gamesNames){
         game1Name1game2Name2: comparePairNames(gamesNames.game1.name1Words, gamesNames.game2.name2Words),
         game1Name2game2Name1: comparePairNames(gamesNames.game1.name2Words, gamesNames.game2.name1Words),
     }
+    console.log(resultsOfComparing.game1Name1game2Name1);
     let resultPairs = {
         leftUpRightDown: {
             sameWordsCount: resultsOfComparing.game1Name1game2Name1.sameWordsCount + resultsOfComparing.game1Name2game2Name2.sameWordsCount,
@@ -214,13 +218,13 @@ function compareAllNames(gamesNames){
     let isInverted = false;
     let totalSimilarity = resultPairs.leftUpRightDown.averagePercent;
     if (resultPairs.leftDownRightUp.averagePercent > resultPairs.leftUpRightDown.averagePercent){
-        let isInverted = true;
-        let totalSimilarity = resultPairs.leftDownRightUp.averagePercent;
+        isInverted = true;
+        totalSimilarity = resultPairs.leftDownRightUp.averagePercent;
     } else if (
         resultPairs.leftDownRightUp.averagePercent === resultPairs.leftUpRightDown.averagePercent && 
         resultPairs.leftDownRightUp.sameWordsCount > resultPairs.leftUpRightDown.sameWordsCount){
-        let isInverted = true;
-        let totalSimilarity = resultPairs.leftDownRightUp.averagePercent;
+        isInverted = true;
+        totalSimilarity = resultPairs.leftDownRightUp.averagePercent;
     }
     return {
         resultPairs: resultPairs,
