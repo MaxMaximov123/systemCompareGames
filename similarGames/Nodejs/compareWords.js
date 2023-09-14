@@ -61,6 +61,7 @@ let replacements = {
     'ль': ['hl'],
     'йи': ['illy'],
     'сюй': ['hsu'],
+    'кс': ['x'],
 
     // Russian 3-character replacements
 

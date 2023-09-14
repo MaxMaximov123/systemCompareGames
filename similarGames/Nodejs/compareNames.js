@@ -143,10 +143,12 @@ async function updateTranslations(){
 
 // ---------------------------------- //
 
-gamesNames = {"game1":{"name1":"Fiklik O","name2":"Kulisek M","bookieKey":"FONBET"},"game2":{"name1":"Фиклик О.","name2":"Кулисек М.","bookieKey":"OLIMP"}}
-gamesNames.game1 = formatGameNames(gamesNames.game1);
-gamesNames.game2 = formatGameNames(gamesNames.game2);
-console.log(compareAllNames(gamesNames));
+// gamesNames = {"game1":{"name1":"Basket Roma (w)","name2":"Oxygen Roma Basket (w)","bookieKey":"FONBET"},"game2":{"name1":"Баскет Рома (жен)","name2":"Оксиген Рома (жен)","bookieKey":"OLIMP"}}
+// gamesNames.game1 = formatGameNames(gamesNames.game1);
+// gamesNames.game2 = formatGameNames(gamesNames.game2);
+// console.log(gamesNames.game1);
+// console.log(gamesNames.game2);
+// console.log(compareAllNames(gamesNames));
 
 
 // ---------------------------------- //
