@@ -251,7 +251,7 @@ async function start(sportKey, params) {
         if (newPairsTransactionsForAdding.length > 0){
             let pairsId = (await db('pairs').insert(newPairsTransactionsForAdding).returning('id'));
             console.log(pairsId, 'pairs added');
-            // process.exit();
+            process.exit();
         }
 
         // let newDecisionsTransactionsForAdding = newDecisionsTransactions.slice();
@@ -266,6 +266,9 @@ async function start(sportKey, params) {
     }, 1000);
 
     let allGames = {};
+    let allOutcomesPre = {};
+    let allOutcomesLive = {};
+    let allScores = {};
     let newGames = await db('games')
         .select(
             'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.team1Id', 'games.team2Id',
@@ -287,6 +290,24 @@ async function start(sportKey, params) {
         allGames[game.id].gameNames = formatGameNames(allGames[game.id].gameNames);
         console.log(countGames, '/', newGames.length);
         countGames++;
+    }
+    let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
+    for (let outcome of newOutcomesPre){
+        let newOutcome = allOutcomesPre[outcome.id] || [];
+        newOutcome.push(outcome);
+        allOutcomesPre[outcome.id] = newOutcome;    
+    }
+    let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
+    for (let outcome of newOutcomesLive){
+        let newOutcome = allOutcomesLive[outcome.id] || [];
+        newOutcome.push(outcome);
+        allOutcomesLive[outcome.id] = newOutcome;    
+    }
+    let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
+    for (let score of newScores){
+        let newScore = allScores[score.id] || [];
+        newScore.push(score);
+        allScores[score.id] = newScore;    
     }
     let gamesForComparison = Object.values(allGames).slice();
     while (true){
@@ -341,13 +362,8 @@ async function start(sportKey, params) {
                     
                     
                     
-                    let game1DataScores = [];
-                    let game2DataScores = [];
-
-                    [game1DataScores, game2DataScores] = await Promise.all([
-                        db('scores').select('*').where('id', game1.id).orderBy('now', 'asc'),
-                        db('scores').select('*').where('id', game2.id).orderBy('now', 'asc'),
-                    ]);
+                    let game1DataScores = allScores[''  + game1.id].slice() || [];
+                    let game2DataScores = allScores['' + game2.id].slice() || [];
 
                     if (game1DataScores.length > 1 && game2DataScores.length > 1){
                         totalSimilarityScores = compareScores(game1DataScores, game2DataScores);
@@ -357,13 +373,9 @@ async function start(sportKey, params) {
                     game2DataScores = null;
                     
                     if (game1.isLive === true || game2.isLive === true){
-                        let game1DataOutcomesLive = [];
-                        let game2DataOutcomesLive = [];
+                        let game1DataOutcomesLive = allOutcomesLive[''  + game1.id].slice() || [];
+                        let game2DataOutcomesLive = allOutcomesLive[''  + game2.id].slice() || [];
                         
-                        [game1DataOutcomesLive, game2DataOutcomesLive] = await Promise.all([
-                                db('outcomes').select('*').where('id', game1.id).where('isLive', true).orderBy('now', 'asc'),
-                                db('outcomes').select('*').where('id', game2.id).where('isLive', true).orderBy('now', 'asc')
-                            ]);
                         if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
                             totalSimilarityOutcomesLive = compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
                             if (totalSimilarityOutcomesLive !== totalSimilarityOutcomesLive || !totalSimilarityOutcomesLive) totalSimilarityOutcomesLive = 0;
@@ -371,13 +383,9 @@ async function start(sportKey, params) {
                         game1DataOutcomesLive = null;
                         game2DataOutcomesLive = null;
                     }
-                    let game1DataOutcomesPre = [];
-                    let game2DataOutcomesPre = [];
+                    let game1DataOutcomesPre = allOutcomesPre[''  + game1.id].slice() || [];
+                    let game2DataOutcomesPre = allOutcomesPre[''  + game2.id].slice() || [];
 
-                    [game1DataOutcomesPre, game2DataOutcomesPre] = await Promise.all([
-                        db('outcomes').select('*').where('id', game1.id).where('isLive', false).orderBy('now', 'asc'),
-                        db('outcomes').select('*').where('id', game2.id).where('isLive', false).orderBy('now', 'asc')
-                    ]);
                     if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                         totalSimilarityOutcomesPre = compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
                         if (!totalSimilarityOutcomesPre || totalSimilarityOutcomesPre !== totalSimilarityOutcomesPre) totalSimilarityOutcomesPre = 0;
@@ -486,63 +494,63 @@ async function start(sportKey, params) {
                             // })
                             // console.log('decision added');
                         } catch(e) {}
-                    } else {
-                        // console.log('recapitulating a pair')
-                        const pairForUpdate = (await db('pairs').where(function () {
-                            this.where('id1', game1.id).andWhere('id2', game2.id);
-                        }).orWhere(function (){
-                            this.where('id2', game1.id).andWhere('id1', game2.id)
-                        }).select('id', 'needGroup','grouped'))[0];
+                    } //else {
+                    //     // console.log('recapitulating a pair')
+                    //     const pairForUpdate = (await db('pairs').where(function () {
+                    //         this.where('id1', game1.id).andWhere('id2', game2.id);
+                    //     }).orWhere(function (){
+                    //         this.where('id2', game1.id).andWhere('id1', game2.id)
+                    //     }).select('id', 'needGroup','grouped'))[0];
                         
-                        if (pairForUpdate.needGroup !== needGroup ||
-                            pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
-                            await db('pairs').where(function () {
-                                this.where('id1', game1.id).andWhere('id2', game2.id);
-                            }).orWhere(function (){
-                                this.where('id2', game1.id).andWhere('id1', game2.id);
-                            }).update({
-                                'isLive': game1.isLive,
-                                'similarityNames': totalSimilarityNames.totalSimilarity,
-                                'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                'similarityScores': totalSimilarityScores,
-                                'timeDiscrepancy': timeDiscrepancy,
-                                'needGroup': needGroup,
-                                'grouped': game1.globalGameId === game2.globalGameId,
-                                'now': new Date().getTime(),
-                            });
-                            console.log('update pair');
-                            try {
-                                newDecisionsTransactions.push({
-                                    'pairId': pairForUpdate.id,
-                                    'similarityNames': totalSimilarityNames.totalSimilarity,
-                                    'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                    'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                    'similarityScores': totalSimilarityScores,
-                                    'timeDiscrepancy': timeDiscrepancy,
-                                    'needGroup': needGroup,
-                                    'grouped': game1.globalGameId === game2.globalGameId,
-                                    'createdAt': new Date(),
-                                    'game1StartTime': new Date(Number(game1.startTime)),
-                                    'game2StartTime': new Date(Number(game2.startTime)),
-                                });
-                                // await db('decisions').insert({
-                                //     'pairId': pairForUpdate.id,
-                                //     'similarityNames': totalSimilarityNames.totalSimilarity,
-                                //     'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                                //     'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                                //     'similarityScores': totalSimilarityScores,
-                                //     'timeDiscrepancy': timeDiscrepancy,
-                                //     'needGroup': needGroup,
-                                //     'grouped': game1.globalGameId === game2.globalGameId,
-                                //     'createdAt': new Date(),
-                                //     'game1StartTime': new Date(Number(game1.startTime)),
-                                //     'game2StartTime': new Date(Number(game2.startTime)),
-                                // });
-                                // console.log('decision added');
-                            } catch(e) {}
-                        }
-                    }
+                    //     if (pairForUpdate.needGroup !== needGroup ||
+                    //         pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
+                    //         await db('pairs').where(function () {
+                    //             this.where('id1', game1.id).andWhere('id2', game2.id);
+                    //         }).orWhere(function (){
+                    //             this.where('id2', game1.id).andWhere('id1', game2.id);
+                    //         }).update({
+                    //             'isLive': game1.isLive,
+                    //             'similarityNames': totalSimilarityNames.totalSimilarity,
+                    //             'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                    //             'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                    //             'similarityScores': totalSimilarityScores,
+                    //             'timeDiscrepancy': timeDiscrepancy,
+                    //             'needGroup': needGroup,
+                    //             'grouped': game1.globalGameId === game2.globalGameId,
+                    //             'now': new Date().getTime(),
+                    //         });
+                    //         console.log('update pair');
+                    //         try {
+                    //             newDecisionsTransactions.push({
+                    //                 'pairId': pairForUpdate.id,
+                    //                 'similarityNames': totalSimilarityNames.totalSimilarity,
+                    //                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                    //                 'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                    //                 'similarityScores': totalSimilarityScores,
+                    //                 'timeDiscrepancy': timeDiscrepancy,
+                    //                 'needGroup': needGroup,
+                    //                 'grouped': game1.globalGameId === game2.globalGameId,
+                    //                 'createdAt': new Date(),
+                    //                 'game1StartTime': new Date(Number(game1.startTime)),
+                    //                 'game2StartTime': new Date(Number(game2.startTime)),
+                    //             });
+                    //             // await db('decisions').insert({
+                    //             //     'pairId': pairForUpdate.id,
+                    //             //     'similarityNames': totalSimilarityNames.totalSimilarity,
+                    //             //     'similarityOutcomesPre': totalSimilarityOutcomesPre,
+                    //             //     'similarityOutcomesLive': totalSimilarityOutcomesLive,
+                    //             //     'similarityScores': totalSimilarityScores,
+                    //             //     'timeDiscrepancy': timeDiscrepancy,
+                    //             //     'needGroup': needGroup,
+                    //             //     'grouped': game1.globalGameId === game2.globalGameId,
+                    //             //     'createdAt': new Date(),
+                    //             //     'game1StartTime': new Date(Number(game1.startTime)),
+                    //             //     'game2StartTime': new Date(Number(game2.startTime)),
+                    //             // });
+                    //             // console.log('decision added');
+                    //         } catch(e) {}
+                    //     }
+                    // }
                     
                 }
             }
@@ -586,6 +594,24 @@ async function start(sportKey, params) {
         allGames = {};
         for (let game of gamesForComparison){
             allGames[game.id] = game;
+        }
+        let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
+        for (let outcome of newOutcomesPre){
+            let newOutcome = allOutcomesPre[outcome.id] || [];
+            newOutcome.push(outcome);
+            allOutcomesPre[outcome.id] = newOutcome;    
+        }
+        let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
+        for (let outcome of newOutcomesLive){
+            let newOutcome = allOutcomesLive[outcome.id] || [];
+            newOutcome.push(outcome);
+            allOutcomesLive[outcome.id] = newOutcome;    
+        }
+        let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
+        for (let score of newScores){
+            let newScore = allScores[score.id] || [];
+            newScore.push(score);
+            allScores[score.id] = newScore;    
         }
     }
 }
