@@ -17,7 +17,6 @@ const replacements = {
         [/\sSve\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
-        [/\scity\s/gi, ' '],
         [/-pro\s/gi, ' '],
 
     ],
@@ -26,8 +25,6 @@ const replacements = {
         [/\sesports?\s/gi, ' '],
         [/\s\(жен\)\s/gi, ' '],
         [/\s\(рез\)\s/gi, ' '],
-        [/\sунив\.?\s/gi, ' '],
-        [/\sуниверситет\s/gi, ' '],
         [/\spro\s/gi, ' '],
         [/\sФК\s/gi, ' '],
         [/\sСВ\s/gi, ' '],
@@ -48,7 +45,6 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
-        [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
 
@@ -60,14 +56,12 @@ const replacements = {
         [/\swomen\s/gi, ' '],
         [/\scf\s/gi, ' '],
         [/\sfc\s/gi, ' '],
-        [/\suniversity\s/gi, ' '],
         [/\s\(women\)\s/gi, ' '],
         [/\sreserves\s/gi, ' '],
         [/\sпро\s/gi, ' '],
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
-        [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
 
@@ -79,13 +73,11 @@ const replacements = {
         [/\scf\s/gi, ' '],
         [/\sc\s/gi, ' '],
         [/\s\([A-Z]{3}\)\s/g, ' '],
-        [/\suniversity\s/gi, ' '],
         [/\spro\s/gi, ' '],
         [/\s\(U\d+\)\s/gi, ' '],
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
-        [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
 
@@ -99,7 +91,6 @@ const replacements = {
         [/\sesports?\s/gi, ' '],
         [/\syouth\s/gi, ' '],
         [/\scf\s/gi, ' '],
-        [/\suniversity\s/gi, ' '],
         [/\sreserves\s/gi, ' '],
         [/\spro\s/gi, ' '],
         [/\sF\.C\.\s/gi, ' '],
@@ -108,16 +99,12 @@ const replacements = {
         [/\sfv\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
-        [/\scity\s/gi, ' '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
 
 
     ],
     "FONBET": [
-        [/\suniversity\s/gi, ' '],
-        [/\s\(univ\)\s/gi, ' '],
-        [/\suniv\.?\s/gi, ' '],
         [/\s\(w\)\s/gi, ' '],
         [/\s\(r\)\s/gi, ' '],
         [/\scf\s/gi, ' '],
@@ -126,13 +113,21 @@ const replacements = {
         [/\spro\s/gi, ' '],
         [/\sfv\s/gi, ' '],
         [/\sfc\s/gi, ' '],
-        [/\scity\s/gi, ' '],
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
     ],
 }
+const commonWords = [
+    'univ',
+    'university',
+    'city',
+    'town',
+    'унив',
+    'университет',
+];
+
 const allTranslatedWords = {};
 async function updateTranslations(){
     const result = (await db('translations').select('originalWord', 'translationWord'));
@@ -140,23 +135,23 @@ async function updateTranslations(){
         allTranslatedWords[wordPair.originalWord] = Array.from(new Set(wordPair.translationWord.split(';').slice(0, 2))).map(word => word.toLowerCase());
     }
 }
-
-// ---------------------------------- //
-
-// gamesNames = {"game1":{"name1":"Thai-Son Kwiatkowski","name2":"Tennys Sandgren","bookieKey":"BETRADAR"},"game2":{"name1":"Чантава Т.","name2":"Костаче С.-М.","bookieKey":"OLIMP"}}
-// gamesNames.game1 = formatGameNames(gamesNames.game1);
-// gamesNames.game2 = formatGameNames(gamesNames.game2);
-// console.log(gamesNames.game1);
-// console.log(gamesNames.game2);
-// console.log(compareAllNames(gamesNames));
-
-
-// ---------------------------------- //
-
-
-
 updateTranslations();
-setInterval(updateTranslations, 1000 * 60 * 10);
+setInterval(updateTranslations, 1000 * 60 * 1);
+
+// ---------------------------------- //
+
+gamesNames = {"game1":{"name1":"Тиан Ф.","name2":"Картал С.","bookieKey":"OLIMP"},"game2":{"name1":"Mitu C-A / Stollar F","name2":"Moratelli A / Rosatello C","bookieKey":"BETRADAR"}}
+
+// setTimeout(() => {
+//     gamesNames.game1 = formatGameNames(gamesNames.game1);
+//     gamesNames.game2 = formatGameNames(gamesNames.game2);
+//     console.log(gamesNames.game1);
+//     console.log(gamesNames.game2);
+//     console.log(compareAllNames(gamesNames))
+// }, 5000);
+
+
+// ---------------------------------- //
 
 function comparePairNames(name1Words, name2Words){
     let result = {
@@ -170,15 +165,15 @@ function comparePairNames(name1Words, name2Words){
         for (let word2Options of name2Words){
             let resultCompareWords = false;
             for (let word1Option of word1Options){
-                if (resultCompareWords || result.name1Words.includes(word1Option) || 
-                result.name2Words.includes(word1Option)) break;
+                if (resultCompareWords || result.name1Words.includes(word1Options[0]) || 
+                result.name2Words.includes(word1Options[0])) break;
                 for (let word2Option of word2Options){
-                    if (resultCompareWords || result.name1Words.includes(word2Option) || 
-                    result.name2Words.includes(word2Option)) break;
+                    if (resultCompareWords || result.name1Words.includes(word2Options[0]) || 
+                    result.name2Words.includes(word2Options[0])) break;
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
-                        result.name1Words.push(word1Option);
-                        result.name2Words.push(word2Option);
+                        result.name1Words.push(word1Options[0]);
+                        result.name2Words.push(word2Options[0]);
                         result.sameWordsCount++;
                         break;
                     }
@@ -190,10 +185,12 @@ function comparePairNames(name1Words, name2Words){
 
     let fullWordExist = false;
     for (let numWord=0;numWord<result.name1Words.length;numWord++){
-        if (result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
+        if (!commonWords.includes(result.name1Words[numWord]) &&
+        !commonWords.includes(result.name2Words[numWord]) &&
+         result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
-    // console.log(namesSets)
+    // console.log(result);
     return result;
 }
 
@@ -204,7 +201,7 @@ function compareAllNames(gamesNames){
         game1Name1game2Name2: comparePairNames(gamesNames.game1.name1Words, gamesNames.game2.name2Words),
         game1Name2game2Name1: comparePairNames(gamesNames.game1.name2Words, gamesNames.game2.name1Words),
     }
-    console.log(resultsOfComparing.game1Name1game2Name1);
+    // console.log(resultsOfComparing.game1Name1game2Name1);
     let resultPairs = {
         leftUpRightDown: {
             sameWordsCount: resultsOfComparing.game1Name1game2Name1.sameWordsCount + resultsOfComparing.game1Name2game2Name2.sameWordsCount,

@@ -248,14 +248,22 @@ async function start(sportKey, params) {
     const addingNewPairs = setInterval(async () =>{
         let newPairsTransactionsForAdding = newPairsTransactions.slice();
         newPairsTransactions.length = 0;
-        // console.log(newPairsTransactionsForAdding, 'pairs');
         if (newPairsTransactionsForAdding.length > 0){
-            const pairId = (await db('pairs').insert(newPairsTransactionsForAdding).returning('id'))[0].id;
-            console.log('pairs added');
+            let pairsId = (await db('pairs').insert(newPairsTransactionsForAdding).returning('id'));
+            console.log(pairsId, 'pairs added');
+            // process.exit();
         }
 
+        // let newDecisionsTransactionsForAdding = newDecisionsTransactions.slice();
+        // newDecisionsTransactions.length = 0;
+        // if (newDecisionsTransactionsForAdding.length > 0){
+        //     await db('decisions').insert(newDecisionsTransactionsForAdding);
+        //     console.log('decisions added');
+        // }
 
-    }, 5000);
+
+
+    }, 1000);
 
     let allGames = {};
     let newGames = await db('games')
