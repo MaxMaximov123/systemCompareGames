@@ -362,8 +362,8 @@ async function start(sportKey, params) {
                     
                     
                     
-                    let game1DataScores = allScores[''  + game1.id].slice() || [];
-                    let game2DataScores = allScores['' + game2.id].slice() || [];
+                    let game1DataScores = (allScores[''  + game1.id] || []).slice();
+                    let game2DataScores = (allScores['' + game2.id] || []).slice();
 
                     if (game1DataScores.length > 1 && game2DataScores.length > 1){
                         totalSimilarityScores = compareScores(game1DataScores, game2DataScores);
@@ -373,8 +373,8 @@ async function start(sportKey, params) {
                     game2DataScores = null;
                     
                     if (game1.isLive === true || game2.isLive === true){
-                        let game1DataOutcomesLive = allOutcomesLive[''  + game1.id].slice() || [];
-                        let game2DataOutcomesLive = allOutcomesLive[''  + game2.id].slice() || [];
+                        let game1DataOutcomesLive = (allOutcomesLive[''  + game1.id] || []).slice();
+                        let game2DataOutcomesLive = (allOutcomesLive[''  + game2.id] || []).slice();
                         
                         if (game1DataOutcomesLive.length > 1 && game2DataOutcomesLive.length > 1){
                             totalSimilarityOutcomesLive = compareOutcomes(game1DataOutcomesLive, game2DataOutcomesLive);
@@ -383,8 +383,8 @@ async function start(sportKey, params) {
                         game1DataOutcomesLive = null;
                         game2DataOutcomesLive = null;
                     }
-                    let game1DataOutcomesPre = allOutcomesPre[''  + game1.id].slice() || [];
-                    let game2DataOutcomesPre = allOutcomesPre[''  + game2.id].slice() || [];
+                    let game1DataOutcomesPre = (allOutcomesPre[''  + game1.id] || []).slice();
+                    let game2DataOutcomesPre = (allOutcomesPre[''  + game2.id] || []).slice();
 
                     if (game1DataOutcomesPre.length > 1 && game2DataOutcomesPre.length > 1){
                         totalSimilarityOutcomesPre = compareOutcomes(game1DataOutcomesPre, game2DataOutcomesPre);
