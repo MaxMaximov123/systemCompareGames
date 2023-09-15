@@ -305,6 +305,7 @@ async function start(sportKey, params) {
 
             let decisions = [];
             for (let pair of pairs){
+                pair = pair[0];
                 decisions.push({
                     'pairId': pair.id,
                     'similarityNames': pair.similarityNames,

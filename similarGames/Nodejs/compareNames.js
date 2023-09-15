@@ -141,15 +141,15 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-gamesNames = {"game1":{"name1":"Qatar","name2":"Bahrain - Twenty20","bookieKey":"BET365"},"game2":{"name1":"Qatar","name2":"Bahrain","bookieKey":"BETRADAR"}}
+// gamesNames = {"game1":{"name1":"Qatar","name2":"Bahrain - Twenty20","bookieKey":"BET365"},"game2":{"name1":"Qatar","name2":"Bahrain","bookieKey":"BETRADAR"}}
 
-setTimeout(() => {
-    gamesNames.game1 = formatGameNames(gamesNames.game1);
-    gamesNames.game2 = formatGameNames(gamesNames.game2);
-    console.log(gamesNames.game1);
-    console.log(gamesNames.game2);
-    console.log(compareAllNames(gamesNames))
-}, 5000);
+// setTimeout(() => {
+//     gamesNames.game1 = formatGameNames(gamesNames.game1);
+//     gamesNames.game2 = formatGameNames(gamesNames.game2);
+//     console.log(gamesNames.game1);
+//     console.log(gamesNames.game2);
+//     console.log(compareAllNames(gamesNames))
+// }, 5000);
 
 
 // ---------------------------------- //
