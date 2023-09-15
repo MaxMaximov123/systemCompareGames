@@ -578,6 +578,9 @@ async function start(sportKey, params) {
             }
         }
         allGames = {};
+        let allOutcomesPre = {};
+        let allOutcomesLive = {};
+        let allScores = {};
         for (let game of gamesForComparison){
             allGames[game.id] = game;
         }
