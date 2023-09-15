@@ -23,7 +23,7 @@ let replacements = {
     'о': ['o', 'a', 'e', 'u', 'au', 'eau'], 
     'п': ['p'], 
     'р': ['r', 'rh'], 
-    'с': ['s', 'c', 'z', 'ts', 'x', 'sh'], 
+    'с': ['s', 'c', 'z', 'ts', 'x'],
     'т': ['t', 'c', 'th'],
     'у': ['u', 'o', 'w', 'oo', 'wu', 'ou', 'yu'], 
     'ф': ['f', 'v'], 
@@ -173,8 +173,8 @@ function compareNamesWithCash(word1, word2){
         return areWordsSimilar;
     }
 }
-// let word1 = 'bokelj';
-// let word2 = 'беране';
+// let word1 = 'shang';
+// let word2 = 'санок';
 
 // word1 = word1.toLowerCase();
 // word2 = word2.toLowerCase();

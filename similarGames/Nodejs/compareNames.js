@@ -126,6 +126,7 @@ const commonWords = [
     'town',
     'унив',
     'университет',
+    'сити'
 ];
 
 const allTranslatedWords = {};
@@ -140,7 +141,7 @@ setInterval(updateTranslations, 1000 * 60 * 1);
 
 // ---------------------------------- //
 
-gamesNames = {"game1":{"name1":"Тиан Ф.","name2":"Картал С.","bookieKey":"OLIMP"},"game2":{"name1":"Mitu C-A / Stollar F","name2":"Moratelli A / Rosatello C","bookieKey":"BETRADAR"}}
+// gamesNames = {"game1":{"name1":"Aradippou","name2":"Als Omonia","bookieKey":"BETRADAR"},"game2":{"name1":"Astashenko (FLX) Ajax","name2":"Reshetnikov (ARE) Southampton","bookieKey":"FONBET"}}
 
 // setTimeout(() => {
 //     gamesNames.game1 = formatGameNames(gamesNames.game1);

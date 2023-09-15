@@ -231,6 +231,18 @@ async function delay(ms) {
     return await new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function pairIsExist(pairs, game1Id, game2Id){
+    for (let pair of pairs){
+        if (
+            (Number(pair.id1) === game1Id && Number(pair.id2) === game2Id) ||
+            (Number(pair.id1) === game2Id && Number(pair.id2) === game1Id)
+            ){
+                return {exist: true, needGroup: pair.needGroup, pairId: pair.id};
+            }
+    }
+    return {exist: false, needGroup: null, pairId: null};
+}
+
 async function start(sportKey, params) {
     require('dotenv').config();
 
@@ -245,24 +257,66 @@ async function start(sportKey, params) {
     const newPairsTransactions = [];
     const newDecisionsTransactions = [];
     const updatePairsTransactions = [];
+
     const addingNewPairs = setInterval(async () =>{
         let newPairsTransactionsForAdding = newPairsTransactions.slice();
         newPairsTransactions.length = 0;
         if (newPairsTransactionsForAdding.length > 0){
-            let pairsId = (await db('pairs').insert(newPairsTransactionsForAdding).returning('id'));
-            console.log(pairsId, 'pairs added');
+            let pairs = (await db('pairs').insert(newPairsTransactionsForAdding).returning('*'));
+            console.log('pairs added');
+
+            let decisions = [];
+            for (let pair of pairs){
+                decisions.push({
+                    'pairId': pair.id,
+                    'similarityNames': pair.similarityNames,
+                    'similarityOutcomesPre': pair.similarityOutcomesPre,
+                    'similarityOutcomesLive': pair.similarityOutcomesLive,
+                    'similarityScores': pair.similarityScores,
+                    'timeDiscrepancy': pair.timeDiscrepancy,
+                    'needGroup': pair.needGroup,
+                    'grouped': pair.grouped,
+                    'createdAt': new Date(),
+                    'game1StartTime': null,
+                    'game2StartTime': null,
+                });
+            }
+            await db('decisions').insert(decisions);
         }
 
-        // let newDecisionsTransactionsForAdding = newDecisionsTransactions.slice();
-        // newDecisionsTransactions.length = 0;
-        // if (newDecisionsTransactionsForAdding.length > 0){
-        //     await db('decisions').insert(newDecisionsTransactionsForAdding);
-        //     console.log('decisions added');
-        // }
+        let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
+        updatePairsTransactions.length = 0;
+        if (updatePairsTransactionsForAdding.length > 0){
+            const updatePromises = updatePairsTransactionsForAdding.map(update => {
+                return db('pairs')
+                  .where({ id: update.pairId })
+                  .update(update.data)
+                  .returning('*');
+              });
+            let pairs = await Promise.all(updatePromises);
+            console.log('update pairs');
 
+            let decisions = [];
+            for (let pair of pairs){
+                decisions.push({
+                    'pairId': pair.id,
+                    'similarityNames': pair.similarityNames,
+                    'similarityOutcomesPre': pair.similarityOutcomesPre,
+                    'similarityOutcomesLive': pair.similarityOutcomesLive,
+                    'similarityScores': pair.similarityScores,
+                    'timeDiscrepancy': pair.timeDiscrepancy,
+                    'needGroup': pair.needGroup,
+                    'grouped': pair.grouped,
+                    'createdAt': new Date(),
+                    'game1StartTime': null,
+                    'game2StartTime': null,
+                });
+            }
+            await db('decisions').insert(decisions);
+            console.log('add decisions')
+        }
 
-
-    }, 1000);
+    }, 3000);
 
     let allGames = {};
     let allOutcomesPre = {};
@@ -290,6 +344,9 @@ async function start(sportKey, params) {
         console.log(countGames, '/', newGames.length);
         countGames++;
     }
+
+    let allExistingPairs = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
+
     let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
     for (let outcome of newOutcomesPre){
         let newOutcome = allOutcomesPre[outcome.id] || [];
@@ -312,6 +369,7 @@ async function start(sportKey, params) {
     while (true){
         let findingСoupleToGameFunctions = [];
         for (let numGame1=0;numGame1<gamesForComparison.length;numGame1++){
+            await delay(100);
             // console.log(sportKey, 'game1', numGame1, '/', games.length);
             const game1 = gamesForComparison[numGame1];
             const findingСoupleToGame = async (gamesForComparison, game1, numGame1) => {
@@ -352,13 +410,6 @@ async function start(sportKey, params) {
                     totalSimilarityNames = compareAllNames(gamesNames);
                     // console.log(totalSimilarityNames);
                     if (totalSimilarityNames.totalSimilarity < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
-
-                    const pairExist = (await db('pairs').select('similarityNames').where(function () {
-                        this.where('id1', game1.id).andWhere('id2', game2.id);
-                    }).orWhere(function (){
-                        this.where('id2', game1.id).andWhere('id1', game2.id);
-                    }));
-                    
                     
                     
                     let game1DataScores = (allScores[''  + game1.id] || []).slice();
@@ -445,7 +496,8 @@ async function start(sportKey, params) {
                             console.log(response)
                         }
                     }
-                    if (pairExist.length === 0){
+                    let pairExist = pairIsExist(allExistingPairs, game1.id, game2.id);
+                    if (!pairExist.exist){
                         newPairsTransactions.push({
                             'id1': game1.id,
                             'id2': game2.id,
@@ -464,9 +516,11 @@ async function start(sportKey, params) {
                             'grouped': game1.globalGameId === game2.globalGameId,
                             'now': new Date().getTime(),
                         });
-                        try {
-                            newDecisionsTransactions.push({
-                                'pairId': 1,
+                    } else if (pairExist.needGroup !== needGroup){
+                        updatePairsTransactions.push({
+                            pairId: pairExist.pairId,
+                            data: {
+                                'isLive': game1.isLive,
                                 'similarityNames': totalSimilarityNames.totalSimilarity,
                                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
                                 'similarityOutcomesLive': totalSimilarityOutcomesLive,
@@ -474,82 +528,10 @@ async function start(sportKey, params) {
                                 'timeDiscrepancy': timeDiscrepancy,
                                 'needGroup': needGroup,
                                 'grouped': game1.globalGameId === game2.globalGameId,
-                                'createdAt': new Date(),
-                                'game1StartTime': new Date(Number(game1.startTime)),
-                                'game2StartTime': new Date(Number(game2.startTime)),
-                            });
-                            // await db('decisions').insert({
-                            //     'pairId': pairId,
-                            //     'similarityNames': totalSimilarityNames.totalSimilarity,
-                            //     'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                            //     'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                            //     'similarityScores': totalSimilarityScores,
-                            //     'timeDiscrepancy': timeDiscrepancy,
-                            //     'needGroup': needGroup,
-                            //     'grouped': game1.globalGameId === game2.globalGameId,
-                            //     'createdAt': new Date(),
-                            //     'game1StartTime': new Date(Number(game1.startTime)),
-                            //     'game2StartTime': new Date(Number(game2.startTime)),
-                            // })
-                            // console.log('decision added');
-                        } catch(e) {}
-                    } //else {
-                    //     // console.log('recapitulating a pair')
-                    //     const pairForUpdate = (await db('pairs').where(function () {
-                    //         this.where('id1', game1.id).andWhere('id2', game2.id);
-                    //     }).orWhere(function (){
-                    //         this.where('id2', game1.id).andWhere('id1', game2.id)
-                    //     }).select('id', 'needGroup','grouped'))[0];
-                        
-                    //     if (pairForUpdate.needGroup !== needGroup ||
-                    //         pairForUpdate.grouped !== (game1.globalGameId === game2.globalGameId)){
-                    //         await db('pairs').where(function () {
-                    //             this.where('id1', game1.id).andWhere('id2', game2.id);
-                    //         }).orWhere(function (){
-                    //             this.where('id2', game1.id).andWhere('id1', game2.id);
-                    //         }).update({
-                    //             'isLive': game1.isLive,
-                    //             'similarityNames': totalSimilarityNames.totalSimilarity,
-                    //             'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                    //             'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                    //             'similarityScores': totalSimilarityScores,
-                    //             'timeDiscrepancy': timeDiscrepancy,
-                    //             'needGroup': needGroup,
-                    //             'grouped': game1.globalGameId === game2.globalGameId,
-                    //             'now': new Date().getTime(),
-                    //         });
-                    //         console.log('update pair');
-                    //         try {
-                    //             newDecisionsTransactions.push({
-                    //                 'pairId': pairForUpdate.id,
-                    //                 'similarityNames': totalSimilarityNames.totalSimilarity,
-                    //                 'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                    //                 'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                    //                 'similarityScores': totalSimilarityScores,
-                    //                 'timeDiscrepancy': timeDiscrepancy,
-                    //                 'needGroup': needGroup,
-                    //                 'grouped': game1.globalGameId === game2.globalGameId,
-                    //                 'createdAt': new Date(),
-                    //                 'game1StartTime': new Date(Number(game1.startTime)),
-                    //                 'game2StartTime': new Date(Number(game2.startTime)),
-                    //             });
-                    //             // await db('decisions').insert({
-                    //             //     'pairId': pairForUpdate.id,
-                    //             //     'similarityNames': totalSimilarityNames.totalSimilarity,
-                    //             //     'similarityOutcomesPre': totalSimilarityOutcomesPre,
-                    //             //     'similarityOutcomesLive': totalSimilarityOutcomesLive,
-                    //             //     'similarityScores': totalSimilarityScores,
-                    //             //     'timeDiscrepancy': timeDiscrepancy,
-                    //             //     'needGroup': needGroup,
-                    //             //     'grouped': game1.globalGameId === game2.globalGameId,
-                    //             //     'createdAt': new Date(),
-                    //             //     'game1StartTime': new Date(Number(game1.startTime)),
-                    //             //     'game2StartTime': new Date(Number(game2.startTime)),
-                    //             // });
-                    //             // console.log('decision added');
-                    //         } catch(e) {}
-                    //     }
-                    // }
+                                'now': new Date().getTime(),
+                            }
+                        });
+                    }
                     
                 }
             }
