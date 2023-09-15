@@ -258,6 +258,7 @@ async function start(sportKey, params) {
     const newDecisionsTransactions = [];
     const updatePairsTransactions = [];
 
+    let allExistingPairs = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
     const addingNewPairs = setInterval(async () =>{
         let newPairsTransactionsForAdding = newPairsTransactions.slice();
         newPairsTransactions.length = 0;
@@ -267,6 +268,12 @@ async function start(sportKey, params) {
 
             let decisions = [];
             for (let pair of pairs){
+                allExistingPairs.push({
+                    id: pair.id,
+                    id1: pair.id1,
+                    id2: pair.id2,
+                    needGroup: pair.needGroup
+                });
                 decisions.push({
                     'pairId': pair.id,
                     'similarityNames': pair.similarityNames,
@@ -345,8 +352,6 @@ async function start(sportKey, params) {
         countGames++;
     }
 
-    let allExistingPairs = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
-
     let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
     for (let outcome of newOutcomesPre){
         let newOutcome = allOutcomesPre[outcome.id] || [];
@@ -369,7 +374,7 @@ async function start(sportKey, params) {
     while (true){
         let findingСoupleToGameFunctions = [];
         for (let numGame1=0;numGame1<gamesForComparison.length;numGame1++){
-            await delay(100);
+            await delay(10);
             // console.log(sportKey, 'game1', numGame1, '/', games.length);
             const game1 = gamesForComparison[numGame1];
             const findingСoupleToGame = async (gamesForComparison, game1, numGame1) => {
