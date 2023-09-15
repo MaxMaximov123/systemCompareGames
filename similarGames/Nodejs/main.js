@@ -251,7 +251,6 @@ async function start(sportKey, params) {
         if (newPairsTransactionsForAdding.length > 0){
             let pairsId = (await db('pairs').insert(newPairsTransactionsForAdding).returning('id'));
             console.log(pairsId, 'pairs added');
-            process.exit();
         }
 
         // let newDecisionsTransactionsForAdding = newDecisionsTransactions.slice();
