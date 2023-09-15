@@ -323,7 +323,7 @@ async function start(sportKey, params) {
             console.log('add decisions')
         }
 
-    }, 3000);
+    }, 5000);
 
     let allGames = {};
     let allOutcomesPre = {};

@@ -53,6 +53,7 @@
         </tr>
     </table>
     <v-text-field
+        @keyup.enter="searchByNames"
         v-model="filters.teamName"
         :loading="loadingUpdate"
         density="compact"
