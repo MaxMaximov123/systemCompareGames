@@ -273,12 +273,12 @@ async function start(sportKey, params) {
 
             let decisions = [];
             for (let pair of pairs){
-                allExistingPairs.push({
+                allExistingPairs['' + pair.id1 + '|' + pair.id2] = {
                     id: pair.id,
                     id1: pair.id1,
                     id2: pair.id2,
                     needGroup: pair.needGroup
-                });
+                };
                 decisions.push({
                     'pairId': pair.id,
                     'similarityNames': pair.similarityNames,
