@@ -4,7 +4,7 @@ const config = require('./knexfile');
 const db = knex(config.development);
 
 const compareNamesWithCash = require('./compareWords');
-const MINIMUM_CHAR_COUNT = 3;
+const MINIMUM_CHAR_COUNT = 4;
 const replacements = {
     "BETRADAR": [
         [/\sesports?\s/gi, ' '],
@@ -126,7 +126,9 @@ const commonWords = [
     'town',
     'унив',
     'университет',
-    'сити'
+    'сити',
+    'юнайтед',
+    'united'
 ];
 
 const allTranslatedWords = {};
@@ -141,7 +143,7 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"Qatar","name2":"Bahrain - Twenty20","bookieKey":"BET365"},"game2":{"name1":"Qatar","name2":"Bahrain","bookieKey":"BETRADAR"}}
+// gamesNames = {"game1":{"name1":"Рот-Вайс Оберхаузен","name2":"Фортуна Кёльн","bookieKey":"OLIMP"},"game2":{"name1":"Hansa Rostock","name2":"Fortuna","bookieKey":"FONBET"}}
 
 // setTimeout(() => {
 //     gamesNames.game1 = formatGameNames(gamesNames.game1);
@@ -160,21 +162,26 @@ function comparePairNames(name1Words, name2Words){
         sameWordsCount: 0,
         name1Words: [],
         name2Words: [],
+        name1OriginalWords: [],
+        name2OriginalWords: [],
         sameWordsPercent: 0,
     }
     for (let word1Options of name1Words){
         for (let word2Options of name2Words){
             let resultCompareWords = false;
             for (let word1Option of word1Options){
-                if (resultCompareWords || result.name1Words.includes(word1Options[0]) || 
-                result.name2Words.includes(word1Options[0])) break;
+                if (resultCompareWords || result.name1OriginalWords.includes(word1Options[0]) || 
+                result.name1OriginalWords.includes(word1Options[0])) break;
                 for (let word2Option of word2Options){
-                    if (resultCompareWords || result.name1Words.includes(word2Options[0]) || 
-                    result.name2Words.includes(word2Options[0])) break;
+                    if (resultCompareWords || result.name1OriginalWords.includes(word2Options[0]) || 
+                    result.name1OriginalWords.includes(word2Options[0])) break;
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
-                        result.name1Words.push(word1Options[0]);
-                        result.name2Words.push(word2Options[0]);
+                        result.name1Words.push(word1Option);
+                        result.name2Words.push(word2Option);
+
+                        result.name1OriginalWords.push(word1Options[0]);
+                        result.name2OriginalWords.push(word2Options[0]);
                         result.sameWordsCount++;
                         break;
                     }
@@ -191,7 +198,7 @@ function comparePairNames(name1Words, name2Words){
          result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
-    // console.log(result);
+    console.log(result);
     return result;
 }
 

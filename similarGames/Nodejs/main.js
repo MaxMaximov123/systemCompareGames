@@ -258,11 +258,16 @@ async function start(sportKey, params) {
     const newDecisionsTransactions = [];
     const updatePairsTransactions = [];
 
-    let allExistingPairs = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
+    let allExistingPairsArray = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
+    let allExistingPairs = {};
+    for (let pair of allExistingPairsArray){
+        allExistingPairs['' + pair.id1 + '|' + pair.id2] = pair;
+    }
     const addingNewPairs = setInterval(async () =>{
-        let newPairsTransactionsForAdding = newPairsTransactions.slice();
-        newPairsTransactions.length = 0;
-        if (newPairsTransactionsForAdding.length > 0){
+
+        if (newPairsTransactions.length > 0){
+            let newPairsTransactionsForAdding = newPairsTransactions.slice();
+            newPairsTransactions.length = 0;
             let pairs = (await db('pairs').insert(newPairsTransactionsForAdding).returning('*'));
             console.log('pairs added');
 
@@ -291,9 +296,9 @@ async function start(sportKey, params) {
             await db('decisions').insert(decisions);
         }
 
-        let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
-        updatePairsTransactions.length = 0;
-        if (updatePairsTransactionsForAdding.length > 0){
+        if (updatePairsTransactions.length > 0){
+            let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
+            updatePairsTransactions.length = 0;
             const updatePromises = updatePairsTransactionsForAdding.map(update => {
                 return db('pairs')
                   .where({ id: update.pairId })
@@ -375,7 +380,7 @@ async function start(sportKey, params) {
     while (true){
         let findingСoupleToGameFunctions = [];
         for (let numGame1=0;numGame1<gamesForComparison.length;numGame1++){
-            await delay(10);
+            await delay(5);
             // console.log(sportKey, 'game1', numGame1, '/', games.length);
             const game1 = gamesForComparison[numGame1];
             const findingСoupleToGame = async (gamesForComparison, game1, numGame1) => {
@@ -502,7 +507,7 @@ async function start(sportKey, params) {
                             console.log(response)
                         }
                     }
-                    let pairExist = pairIsExist(allExistingPairs, game1.id, game2.id);
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {exist: false, needGroup: null, pairId: null};
                     if (!pairExist.exist){
                         newPairsTransactions.push({
                             'id1': game1.id,
@@ -523,6 +528,7 @@ async function start(sportKey, params) {
                             'now': new Date().getTime(),
                         });
                     } else if (pairExist.needGroup !== needGroup){
+                        allExistingPairs['' + game1.id + '|' + game2.id].needGroup = needGroup;
                         updatePairsTransactions.push({
                             pairId: pairExist.pairId,
                             data: {

@@ -24,7 +24,7 @@ let replacements = {
     'п': ['p'], 
     'р': ['r', 'rh'], 
     'с': ['s', 'c', 'z', 'ts', 'x', 'sz'],
-    'т': ['t', 'c', 'th'],
+    'т': ['t', 'th'],
     'у': ['u', 'o', 'w', 'oo', 'wu', 'ou', 'yu'], 
     'ф': ['f', 'v'], 
     'х': ['h', 'k', 'j', 'ch', 'kh'],
@@ -76,12 +76,12 @@ let replacements = {
 
     // English 1-character replacements
 
-    'y': ['i'],
-    'u': ['o'],
-    'c': ['s'],
+    'y': ['i', 'y'],
+    'u': ['o', 'u', 'oo'],
+    'c': ['s', 'c'],
     's': ['c'],
     'i': ['y', 'e'],
-    'e': ['a', 'ai'],
+    'e': ['a', 'ai', 'e', 'ie'],
     'ha': ['a'],
     'xi': ['i'],
     'ie': ['ye'],
@@ -304,7 +304,6 @@ function compareWords({
                     word2Offset: word2Offset + word2PieceOptionLength,
                     level: level + 1,
                 });
-
                 if (!areWordsSimilar) {
                     continue;
                 }
