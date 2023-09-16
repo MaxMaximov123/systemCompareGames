@@ -198,7 +198,7 @@ function comparePairNames(name1Words, name2Words){
          result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
-    console.log(result);
+    // console.log(result);
     return result;
 }
 
