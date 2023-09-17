@@ -11,6 +11,10 @@ const db = knex(config.development);
 const {compareAllNames, formatGameNames} = require('./compareNames');
 
 const TIK_STEP = 3;
+let allOutcomesPre = {};
+let allOutcomesLive = {};
+let allScores = {};
+let allGames = {};
 
 // границы сдвига
 const START_SHIFT = -5;
@@ -243,6 +247,27 @@ function pairIsExist(pairs, game1Id, game2Id){
     return {exist: false, needGroup: null, pairId: null};
 }
 
+async function updateOutcomesAndScores(){
+    let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
+    for (let outcome of newOutcomesPre){
+        let newOutcome = allOutcomesPre[outcome.id] || [];
+        newOutcome.push(outcome);
+        allOutcomesPre[outcome.id] = newOutcome;    
+    }
+    let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
+    for (let outcome of newOutcomesLive){
+        let newOutcome = allOutcomesLive[outcome.id] || [];
+        newOutcome.push(outcome);
+        allOutcomesLive[outcome.id] = newOutcome;    
+    }
+    let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
+    for (let score of newScores){
+        let newScore = allScores[score.id] || [];
+        newScore.push(score);
+        allScores[score.id] = newScore;    
+    }
+}
+
 async function start(sportKey, params) {
     require('dotenv').config();
 
@@ -260,9 +285,11 @@ async function start(sportKey, params) {
 
     let allExistingPairsArray = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
     let allExistingPairs = {};
+    console.log('got all pairs');
     for (let pair of allExistingPairsArray){
         allExistingPairs['' + pair.id1 + '|' + pair.id2] = pair;
     }
+    
     const addingNewPairs = setInterval(async () =>{
 
         if (newPairsTransactions.length > 0){
@@ -330,11 +357,7 @@ async function start(sportKey, params) {
         }
 
     }, 5000);
-
-    let allGames = {};
-    let allOutcomesPre = {};
-    let allOutcomesLive = {};
-    let allScores = {};
+    
     let newGames = await db('games')
         .select(
             'games.id', 'games.bookieKey', 'games.team1Name', 'games.team2Name', 'games.team1Id', 'games.team2Id',
@@ -357,25 +380,8 @@ async function start(sportKey, params) {
         console.log(countGames, '/', newGames.length);
         countGames++;
     }
-
-    let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
-    for (let outcome of newOutcomesPre){
-        let newOutcome = allOutcomesPre[outcome.id] || [];
-        newOutcome.push(outcome);
-        allOutcomesPre[outcome.id] = newOutcome;    
-    }
-    let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
-    for (let outcome of newOutcomesLive){
-        let newOutcome = allOutcomesLive[outcome.id] || [];
-        newOutcome.push(outcome);
-        allOutcomesLive[outcome.id] = newOutcome;    
-    }
-    let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
-    for (let score of newScores){
-        let newScore = allScores[score.id] || [];
-        newScore.push(score);
-        allScores[score.id] = newScore;    
-    }
+    await updateOutcomesAndScores();
+    setInterval(updateOutcomesAndScores, 1000 * 60);
     let gamesForComparison = Object.values(allGames).slice();
     while (true){
         let findingСoupleToGameFunctions = [];
@@ -591,24 +597,7 @@ async function start(sportKey, params) {
         for (let game of gamesForComparison){
             allGames[game.id] = game;
         }
-        let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
-        for (let outcome of newOutcomesPre){
-            let newOutcome = allOutcomesPre[outcome.id] || [];
-            newOutcome.push(outcome);
-            allOutcomesPre[outcome.id] = newOutcome;    
-        }
-        let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
-        for (let outcome of newOutcomesLive){
-            let newOutcome = allOutcomesLive[outcome.id] || [];
-            newOutcome.push(outcome);
-            allOutcomesLive[outcome.id] = newOutcome;    
-        }
-        let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
-        for (let score of newScores){
-            let newScore = allScores[score.id] || [];
-            newScore.push(score);
-            allScores[score.id] = newScore;    
-        }
+        await updateOutcomesAndScores();
     }
 }
 
