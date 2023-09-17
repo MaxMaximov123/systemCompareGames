@@ -11,10 +11,6 @@ const db = knex(config.development);
 const {compareAllNames, formatGameNames} = require('./compareNames');
 
 const TIK_STEP = 3;
-let allOutcomesPre = {};
-let allOutcomesLive = {};
-let allScores = {};
-let allGames = {};
 
 // границы сдвига
 const START_SHIFT = -5;
@@ -282,6 +278,32 @@ async function start(sportKey, params) {
     const newPairsTransactions = [];
     const newDecisionsTransactions = [];
     const updatePairsTransactions = [];
+
+    let allOutcomesPre = {};
+    let allOutcomesLive = {};
+    let allScores = {};
+    let allGames = {};
+
+    async function updateOutcomesAndScores(){
+        let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
+        for (let outcome of newOutcomesPre){
+            let newOutcome = allOutcomesPre[outcome.id] || [];
+            newOutcome.push(outcome);
+            allOutcomesPre[outcome.id] = newOutcome;    
+        }
+        let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
+        for (let outcome of newOutcomesLive){
+            let newOutcome = allOutcomesLive[outcome.id] || [];
+            newOutcome.push(outcome);
+            allOutcomesLive[outcome.id] = newOutcome;    
+        }
+        let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
+        for (let score of newScores){
+            let newScore = allScores[score.id] || [];
+            newScore.push(score);
+            allScores[score.id] = newScore;    
+        }
+    }
 
     let allExistingPairsArray = await db('pairs').select('id', 'id1', 'id2', 'needGroup');
     let allExistingPairs = {};
