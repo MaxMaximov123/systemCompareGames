@@ -124,11 +124,18 @@ const commonWords = [
     'university',
     'city',
     'town',
+    'таун',
+    'город',
+    'country',
+    'страна',
     'унив',
     'университет',
     'сити',
     'юнайтед',
-    'united'
+    'united',
+    'calcio',
+    'the'
+
 ];
 
 const allTranslatedWords = {};
@@ -143,7 +150,7 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"Рот-Вайс Оберхаузен","name2":"Фортуна Кёльн","bookieKey":"OLIMP"},"game2":{"name1":"Hansa Rostock","name2":"Fortuna","bookieKey":"FONBET"}}
+// gamesNames = {"game1":{"name1":"The New Saints FC","name2":"Haverfordwest County","bookieKey":"BETMGM"},"game2":{"name1":"Тэмворс","name2":"Харборо Таун","bookieKey":"OLIMP"}}
 
 // setTimeout(() => {
 //     gamesNames.game1 = formatGameNames(gamesNames.game1);
