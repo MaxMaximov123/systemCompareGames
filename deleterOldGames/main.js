@@ -25,7 +25,7 @@ async function start(sportKey) {
     //_______________________________________//
 
     while (true){
-        await db('pairs').where('now', '<', new Date().getTime() - 1000 * 60 * 60 * 24 * 1.5).del();
+        await db('pairs').where('now', '<', new Date().getTime() - 1000 * 60 * 60 * 24).del();
         console.log('DELETE old pairs');
         await delay(60 * 1000 * 10);
         try{
