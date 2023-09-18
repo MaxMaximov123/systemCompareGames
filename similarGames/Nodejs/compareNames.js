@@ -150,7 +150,7 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"The New Saints FC","name2":"Haverfordwest County","bookieKey":"BETMGM"},"game2":{"name1":"Тэмворс","name2":"Харборо Таун","bookieKey":"OLIMP"}}
+// gamesNames = {"game1":{"name1":"Piacenza","name2":"Villa d'Alme Valle Brembana","bookieKey":"FONBET"},"game2":{"name1":"Volgograd","name2":"Veles","bookieKey":"BETRADAR"}}
 
 // setTimeout(() => {
 //     gamesNames.game1 = formatGameNames(gamesNames.game1);
@@ -178,10 +178,10 @@ function comparePairNames(name1Words, name2Words){
             let resultCompareWords = false;
             for (let word1Option of word1Options){
                 if (resultCompareWords || result.name1OriginalWords.includes(word1Options[0]) || 
-                result.name1OriginalWords.includes(word1Options[0])) break;
+                result.name2OriginalWords.includes(word1Options[0])) break;
                 for (let word2Option of word2Options){
                     if (resultCompareWords || result.name1OriginalWords.includes(word2Options[0]) || 
-                    result.name1OriginalWords.includes(word2Options[0])) break;
+                    result.name2OriginalWords.includes(word2Options[0])) break;
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
                         result.name1Words.push(word1Option);
@@ -205,7 +205,7 @@ function comparePairNames(name1Words, name2Words){
          result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
-    // console.log(result);
+    console.log(result);
     return result;
 }
 
