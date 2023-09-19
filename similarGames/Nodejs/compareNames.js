@@ -150,15 +150,23 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"Piacenza","name2":"Villa d'Alme Valle Brembana","bookieKey":"FONBET"},"game2":{"name1":"Volgograd","name2":"Veles","bookieKey":"BETRADAR"}}
+gamesNames = {
+    "game1":{
+        "name1":"Botafogo FC SP (U20)",
+        "name2":"AA inter de Limeria SP (U20)",
+        "bookieKey":"BETMGM"},
+    "game2":{
+        "name1":"SpVgg Unterhaching",
+        "name2":"Saabrucken",
+        "bookieKey":"PINNACLE"}}
 
-// setTimeout(() => {
-//     gamesNames.game1 = formatGameNames(gamesNames.game1);
-//     gamesNames.game2 = formatGameNames(gamesNames.game2);
-//     console.log(gamesNames.game1);
-//     console.log(gamesNames.game2);
-//     console.log(compareAllNames(gamesNames))
-// }, 5000);
+setTimeout(() => {
+    gamesNames.game1 = formatGameNames(gamesNames.game1);
+    gamesNames.game2 = formatGameNames(gamesNames.game2);
+    console.log(gamesNames.game1);
+    console.log(gamesNames.game2);
+    console.log(compareAllNames(gamesNames))
+}, 5000);
 
 
 // ---------------------------------- //
