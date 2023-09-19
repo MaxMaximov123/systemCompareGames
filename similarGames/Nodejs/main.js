@@ -510,6 +510,34 @@ async function start(sportKey, params) {
                     });
 
                     let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || allExistingPairs['' + game2.id + '|' + game1.id] || {exist: false, needGroup: null, pairId: null};
+                    if ((!pairExist.exist && needGroup && !(game1.globalGameId === game2.globalGameId)) ||
+                        (pairExist.exist && needGroup && pairExist.needGroup === false && !(game1.globalGameId === game2.globalGameId))
+                    ){
+                        let dataForAddingInCore = {
+                            games: {
+                                [Number(game1.id)]: {
+                                    leagueId: Number(game1.leagueId),
+                                    team1Id: Number(game1.team1Id),
+                                    team2Id: Number(game1.team2Id)
+                                },
+                                [Number(game2.id)]: {
+                                    leagueId: Number(game2.leagueId),
+                                    team1Id: totalSimilarityNames.isInverted ? Number(game2.team2Id) : Number(game2.team1Id),
+                                    team2Id: totalSimilarityNames.isInverted ? Number(game2.team1Id) : Number(game2.team2Id)
+                                }
+                            },
+                            "extend": true,
+                            "makingType": "EXTENSION"
+                        };
+                        console.log(dataForAddingInCore);
+                        let response = (await postRequest(
+                            'https://sm.livesport.tools/api/game-manager/games/group',
+                            dataForAddingInCore
+                            ));
+                        if (response){
+                            console.log(response)
+                        }
+                    }
                     if (!pairExist.exist){
                         newPairsTransactions.push({
                             'id1': game1.id,
@@ -529,32 +557,6 @@ async function start(sportKey, params) {
                             'grouped': game1.globalGameId === game2.globalGameId,
                             'now': new Date().getTime(),
                         });
-                        if (needGroup && !(game1.globalGameId === game2.globalGameId)){
-                            let dataForAddingInCore = {
-                                games: {
-                                    [Number(game1.id)]: {
-                                        leagueId: Number(game1.leagueId),
-                                        team1Id: Number(game1.team1Id),
-                                        team2Id: Number(game1.team2Id)
-                                    },
-                                    [Number(game2.id)]: {
-                                        leagueId: Number(game2.leagueId),
-                                        team1Id: totalSimilarityNames.isInverted ? Number(game2.team2Id) : Number(game2.team1Id),
-                                        team2Id: totalSimilarityNames.isInverted ? Number(game2.team1Id) : Number(game2.team2Id)
-                                    }
-                                },
-                                "extend": true,
-                                "makingType": "EXTENSION"
-                            };
-                            console.log(dataForAddingInCore);
-                            let response = (await postRequest(
-                                'https://sm.livesport.tools/api/game-manager/games/group',
-                                dataForAddingInCore
-                                ));
-                            if (response){
-                                console.log(response)
-                            }
-                        }
                     } else if (pairExist.needGroup !== needGroup){
                         allExistingPairs['' + game1.id + '|' + game2.id].needGroup = needGroup;
                         updatePairsTransactions.push({
