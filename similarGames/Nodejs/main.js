@@ -535,7 +535,7 @@ async function start(sportKey, params) {
                             console.log(response)
                         }
                     }
-                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {exist: false, needGroup: null, pairId: null};
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || allExistingPairs['' + game2.id + '|' + game1.id] || {exist: false, needGroup: null, pairId: null};
                     if (!pairExist.exist){
                         newPairsTransactions.push({
                             'id1': game1.id,
