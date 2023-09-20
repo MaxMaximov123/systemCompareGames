@@ -378,7 +378,7 @@ async function start(sportKey, params) {
             console.log('add decisions')
         }
 
-    }, 1000 * 30);
+    }, 1000 * 10);
     
     let newGames = await db('games')
         .select(
