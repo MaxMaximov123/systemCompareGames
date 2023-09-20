@@ -310,6 +310,7 @@ async function start(sportKey, params) {
     console.log('got all pairs');
     for (let pair of allExistingPairsArray){
         allExistingPairs['' + pair.id1 + '|' + pair.id2] = pair;
+        allExistingPairs['' + pair.id2 + '|' + pair.id1] = pair;
     }
     
     const addingNewPairs = setInterval(async () =>{
@@ -322,7 +323,7 @@ async function start(sportKey, params) {
 
             let decisions = [];
             for (let pair of pairs){
-                allExistingPairs['' + pair.id1 + '|' + pair.id2] = {
+                allExistingPairs['' + pair.id1 + '|' + pair.id2] = allExistingPairs['' + pair.id2 + '|' + pair.id1] = {
                     id: pair.id,
                     id1: pair.id1,
                     id2: pair.id2,
@@ -511,7 +512,7 @@ async function start(sportKey, params) {
                     });
 
                     if (needGroup && groupedOldSystem) continue;
-                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || allExistingPairs['' + game2.id + '|' + game1.id] || {exist: false, needGroup: null, pairId: null};
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {exist: false, needGroup: null, pairId: null};
                     if (needGroup && !groupedOldSystem){
                         let dataForAddingInCore = {
                             games: {
