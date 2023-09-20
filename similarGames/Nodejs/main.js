@@ -512,9 +512,7 @@ async function start(sportKey, params) {
 
                     if (needGroup && groupedOldSystem) continue;
                     let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || allExistingPairs['' + game2.id + '|' + game1.id] || {exist: false, needGroup: null, pairId: null};
-                    if ((!pairExist.exist && needGroup && !groupedOldSystem) ||
-                        (pairExist.exist && needGroup && pairExist.needGroup === false && !groupedOldSystem)
-                    ){
+                    if (needGroup && !groupedOldSystem){
                         let dataForAddingInCore = {
                             games: {
                                 [Number(game1.id)]: {
