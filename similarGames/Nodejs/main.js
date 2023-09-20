@@ -512,10 +512,7 @@ async function start(sportKey, params) {
                     });
 
                     if (needGroup && groupedOldSystem) continue;
-                    let pairExist = null;
-                    if (allExistingPairs['' + game1.id + '|' + game2.id]) pairExist = allExistingPairs['' + game1.id + '|' + game2.id];
-                    else pairExist = {exist: false, needGroup: null, pairId: null};
-                    console.log(pairExist, allExistingPairs['' + game1.id + '|' + game2.id]);
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id];
                     if (needGroup && !groupedOldSystem){
                         let dataForAddingInCore = {
                             games: {
@@ -542,7 +539,7 @@ async function start(sportKey, params) {
                             console.log(response)
                         }
                     }
-                    if (!pairExist.exist){
+                    if (!pairExist){
                         allExistingPairs['' + game1.id + '|' + game2.id] = allExistingPairs['' + game2.id + '|' + game1.id] = {
                             id: null,
                             id1: game1.id,
