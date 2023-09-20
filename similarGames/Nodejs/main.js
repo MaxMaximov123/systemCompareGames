@@ -414,6 +414,7 @@ async function start(sportKey, params) {
             const findingСoupleToGame = async (gamesForComparison, game1, numGame1) => {
                 for (let numGame2=numGame1;numGame2<gamesForComparison.length;numGame2++){
                     const game2 = gamesForComparison[numGame2];
+                    let groupedOldSystem = game1.globalGameId === game2.globalGameId;
                     console.log(sportKey, 'game1', numGame1, 'game2', numGame2, '/', gamesForComparison.length);
                     for (let numKey of ['startTime', 'liveFrom', 'leagueId', 'team1Id', 'team2Id', 'id']){
                         game1[numKey] = Number(game1[numKey]);
@@ -439,7 +440,7 @@ async function start(sportKey, params) {
                         // console.log(realStartTimeDistance / 60 / 1000)
                         timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1.sportKey] * 60 * 1000)));
                     }
-                    if (timeDiscrepancy < 0.8 && game1.globalGameId !== game2.globalGameId) continue;
+                    if (timeDiscrepancy < 0.8 && !groupedOldSystem) continue;
                     
                     let gamesNames = {
                         game1: game1.gameNames,
@@ -448,7 +449,7 @@ async function start(sportKey, params) {
                     // gamesNames = await getGameObjectSetsForSimilarity(gamesNames);
                     totalSimilarityNames = compareAllNames(gamesNames);
                     // console.log(totalSimilarityNames);
-                    if (totalSimilarityNames.totalSimilarity < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
+                    if (totalSimilarityNames.totalSimilarity < 0.75 && !groupedOldSystem) continue;
                     
                     
                     let game1DataScores = (allScores[''  + game1.id] || []).slice();
@@ -505,13 +506,14 @@ async function start(sportKey, params) {
                         scores: totalSimilarityScores, 
                         names: totalSimilarityNames, 
                         need: needGroup,
-                        grouped: game1.globalGameId === game2.globalGameId,
+                        grouped: groupedOldSystem,
                         timeDiscrepancy: timeDiscrepancy
                     });
 
+                    if (needGroup && groupedOldSystem) continue;
                     let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || allExistingPairs['' + game2.id + '|' + game1.id] || {exist: false, needGroup: null, pairId: null};
-                    if ((!pairExist.exist && needGroup && !(game1.globalGameId === game2.globalGameId)) ||
-                        (pairExist.exist && needGroup && pairExist.needGroup === false && !(game1.globalGameId === game2.globalGameId))
+                    if ((!pairExist.exist && needGroup && !groupedOldSystem) ||
+                        (pairExist.exist && needGroup && pairExist.needGroup === false && !groupedOldSystem)
                     ){
                         let dataForAddingInCore = {
                             games: {
@@ -537,6 +539,7 @@ async function start(sportKey, params) {
                         if (response){
                             console.log(response)
                         }
+                        if (response.code === 200) process.exit();
                     }
                     if (!pairExist.exist){
                         newPairsTransactions.push({
@@ -554,11 +557,12 @@ async function start(sportKey, params) {
                             'totalSimilarity': (totalSimilarityOutcomesPre + totalSimilarityOutcomesLive + totalSimilarityScores) / 3,
                             'timeDiscrepancy': timeDiscrepancy,
                             'needGroup': needGroup,
-                            'grouped': game1.globalGameId === game2.globalGameId,
+                            'grouped': groupedOldSystem,
                             'now': new Date().getTime(),
                         });
                     } else if (pairExist.needGroup !== needGroup){
                         allExistingPairs['' + game1.id + '|' + game2.id].needGroup = needGroup;
+                        allExistingPairs['' + game2.id + '|' + game1.id].needGroup = needGroup;
                         updatePairsTransactions.push({
                             pairId: pairExist.pairId,
                             data: {
@@ -569,7 +573,7 @@ async function start(sportKey, params) {
                                 'similarityScores': totalSimilarityScores,
                                 'timeDiscrepancy': timeDiscrepancy,
                                 'needGroup': needGroup,
-                                'grouped': game1.globalGameId === game2.globalGameId,
+                                'grouped': groupedOldSystem,
                                 'now': new Date().getTime(),
                             }
                         });
