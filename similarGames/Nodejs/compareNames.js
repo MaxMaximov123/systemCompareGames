@@ -185,11 +185,18 @@ function comparePairNames(name1Words, name2Words){
         for (let word2Options of name2Words){
             let resultCompareWords = false;
             for (let word1Option of word1Options){
-                if (resultCompareWords || result.name1OriginalWords.includes(word1Options[0]) || 
-                result.name2OriginalWords.includes(word1Options[0])) break;
+                if (
+                    resultCompareWords || 
+                    result.name1OriginalWords.includes(word1Options[0]) || 
+                    result.name2OriginalWords.includes(word2Options[0])
+                    ) break;
                 for (let word2Option of word2Options){
-                    if (resultCompareWords || result.name1OriginalWords.includes(word2Options[0]) || 
-                    result.name2OriginalWords.includes(word2Options[0])) break;
+                    if (
+                        resultCompareWords || 
+                        result.name1OriginalWords.includes(word1Options[0]) || 
+                        result.name2OriginalWords.includes(word2Options[0])
+                        ) break;
+
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
                         result.name1Words.push(word1Option);

@@ -378,7 +378,7 @@ async function start(sportKey, params) {
             console.log('add decisions')
         }
 
-    }, 5000);
+    }, 1000 * 30);
     
     let newGames = await db('games')
         .select(
@@ -539,7 +539,6 @@ async function start(sportKey, params) {
                         if (response){
                             console.log(response)
                         }
-                        if (response.code === 200) process.exit();
                     }
                     if (!pairExist.exist){
                         newPairsTransactions.push({
