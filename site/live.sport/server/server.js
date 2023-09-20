@@ -126,8 +126,8 @@ app.post('/api/pairs', async (req, res) => {
         'games1.sportKey as sportKey',
         'games2.bookieKey as bookieKey2',
         'games2.startTime as startTime2',
-        'games1.lastUpdate as hasHistory1',
-        'games2.lastUpdate as hasHistory2'
+        'pairs.id as hasHistory1',
+        'pairs.id as hasHistory2'
         );
       result.pairs = pairs;
       result.pageCount = await db('pairs')
