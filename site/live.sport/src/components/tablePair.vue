@@ -117,7 +117,7 @@
                 <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
                     <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
                     Пара {{ item.id }}
-                    <a v-if="item.hashistory1 && item.hashistory2" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
+                    <a v-if="item.hashistory1 !== null && item.hashistory2 !== null" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                 </td>
                 <td style="text-align: left; position: relative; border: 1px solid #000; padding-right: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
