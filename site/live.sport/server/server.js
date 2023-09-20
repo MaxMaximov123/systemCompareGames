@@ -71,8 +71,6 @@ app.post('/api/pairs', async (req, res) => {
       .join('games as games1', 'pairs.id1', 'games1.id')
       .join('games as games2', 'pairs.id2', 'games2.id')
       .leftJoin('decisions', 'pairs.id', 'decisions.pairId')
-      .leftJoin('teamsNamesUpdates as teamsNamesUpdates1', 'pairs.id1', 'teamsNamesUpdates1.gameId')
-      .leftJoin('teamsNamesUpdates as teamsNamesUpdates2', 'pairs.id2', 'teamsNamesUpdates2.gameId')
 
       .groupBy('pairs.id',
         'games1.lastUpdate', 'games2.lastUpdate', 'games1.bookieKey', 'games2.bookieKey',
@@ -80,8 +78,6 @@ app.post('/api/pairs', async (req, res) => {
         'games2.startTime', 'games1.sportKey', 'games2.sportKey'
         )
       .count('decisions.id as decisionsCount')
-      .count('teamsNamesUpdates1.id as game1NamesUpdates')
-      .count('teamsNamesUpdates2.id as game2NamesUpdates')
       .select(
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
