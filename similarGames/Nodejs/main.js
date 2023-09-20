@@ -512,7 +512,7 @@ async function start(sportKey, params) {
                     });
 
                     if (needGroup && groupedOldSystem) continue;
-                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {exist: false, needGroup: null, pairId: null};
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || allExistingPairs['' + game2.id + '|' + game1.id] || {exist: false, needGroup: null, pairId: null};
                     if (needGroup && !groupedOldSystem){
                         let dataForAddingInCore = {
                             games: {
@@ -540,6 +540,12 @@ async function start(sportKey, params) {
                         }
                     }
                     if (!pairExist.exist){
+                        allExistingPairs['' + game1.id + '|' + game2.id] = allExistingPairs['' + game2.id + '|' + game1.id] = {
+                            id: null,
+                            id1: game1.id,
+                            id2: game2.id,
+                            needGroup: needGroup
+                        };
                         newPairsTransactions.push({
                             'id1': game1.id,
                             'id2': game2.id,
