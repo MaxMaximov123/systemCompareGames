@@ -68,26 +68,19 @@ app.post('/api/pairs', async (req, res) => {
       var pairs = {};
       const result = {};
       pairs = await db('pairs')
-      .join('games as games1', 'pairs.id1', 'games1.id')
-      .join('games as games2', 'pairs.id2', 'games2.id')
-      .leftJoin('decisions', 'pairs.id', 'decisions.pairId')
+      .leftJoin('games as games1', 'pairs.id1', 'games1.id')
+      .leftJoin('games as games2', 'pairs.id2', 'games2.id')
 
-      .groupBy('pairs.id',
-        'games1.lastUpdate', 'games2.lastUpdate', 'games1.bookieKey', 'games2.bookieKey',
-        'games1.liveFrom', 'games2.liveFrom', 'games1.liveTill', 'games2.liveTill', 'games1.startTime',
-        'games2.startTime', 'games1.sportKey', 'games2.sportKey'
-        )
-      .count('decisions.id as decisionsCount')
       .select(
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
         db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
-        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id1 LIMIT 1) as "game1StartTimeUpdates"', []),
-        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id2 LIMIT 1) as "game2StartTimeUpdates"', []),
+        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id1) as "game1StartTimeUpdates"', []),
+        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id2) as "game2StartTimeUpdates"', []),
+        db.raw('(SELECT COUNT(id) FROM "decisions" WHERE "decisions"."pairId" = pairs.id) as "decisionsCount"', []),
         'pairs.id as id',
         'pairs.id1 as game1Id',
         'pairs.id2 as game2Id',
         'pairs.now as now',
-        'pairs.isLive as isLive',
         'pairs.game1Team1Name as game1Team1Name',
         'pairs.game2Team1Name as game2Team1Name',
         'pairs.game1Team2Name as game1Team2Name',
@@ -111,8 +104,6 @@ app.post('/api/pairs', async (req, res) => {
         'games1.sportKey as sportKey',
         'games2.bookieKey as bookieKey2',
         'games2.startTime as startTime2',)
-        .orderBy('pairs.id', 'asc')
-        .offset((requestData.page - 1) * 10).limit(10)
         .where('pairs.similarityNames', '>=', requestData.filters.simNames.min)
         .where('pairs.similarityNames', '<=', requestData.filters.simNames.max)
         .where('pairs.timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
@@ -131,7 +122,9 @@ app.post('/api/pairs', async (req, res) => {
             .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
             .orWhere('game2Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
             .orWhere('game2Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
-        });
+        })
+        .offset((requestData.page - 1) * 10).limit(10);
+
       result.pairs = pairs;
       result.pageCount = await db('pairs')
       .join('games as games1', 'pairs.id1', 'games1.id')
