@@ -285,6 +285,9 @@ async function start(sportKey, params) {
     let allGames = {};
 
     async function updateOutcomesAndScores(){
+        allOutcomesPre = {};
+        allOutcomesLive = {};
+        allScores = {};
         let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
         for (let outcome of newOutcomesPre){
             let newOutcome = allOutcomesPre[outcome.id] || [];
