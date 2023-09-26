@@ -162,15 +162,15 @@ socket.on('message', async (message) => {
 					});
 					console.log('update startTime');
 				}
-				if (data?.team1?.name || data?.team2?.name){
-					await db('teamsNamesUpdates').insert({
-						gameId: game.id,
-						team1Name: game.team1?.name,
-						team2Name: game.team2?.name,
-						time: new Date()
-					});
-					console.log('update names');
-				}
+				// if (data?.team1?.name || data?.team2?.name){
+				// 	await db('teamsNamesUpdates').insert({
+				// 		gameId: game.id,
+				// 		team1Name: game.team1?.name,
+				// 		team2Name: game.team2?.name,
+				// 		time: new Date()
+				// 	});
+				// 	console.log('update names');
+				// }
 				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
 					await updateGame(gameId, {
 						globalGameId: game.globalGameId,
@@ -207,29 +207,28 @@ socket.on('message', async (message) => {
 			
 			if (data.outcomes?.result){
 				const paths = getAllPathsOutcomes(data.outcomes.result);
-				for (let path in paths){
-					await addOucome({
+				await Promise.all(Object.keys(paths).map((path) =>
+					addOucome({
 						id: gameId,
 						path: path,
 						odds: paths[path],
 						now: new Date().getTime(),
 						isLive: game?.isLive,
 					})
-					
-				}
+					));
 				console.log('add outcomes');
 			}
 
 			if (data.scores?.result){
 				const paths = getAllPathsOutcomes(data.scores.result, false);
-				for (let path in paths){	
-					await addScore({
+				await Promise.all(Object.keys(paths).map((path) =>
+					addScore({
 						id: gameId,
 						path: path,
-						score: paths[path],
-						now: new Date().getTime()
+						odds: paths[path],
+						now: new Date().getTime(),
 					})
-				}
+					));
 				console.log('add scores');
 			}
 		}
@@ -249,19 +248,6 @@ socket.on('close', () => {
 });
 
 // ---------------------------------------------------------------------- //
-
-function syncGlobalGameSubscriptions() {
-	for (let globalGameId of Object.keys(globalGameList || {}).map(Number)) {
-		if (globalGames[globalGameId] === undefined) {
-			globalGames[globalGameId] = null;
-
-			socket.send({
-				id: socket.nextRequestId++,
-				type: `globalGame:${globalGameId}/subscribe`,
-			});
-		}
-	}
-}
 
 function syncGameSubscriptions() {
 	for (let gameId of Object.keys(gameList || {}).map(Number)) {
