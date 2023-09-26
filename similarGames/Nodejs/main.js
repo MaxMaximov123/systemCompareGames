@@ -419,7 +419,7 @@ async function start(sportKey, params) {
                         game1[numKey] = Number(game1[numKey]);
                         game2[numKey] = Number(game2[numKey]);
                     }
-                    if (game2.id === game1.id || game2.bookieKey === game1.bookieKey) continue;
+                    if (game2.id >= game1.id || game2.bookieKey === game1.bookieKey) continue;
 
                     let totalSimilarityOutcomesPre = 0;
                     let totalSimilarityOutcomesLive = 0;
@@ -535,8 +535,8 @@ async function start(sportKey, params) {
                             console.log(response)
                         }
                     }
-                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {exist: false, needGroup: null, pairId: null};
-                    if (!pairExist.exist){
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {};
+                    if (!pairExist){
                         newPairsTransactions.push({
                             'id1': game1.id,
                             'id2': game2.id,
