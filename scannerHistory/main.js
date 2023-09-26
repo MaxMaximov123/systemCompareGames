@@ -155,7 +155,7 @@ socket.on('message', async (message) => {
 				merge(game, data);
 				cleanUpDeeply(game);
 				if (data.startTime){
-					db('startTimeUpdates').insert({
+					await db('startTimeUpdates').insert({
 						gameId: game.id,
 						startTime: new Date(game.startTime),
 						time: new Date()
@@ -163,7 +163,7 @@ socket.on('message', async (message) => {
 					console.log('update startTime');
 				}
 				if (data?.team1?.name || data?.team2?.name){
-					db('teamsNamesUpdates').insert({
+					await db('teamsNamesUpdates').insert({
 						gameId: game.id,
 						team1Name: game.team1?.name,
 						team2Name: game.team2?.name,
@@ -172,7 +172,7 @@ socket.on('message', async (message) => {
 					console.log('update names');
 				}
 				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
-					updateGame(gameId, {
+					await updateGame(gameId, {
 						globalGameId: game.globalGameId,
 						unavailableAt: game.unavailableAt,
 						startTime: new Date(game.startTime).getTime(),
@@ -208,7 +208,7 @@ socket.on('message', async (message) => {
 			if (data.outcomes?.result){
 				const paths = getAllPathsOutcomes(data.outcomes.result);
 				for (let path in paths){
-					addOucome({
+					await addOucome({
 						id: gameId,
 						path: path,
 						odds: paths[path],
@@ -223,7 +223,7 @@ socket.on('message', async (message) => {
 			if (data.scores?.result){
 				const paths = getAllPathsOutcomes(data.scores.result, false);
 				for (let path in paths){	
-					addScore({
+					await addScore({
 						id: gameId,
 						path: path,
 						score: paths[path],
