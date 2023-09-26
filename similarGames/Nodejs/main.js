@@ -243,26 +243,6 @@ function pairIsExist(pairs, game1Id, game2Id){
     return {exist: false, needGroup: null, pairId: null};
 }
 
-async function updateOutcomesAndScores(){
-    let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
-    for (let outcome of newOutcomesPre){
-        let newOutcome = allOutcomesPre[outcome.id] || [];
-        newOutcome.push(outcome);
-        allOutcomesPre[outcome.id] = newOutcome;    
-    }
-    let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
-    for (let outcome of newOutcomesLive){
-        let newOutcome = allOutcomesLive[outcome.id] || [];
-        newOutcome.push(outcome);
-        allOutcomesLive[outcome.id] = newOutcome;    
-    }
-    let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
-    for (let score of newScores){
-        let newScore = allScores[score.id] || [];
-        newScore.push(score);
-        allScores[score.id] = newScore;    
-    }
-}
 
 async function start(sportKey, params) {
     require('dotenv').config();
@@ -350,36 +330,42 @@ async function start(sportKey, params) {
         }
 
         if (updatePairsTransactions.length > 0){
-            let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
-            updatePairsTransactions.length = 0;
-            const updatePromises = updatePairsTransactionsForAdding.map(update => {
-                return db('pairs')
-                  .where({ id: update.pairId })
-                  .update(update.data)
-                  .returning('*');
-              });
-            let pairs = await Promise.all(updatePromises);
-            console.log('update pairs');
-
-            let decisions = [];
-            for (let pair of pairs){
-                pair = pair[0];
-                decisions.push({
-                    'pairId': pair.id,
-                    'similarityNames': pair.similarityNames,
-                    'similarityOutcomesPre': pair.similarityOutcomesPre,
-                    'similarityOutcomesLive': pair.similarityOutcomesLive,
-                    'similarityScores': pair.similarityScores,
-                    'timeDiscrepancy': pair.timeDiscrepancy,
-                    'needGroup': pair.needGroup,
-                    'grouped': pair.grouped,
-                    'createdAt': new Date(),
-                    'game1StartTime': null,
-                    'game2StartTime': null,
+            try {
+                let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
+                updatePairsTransactions.length = 0;
+                const updatePromises = updatePairsTransactionsForAdding.map(update => {
+                    try {
+                        return db('pairs')
+                        .where({ id: update.pairId })
+                        .update(update.data)
+                        .returning('*');
+                    } catch(e){return async () => {}};
                 });
+                let pairs = await Promise.all(updatePromises);
+                console.log('update pairs');
+
+                let decisions = [];
+                for (let pair of pairs){
+                    pair = pair[0];
+                    decisions.push({
+                        'pairId': pair.id,
+                        'similarityNames': pair.similarityNames,
+                        'similarityOutcomesPre': pair.similarityOutcomesPre,
+                        'similarityOutcomesLive': pair.similarityOutcomesLive,
+                        'similarityScores': pair.similarityScores,
+                        'timeDiscrepancy': pair.timeDiscrepancy,
+                        'needGroup': pair.needGroup,
+                        'grouped': pair.grouped,
+                        'createdAt': new Date(),
+                        'game1StartTime': null,
+                        'game2StartTime': null,
+                    });
+                }
+                await db('decisions').insert(decisions);
+                console.log('add decisions')
+            } catch(e){
+
             }
-            await db('decisions').insert(decisions);
-            console.log('add decisions')
         }
 
     }, 1000 * 5);
@@ -407,7 +393,7 @@ async function start(sportKey, params) {
         countGames++;
     }
     await updateOutcomesAndScores();
-    // setInterval(updateOutcomesAndScores, 1000 * 60);
+    setInterval(updateOutcomesAndScores, 1000 * 60);
     let gamesForComparison = Object.values(allGames).slice();
     while (true){
         let findingСoupleToGameFunctions = [];
@@ -641,7 +627,7 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
-    for (let sportKey of sportKeys){
+    for (let sportKey of sportKeys.slice(0, 1)){
         console.log('START', sportKey);
         start(sportKey, {
             orderBy: {
