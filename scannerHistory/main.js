@@ -13,56 +13,6 @@ const config = require('./knexfile');
 const db = knex(config.development);
 
 
-async function initDB(){
-	const createGamesTable = async () => {
-		try {
-			await db.schema.createTable('games', function(table) {
-			table.bigint('id').primary().unique();
-			table.bigint('globalGameId');
-			table.string('team1Id');
-			table.string('team2Id');
-			table.string('team1Name');
-			table.string('team2Name');
-			table.string('sportKey');
-			table.string('bookieKey');
-			table.bigint('startTime');
-			});
-			console.log('Games table created');
-		} catch (error) {}
-	};
-		
-	createGamesTable();
-
-	const createOutcomesTable = async () => {
-		try {
-			await db.schema.createTable('outcomes', function(table) {
-			table.bigint('id');
-			table.string('path');
-			table.float('odds');
-			table.bigint('now');
-			});
-			console.log('Outcomes table created');
-		} catch (error) {}
-		};
-		
-	createOutcomesTable();
-
-	const createScoresTable = async () => {
-		try {
-			await db.schema.createTable('scores', function(table) {
-			table.bigint('id');
-			table.string('path');
-			table.integer('score');
-			table.bigint('now');
-			});
-			console.log('Outcomes table created');
-		} catch (error) {}
-		};
-		
-	createScoresTable();
-
-}
-
 // initDB();
 
 const addGame = async (data) => {
@@ -139,7 +89,6 @@ socket.on('open', () => {
 
 socket.on('message', async (message) => {
 	message = message.toString();
-	// console.info(`<<`, JSON.parse(message));
 	let type, data, id, relatedId, error;
 
 	try {
@@ -206,28 +155,24 @@ socket.on('message', async (message) => {
 				merge(game, data);
 				cleanUpDeeply(game);
 				if (data.startTime){
-					try {
-						await db('startTimeUpdates').insert({
-							gameId: game.id,
-							startTime: new Date(game.startTime),
-							time: new Date()
-						});
-						console.log('update startTime');
-					} catch (error) {console.error(error)}
+					db('startTimeUpdates').insert({
+						gameId: game.id,
+						startTime: new Date(game.startTime),
+						time: new Date()
+					});
+					console.log('update startTime');
 				}
 				if (data?.team1?.name || data?.team2?.name){
-					try {
-						await db('teamsNamesUpdates').insert({
-							gameId: game.id,
-							team1Name: game.team1?.name,
-							team2Name: game.team2?.name,
-							time: new Date()
-						});
-						console.log('update names');
-					} catch (error) {console.error(error)}
+					db('teamsNamesUpdates').insert({
+						gameId: game.id,
+						team1Name: game.team1?.name,
+						team2Name: game.team2?.name,
+						time: new Date()
+					});
+					console.log('update names');
 				}
 				if (data.globalGameId || data.startTime || data.liveFrom || data.liveTill || data.unavailableAt){
-					await updateGame(gameId, {
+					updateGame(gameId, {
 						globalGameId: game.globalGameId,
 						unavailableAt: game.unavailableAt,
 						startTime: new Date(game.startTime).getTime(),
@@ -238,6 +183,7 @@ socket.on('message', async (message) => {
 					});
 				}
 			} else {
+				
 				game = games[gameId] = data;
 				await addGame({
 					id: game?.id,
@@ -256,75 +202,41 @@ socket.on('message', async (message) => {
 					lastUpdate: new Date().getTime(),
 					leagueId: game?.league?.id
 				});
+				console.log('add game');
 			}
 			
 			if (data.outcomes?.result){
 				const paths = getAllPathsOutcomes(data.outcomes.result);
 				for (let path in paths){
-					await addOucome({
+					addOucome({
 						id: gameId,
 						path: path,
 						odds: paths[path],
 						now: new Date().getTime(),
 						isLive: game?.isLive,
 					})
+					
 				}
+				console.log('add outcomes');
 			}
 
 			if (data.scores?.result){
 				const paths = getAllPathsOutcomes(data.scores.result, false);
 				for (let path in paths){	
-					await addScore({
+					addScore({
 						id: gameId,
 						path: path,
 						score: paths[path],
 						now: new Date().getTime()
 					})
 				}
+				console.log('add scores');
 			}
 		}
 	}
 
 	// GlobalGameList
 	// ----------------------------------------------------------------------
-
-	if (type === 'globalGameList/subscribed') {
-		console.info(`Successfuly subscribed to GlobalGameList.`);
-		return;
-	}
-
-	if (typeMatch = type.match(/^globalGameList\/(created|updated|deleted)$/)) {
-		if (data === '\x00') {
-			globalGameList = null;
-		} else {
-			if (globalGameList) {
-				merge(globalGameList, data);
-				cleanUpDeeply(globalGameList);
-			} else {
-				globalGameList = data;
-			}
-		}
-
-		syncGlobalGameSubscriptions();
-		return;
-	}
-
-	if (typeMatch = type.match(/^globalGame:([0-9]+)\/(created|updated|deleted)/)) {
-		let globalGameId = Number(typeMatch[1]);
-
-		if (data === '\x00') {
-			delete globalGames[globalGameId];
-		} else {
-			let globalGame = globalGames[globalGameId] || null;
-
-			if (globalGame) {
-				merge(globalGame, data);
-				cleanUpDeeply(globalGame);
-			} else {
-				globalGame = globalGames[globalGameId] = data;
-			}
-		}
-	}
 });
 
 socket.on('error', (error) => {

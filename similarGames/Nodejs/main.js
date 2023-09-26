@@ -379,7 +379,7 @@ async function start(sportKey, params) {
             console.log('add decisions')
         }
 
-    }, 1000 * 10);
+    }, 1000 * 5);
     
     let newGames = await db('games')
         .select(
@@ -404,7 +404,7 @@ async function start(sportKey, params) {
         countGames++;
     }
     await updateOutcomesAndScores();
-    setInterval(updateOutcomesAndScores, 1000 * 60);
+    // setInterval(updateOutcomesAndScores, 1000 * 60);
     let gamesForComparison = Object.values(allGames).slice();
     while (true){
         let findingСoupleToGameFunctions = [];
