@@ -243,6 +243,26 @@ function pairIsExist(pairs, game1Id, game2Id){
     return {exist: false, needGroup: null, pairId: null};
 }
 
+async function updateOutcomesAndScores(){
+    let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
+    for (let outcome of newOutcomesPre){
+        let newOutcome = allOutcomesPre[outcome.id] || [];
+        newOutcome.push(outcome);
+        allOutcomesPre[outcome.id] = newOutcome;    
+    }
+    let newOutcomesLive = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', true);
+    for (let outcome of newOutcomesLive){
+        let newOutcome = allOutcomesLive[outcome.id] || [];
+        newOutcome.push(outcome);
+        allOutcomesLive[outcome.id] = newOutcome;    
+    }
+    let newScores = await db('scores').select('*').whereIn('id', Object.keys(allGames));
+    for (let score of newScores){
+        let newScore = allScores[score.id] || [];
+        newScore.push(score);
+        allScores[score.id] = newScore;    
+    }
+}
 
 async function start(sportKey, params) {
     require('dotenv').config();
@@ -265,9 +285,6 @@ async function start(sportKey, params) {
     let allGames = {};
 
     async function updateOutcomesAndScores(){
-        allOutcomesPre = {};
-        allOutcomesLive = {};
-        allScores = {};
         let newOutcomesPre = await db('outcomes').select('*').whereIn('id', Object.keys(allGames)).where('isLive', false);
         for (let outcome of newOutcomesPre){
             let newOutcome = allOutcomesPre[outcome.id] || [];
@@ -293,7 +310,6 @@ async function start(sportKey, params) {
     console.log('got all pairs');
     for (let pair of allExistingPairsArray){
         allExistingPairs['' + pair.id1 + '|' + pair.id2] = pair;
-        allExistingPairs['' + pair.id2 + '|' + pair.id1] = pair;
     }
     
     const addingNewPairs = setInterval(async () =>{
@@ -306,7 +322,7 @@ async function start(sportKey, params) {
 
             let decisions = [];
             for (let pair of pairs){
-                allExistingPairs['' + pair.id1 + '|' + pair.id2] = allExistingPairs['' + pair.id2 + '|' + pair.id1] = {
+                allExistingPairs['' + pair.id1 + '|' + pair.id2] = {
                     id: pair.id,
                     id1: pair.id1,
                     id2: pair.id2,
@@ -330,45 +346,39 @@ async function start(sportKey, params) {
         }
 
         if (updatePairsTransactions.length > 0){
-            try {
-                let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
-                updatePairsTransactions.length = 0;
-                const updatePromises = updatePairsTransactionsForAdding.map(update => {
-                    try {
-                        return db('pairs')
-                        .where({ id: update.pairId })
-                        .update(update.data)
-                        .returning('*');
-                    } catch(e){return async () => {}};
+            let updatePairsTransactionsForAdding = updatePairsTransactions.slice();
+            updatePairsTransactions.length = 0;
+            const updatePromises = updatePairsTransactionsForAdding.map(update => {
+                return db('pairs')
+                  .where({ id: update.pairId })
+                  .update(update.data)
+                  .returning('*');
+              });
+            let pairs = await Promise.all(updatePromises);
+            console.log('update pairs');
+
+            let decisions = [];
+            for (let pair of pairs){
+                pair = pair[0];
+                decisions.push({
+                    'pairId': pair.id,
+                    'similarityNames': pair.similarityNames,
+                    'similarityOutcomesPre': pair.similarityOutcomesPre,
+                    'similarityOutcomesLive': pair.similarityOutcomesLive,
+                    'similarityScores': pair.similarityScores,
+                    'timeDiscrepancy': pair.timeDiscrepancy,
+                    'needGroup': pair.needGroup,
+                    'grouped': pair.grouped,
+                    'createdAt': new Date(),
+                    'game1StartTime': null,
+                    'game2StartTime': null,
                 });
-                let pairs = await Promise.all(updatePromises);
-                console.log('update pairs');
-
-                let decisions = [];
-                for (let pair of pairs){
-                    pair = pair[0];
-                    decisions.push({
-                        'pairId': pair.id,
-                        'similarityNames': pair.similarityNames,
-                        'similarityOutcomesPre': pair.similarityOutcomesPre,
-                        'similarityOutcomesLive': pair.similarityOutcomesLive,
-                        'similarityScores': pair.similarityScores,
-                        'timeDiscrepancy': pair.timeDiscrepancy,
-                        'needGroup': pair.needGroup,
-                        'grouped': pair.grouped,
-                        'createdAt': new Date(),
-                        'game1StartTime': null,
-                        'game2StartTime': null,
-                    });
-                }
-                await db('decisions').insert(decisions);
-                console.log('add decisions')
-            } catch(e){
-
             }
+            await db('decisions').insert(decisions);
+            console.log('add decisions')
         }
 
-    }, 1000 * 5);
+    }, 5000);
     
     let newGames = await db('games')
         .select(
@@ -404,7 +414,6 @@ async function start(sportKey, params) {
             const findingСoupleToGame = async (gamesForComparison, game1, numGame1) => {
                 for (let numGame2=numGame1;numGame2<gamesForComparison.length;numGame2++){
                     const game2 = gamesForComparison[numGame2];
-                    let groupedOldSystem = game1.globalGameId === game2.globalGameId;
                     console.log(sportKey, 'game1', numGame1, 'game2', numGame2, '/', gamesForComparison.length);
                     for (let numKey of ['startTime', 'liveFrom', 'leagueId', 'team1Id', 'team2Id', 'id']){
                         game1[numKey] = Number(game1[numKey]);
@@ -430,7 +439,7 @@ async function start(sportKey, params) {
                         // console.log(realStartTimeDistance / 60 / 1000)
                         timeDiscrepancy = Math.max(0, 0.8 + 0.2 * (1 - realStartTimeDistance / (maxSportStartTimeDistance[game1.sportKey] * 60 * 1000)));
                     }
-                    if (timeDiscrepancy < 0.8 && !groupedOldSystem) continue;
+                    if (timeDiscrepancy < 0.8 && game1.globalGameId !== game2.globalGameId) continue;
                     
                     let gamesNames = {
                         game1: game1.gameNames,
@@ -439,7 +448,7 @@ async function start(sportKey, params) {
                     // gamesNames = await getGameObjectSetsForSimilarity(gamesNames);
                     totalSimilarityNames = compareAllNames(gamesNames);
                     // console.log(totalSimilarityNames);
-                    if (totalSimilarityNames.totalSimilarity < 0.75 && !groupedOldSystem) continue;
+                    if (totalSimilarityNames.totalSimilarity < 0.75 && game1.globalGameId !== game2.globalGameId) continue;
                     
                     
                     let game1DataScores = (allScores[''  + game1.id] || []).slice();
@@ -496,13 +505,11 @@ async function start(sportKey, params) {
                         scores: totalSimilarityScores, 
                         names: totalSimilarityNames, 
                         need: needGroup,
-                        grouped: groupedOldSystem,
+                        grouped: game1.globalGameId === game2.globalGameId,
                         timeDiscrepancy: timeDiscrepancy
                     });
 
-                    if (needGroup && groupedOldSystem) continue;
-                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id];
-                    if (needGroup && !groupedOldSystem){
+                    if (needGroup && !(game1.globalGameId === game2.globalGameId)){
                         let dataForAddingInCore = {
                             games: {
                                 [Number(game1.id)]: {
@@ -528,13 +535,8 @@ async function start(sportKey, params) {
                             console.log(response)
                         }
                     }
-                    if (!pairExist){
-                        allExistingPairs['' + game1.id + '|' + game2.id] = allExistingPairs['' + game2.id + '|' + game1.id] = {
-                            id: null,
-                            id1: game1.id,
-                            id2: game2.id,
-                            needGroup: needGroup
-                        };
+                    let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {exist: false, needGroup: null, pairId: null};
+                    if (!pairExist.exist){
                         newPairsTransactions.push({
                             'id1': game1.id,
                             'id2': game2.id,
@@ -550,12 +552,11 @@ async function start(sportKey, params) {
                             'totalSimilarity': (totalSimilarityOutcomesPre + totalSimilarityOutcomesLive + totalSimilarityScores) / 3,
                             'timeDiscrepancy': timeDiscrepancy,
                             'needGroup': needGroup,
-                            'grouped': groupedOldSystem,
+                            'grouped': game1.globalGameId === game2.globalGameId,
                             'now': new Date().getTime(),
                         });
                     } else if (pairExist.needGroup !== needGroup){
                         allExistingPairs['' + game1.id + '|' + game2.id].needGroup = needGroup;
-                        allExistingPairs['' + game2.id + '|' + game1.id].needGroup = needGroup;
                         updatePairsTransactions.push({
                             pairId: pairExist.pairId,
                             data: {
@@ -566,7 +567,7 @@ async function start(sportKey, params) {
                                 'similarityScores': totalSimilarityScores,
                                 'timeDiscrepancy': timeDiscrepancy,
                                 'needGroup': needGroup,
-                                'grouped': groupedOldSystem,
+                                'grouped': game1.globalGameId === game2.globalGameId,
                                 'now': new Date().getTime(),
                             }
                         });
@@ -627,7 +628,7 @@ async function main(){
     const async = require('async');
     // const sportKeys = ['TENNIS', 'SOCCER', 'HOCKEY', 'BASEBALL', 'CRICKET', 'BASKETBALL', 'VOLLEYBALL', 'HANDBALL', 'FUTSAL', 'TABLE_TENNIS', 'WATER_POLO', 'CYBERSPORT', 'SNOOKER', 'AMERICAN_FOOTBALL'];
     const sportKeys = process.env.SPORTKEYS.split(';');
-    for (let sportKey of sportKeys.slice(0, 1)){
+    for (let sportKey of sportKeys){
         console.log('START', sportKey);
         start(sportKey, {
             orderBy: {

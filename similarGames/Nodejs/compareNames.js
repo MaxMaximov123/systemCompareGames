@@ -150,7 +150,7 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-// gamesNames = {"game1":{"name1":"Man City (tommy) Esports","name2":"Union Berlin (Chemist) Esports","bookieKey":"BET365"},"game2":{"name1":"Man City","name2":"1. FC Union Berlin (Chemist)","bookieKey":"BETRADAR"}}
+// gamesNames = {"game1":{"name1":"The New Saints FC","name2":"Haverfordwest County","bookieKey":"BETMGM"},"game2":{"name1":"Тэмворс","name2":"Харборо Таун","bookieKey":"OLIMP"}}
 
 // setTimeout(() => {
 //     gamesNames.game1 = formatGameNames(gamesNames.game1);
@@ -177,18 +177,11 @@ function comparePairNames(name1Words, name2Words){
         for (let word2Options of name2Words){
             let resultCompareWords = false;
             for (let word1Option of word1Options){
-                if (
-                    resultCompareWords || 
-                    result.name1OriginalWords.includes(word1Options[0]) || 
-                    result.name2OriginalWords.includes(word2Options[0])
-                    ) break;
+                if (resultCompareWords || result.name1OriginalWords.includes(word1Options[0]) || 
+                result.name1OriginalWords.includes(word1Options[0])) break;
                 for (let word2Option of word2Options){
-                    if (
-                        resultCompareWords || 
-                        result.name1OriginalWords.includes(word1Options[0]) || 
-                        result.name2OriginalWords.includes(word2Options[0])
-                        ) break;
-
+                    if (resultCompareWords || result.name1OriginalWords.includes(word2Options[0]) || 
+                    result.name1OriginalWords.includes(word2Options[0])) break;
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
                         result.name1Words.push(word1Option);
@@ -209,11 +202,7 @@ function comparePairNames(name1Words, name2Words){
     for (let numWord=0;numWord<result.name1Words.length;numWord++){
         if (!commonWords.includes(result.name1Words[numWord]) &&
         !commonWords.includes(result.name2Words[numWord]) &&
-         (
-            (result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && 
-            result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT)) ||
-            result.name1OriginalWords[numWord] === result.name2OriginalWords[numWord] && 
-            result.name1OriginalWords[numWord].length >= 3) fullWordExist = true;
+         result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
     // console.log(result);
