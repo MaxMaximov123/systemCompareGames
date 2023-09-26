@@ -50,8 +50,7 @@ services:
       SPORTKEYS: SOCCER;WATER_POLO
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
   
@@ -70,8 +69,7 @@ services:
       SPORTKEYS: TABLE_TENNIS;AMERICAN_FOOTBALL
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
 
@@ -90,8 +88,7 @@ services:
       SPORTKEYS: TENNIS;SNOOKER
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
 
@@ -110,8 +107,7 @@ services:
       SPORTKEYS: BASKETBALL;FUTSAL
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
 
@@ -130,8 +126,7 @@ services:
       SPORTKEYS: CYBERSPORT;CRICKET
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
 
@@ -150,8 +145,7 @@ services:
       SPORTKEYS: HOCKEY;HANDBALL
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
   
@@ -170,8 +164,7 @@ services:
       SPORTKEYS: BASEBALL;VOLLEYBALL
 
     depends_on:
-      # - python
-      - 195.201.58.179
+      - db
     networks:
       - mynetwork
   
