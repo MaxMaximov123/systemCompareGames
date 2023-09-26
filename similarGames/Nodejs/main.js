@@ -536,7 +536,7 @@ async function start(sportKey, params) {
                         }
                     }
                     let pairExist = allExistingPairs['' + game1.id + '|' + game2.id] || {};
-                    if (!pairExist){
+                    if (!pairExist.id){
                         newPairsTransactions.push({
                             'id1': game1.id,
                             'id2': game2.id,
@@ -555,7 +555,7 @@ async function start(sportKey, params) {
                             'grouped': game1.globalGameId === game2.globalGameId,
                             'now': new Date().getTime(),
                         });
-                    } else if (pairExist.needGroup !== needGroup){
+                    } else if (pairExist.id && pairExist.needGroup !== needGroup){
                         allExistingPairs['' + game1.id + '|' + game2.id].needGroup = needGroup;
                         updatePairsTransactions.push({
                             pairId: pairExist.pairId,
