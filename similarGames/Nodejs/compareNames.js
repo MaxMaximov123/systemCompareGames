@@ -18,6 +18,8 @@ const replacements = {
         [/\sII\s/gi, ' 2 '],
         [/\sIII\s/gi, ' 3 '],
         [/-pro\s/gi, ' '],
+        [/\shk\s/gi, ' '],
+        [/\shc\s/gi, ' '],
 
     ],
     "OLIMP": [
@@ -47,6 +49,8 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
+        [/\shk\s/gi, ' '],
+        [/\shc\s/gi, ' '],
 
     ],
     "BET365": [
@@ -64,6 +68,8 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
+        [/\shk\s/gi, ' '],
+        [/\shc\s/gi, ' '],
 
     ],
     "BETMGM": [
@@ -80,6 +86,8 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
+        [/\shk\s/gi, ' '],
+        [/\shc\s/gi, ' '],
 
 
     ],
@@ -101,6 +109,8 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
+        [/\shk\s/gi, ' '],
+        [/\shc\s/gi, ' '],
 
 
     ],
@@ -117,6 +127,8 @@ const replacements = {
         [/\sIII\s/gi, ' 3 '],
         [/\sca\s/gi, ' '],
         [/-pro\s/gi, ' '],
+        [/\shk\s/gi, ' '],
+        [/\shc\s/gi, ' '],
     ],
 }
 const commonWords = [
