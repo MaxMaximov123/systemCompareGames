@@ -150,23 +150,15 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 // ---------------------------------- //
 
-gamesNames = {
-    "game1":{
-        "name1": "Real Sociedad (Chemist)",
-        "name2":"FC Barcelona (Carnage)",
-        "bookieKey":"BETRADAR"},
-    "game2":{
-        "name1":"Barcelona (mr_elidarius) Esports",
-        "name2":"Real Madrid (DangerDim77) Esports",
-        "bookieKey":"BET365"}}
+// gamesNames = {"game1":{"name1":"Manama","name2":"Al Hala","bookieKey":"BET365"},"game2":{"name1":"Celta Vigo","name2":"Alaves","bookieKey":"VIRGINBET"}}
 
-setTimeout(() => {
-    gamesNames.game1 = formatGameNames(gamesNames.game1);
-    gamesNames.game2 = formatGameNames(gamesNames.game2);
-    console.log(gamesNames.game1);
-    console.log(gamesNames.game2);
-    console.log(compareAllNames(gamesNames))
-}, 5000);
+// setTimeout(() => {
+//     gamesNames.game1 = formatGameNames(gamesNames.game1);
+//     gamesNames.game2 = formatGameNames(gamesNames.game2);
+//     console.log(gamesNames.game1);
+//     console.log(gamesNames.game2);
+//     console.log(compareAllNames(gamesNames))
+// }, 5000);
 
 
 // ---------------------------------- //
@@ -188,7 +180,7 @@ function comparePairNames(name1Words, name2Words){
                 if (resultCompareWords || result.name1OriginalWords.includes(word1Options[0]) || 
                 result.name1OriginalWords.includes(word1Options[0])) break;
                 for (let word2Option of word2Options){
-                    if (resultCompareWords || result.name1OriginalWords.includes(word2Options[0]) || 
+                    if (resultCompareWords || result.name2OriginalWords.includes(word2Options[0]) || 
                     result.name1OriginalWords.includes(word2Options[0])) break;
                     resultCompareWords = compareNamesWithCash(word1Option, word2Option);
                     if (resultCompareWords) {
