@@ -152,13 +152,13 @@ setInterval(updateTranslations, 1000 * 60 * 5);
 
 gamesNames = {
     "game1":{
-        "name1":"Saint Patrick's Athletic",
-        "name2":"Drogheba United",
-        "bookieKey":"BETMGM"},
+        "name1": "Real Sociedad (Chemist)",
+        "name2":"FC Barcelona (Carnage)",
+        "bookieKey":"BETRADAR"},
     "game2":{
-        "name1":"Carshalton Athletic FC",
-        "name2":"Hashtag United FC",
-        "bookieKey":"OLIMP"}}
+        "name1":"Barcelona (mr_elidarius) Esports",
+        "name2":"Real Madrid (DangerDim77) Esports",
+        "bookieKey":"BET365"}}
 
 setTimeout(() => {
     gamesNames.game1 = formatGameNames(gamesNames.game1);
@@ -208,9 +208,19 @@ function comparePairNames(name1Words, name2Words){
 
     let fullWordExist = false;
     for (let numWord=0;numWord<result.name1Words.length;numWord++){
-        if (!commonWords.includes(result.name1Words[numWord]) &&
-        !commonWords.includes(result.name2Words[numWord]) &&
-         result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) fullWordExist = true;
+
+        if (
+            !commonWords.includes(result.name1Words[numWord]) &&
+            !commonWords.includes(result.name2Words[numWord]) &&
+            (
+                (result.name1Words[numWord].length >= MINIMUM_CHAR_COUNT && 
+                result.name2Words[numWord].length >= MINIMUM_CHAR_COUNT) ||
+                (result.name1OriginalWords[numWord] === result.name2OriginalWords[numWord] && 
+                    result.name1OriginalWords[numWord].length >= 2)
+            )
+        ) {
+            fullWordExist = true;
+        }
     }
     result.sameWordsPercent = fullWordExist ? result.sameWordsPercent : 0;
     // console.log(result);
