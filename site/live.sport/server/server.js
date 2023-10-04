@@ -68,8 +68,8 @@ app.post('/api/pairs', async (req, res) => {
       var pairs = {};
       const result = {};
       pairs = await db('pairs')
-      .join('games as games1', 'pairs.id1', 'games1.id')
-      .join('games as games2', 'pairs.id2', 'games2.id')
+      // .join('games as games1', 'pairs.id1', 'games1.id')
+      // .join('games as games2', 'pairs.id2', 'games2.id')
 
       .where('pairs.similarityNames', '>=', requestData.filters.simNames.min)
       .where('pairs.similarityNames', '<=', requestData.filters.simNames.max)
@@ -96,8 +96,8 @@ app.post('/api/pairs', async (req, res) => {
         // db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
         // db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
         // db.raw('(SELECT COUNT(id) FROM "decisions" WHERE "decisions"."pairId" = pairs.id LIMIT 1) as "decisionsCount"', []),
-        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id1 LIMIT 1) as "game1StartTimeUpdates"', []),
-        db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id2 LIMIT 1) as "game2StartTimeUpdates"', []),
+        // db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id1 LIMIT 1) as "game1StartTimeUpdates"', []),
+        // db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id2 LIMIT 1) as "game2StartTimeUpdates"', []),
         'pairs.id as id',
         'pairs.id1 as game1Id',
         'pairs.id2 as game2Id',
@@ -115,23 +115,23 @@ app.post('/api/pairs', async (req, res) => {
         'pairs.timeDiscrepancy as timeDiscrepancy',
         'pairs.needGroup as needGroup',
         'pairs.grouped as grouped',
-        'games1.lastUpdate as lastUpdate1',
-        'games2.lastUpdate as lastUpdate2',
-        'games1.bookieKey as bookieKey1',
-        'games1.liveFrom as liveFrom1',
-        'games2.liveFrom as liveFrom2',
-        'games1.liveTill as liveTill1',
-        'games2.liveTill as liveTill2',
-        'games1.startTime as startTime1',
-        'games1.sportKey as sportKey',
-        'games2.bookieKey as bookieKey2',
-        'games2.startTime as startTime2',
+        // 'games1.lastUpdate as lastUpdate1',
+        // 'games2.lastUpdate as lastUpdate2',
+        // 'games1.bookieKey as bookieKey1',
+        // 'games1.liveFrom as liveFrom1',
+        // 'games2.liveFrom as liveFrom2',
+        // 'games1.liveTill as liveTill1',
+        // 'games2.liveTill as liveTill2',
+        // 'games1.startTime as startTime1',
+        // 'games1.sportKey as sportKey',
+        // 'games2.bookieKey as bookieKey2',
+        // 'games2.startTime as startTime2',
         db.raw('true as hasHistory1'),
         db.raw('true as hasHistory2')
         );
       result.pairs = pairs;
       result.pageCount = await db('pairs')
-      .join('games as games1', 'pairs.id1', 'games1.id')
+      // .join('games as games1', 'pairs.id1', 'games1.id')
       .where('similarityNames', '>=', requestData.filters.simNames.min)
       .where('similarityNames', '<=', requestData.filters.simNames.max)
       .where('timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
@@ -144,7 +144,7 @@ app.post('/api/pairs', async (req, res) => {
       .where('similarityScores', '<=', requestData.filters.simScores.max)
       .whereIn('needGroup', groupedNewSystem)
       .whereIn('grouped', groupedOldSystem)
-      .whereIn('games1.sportKey', sportKey)
+      // .whereIn('games1.sportKey', sportKey)
       .where(function() {
         this.where('game1Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
