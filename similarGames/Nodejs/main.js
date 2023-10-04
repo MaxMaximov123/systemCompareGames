@@ -32,7 +32,6 @@ const maxSportStartTimeDistance = {
     "TENNIS": 60,
     "VOLLEYBALL": 60,
     "WATER_POLO": 60,
-
 }
 
 

@@ -8,4 +8,4 @@ RUN npm i -g knex
 
 COPY deleterOldGames/ ./
 
-CMD ["node", "main.js"]
+# CMD ["node", "main.js"]
