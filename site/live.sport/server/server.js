@@ -83,7 +83,7 @@ app.post('/api/pairs', async (req, res) => {
       .where('pairs.similarityScores', '<=', requestData.filters.simScores.max)
       .whereIn('pairs.needGroup', groupedNewSystem)
       .whereIn('pairs.grouped', groupedOldSystem)
-      .whereIn('games1.sportKey', sportKey)
+      // .whereIn('games1.sportKey', sportKey)
       .where(function() {
         this.where('game1Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
