@@ -25,7 +25,7 @@ services:
       POSTGRES_USER: max
       POSTGRES_PASSWORD: jbfgslgsdlfkngd
       POSTGRES_DB: history
-      POSTGRES_HOST: 195.201.58.179
+      POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
     depends_on:
       - db
