@@ -108,8 +108,7 @@
             <th>Новой системой?</th>
             <th>Старой системой?</th>
             <th>Решения</th>
-            <!-- <th>Создана</th> -->
-            <th colspan="2">Обновлена</th>
+            <th>Обновлена</th>
         </thead>
         <tr class="none-tr"></tr>
         <tbody v-for="item in items" :key="item.id" class="data" :id="item.id">
@@ -117,7 +116,8 @@
                 <td rowspan="2" class="num-pair" :style="{ backgroundColor: getBackgroundColor(item) }">
                     <v-icon @click="downloadImage(item.id)" class="download-link">mdi-download</v-icon>
                     Пара {{ item.id }}
-                    <a v-if="item.hashistory1 !== null && item.hashistory2 !== null" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
+                    <a v-if="(new Date(item.game1LiveTill)).getTime() === 0 ||
+                    (new Date() - new Date(item.game1LiveTill)) / 1000 / 60 < 30" :href="`../graphic/${item.id}/outcomesPre`" target="_blank" class="invisible-link"><i class="fas fa-chart-line"></i></a>
                 </td>
                 <td style="text-align: left; position: relative; border: 1px solid #000; padding-right: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game1Team1Name)" class="copy-name">mdi-content-copy</v-icon>
@@ -126,19 +126,15 @@
                 <td style="text-align: left; position: relative; border: 1px solid #000; padding-left: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game1Team2Name)" class="copy-name">mdi-content-copy</v-icon>
                     {{ item.game1Team2Name }}
-                    <div class="gamePair__teamNamesUpdates d-flex align-center" v-if="item.game1NamesUpdates > 1">
-                        <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game1Id)">mdi-history</v-icon>
-                        {{ item.game1NamesUpdates }}
-                    </div>
                 </td>
                 <td rowspan="2">
                     {{ item.sportKey }}
                 </td>
                 <td>
-                    <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey1 + '.png'">
+                    <img class="bookie-icon" :src="'/bookie-icons/' + item.game1BookieKey + '.png'">
                 </td>
                 <td>
-                    <p v-for="time of ( Number(item.startTime1) || Number(item.liveFrom1) ? formatDateFromUnixTimestamp(Number(item.startTime1) || Number(item.liveFrom1)) : 'Неизвестно').split('*')">{{ time }}</p>
+                    <p v-for="time of ( item.game1StartTime || item.game1LiveFrom ? formatDateFromUnixTimestamp(item.game1StartTime || item.game1LiveFrom) : 'Неизвестно').split('*')">{{ time }}</p>
                     <div v-if="item.game1StartTimeUpdates > 1">
                         <v-icon class="copy-name" size="medium" @click="openModalStartTime(item.game1Id)">mdi-history</v-icon>
                         {{ item.game1StartTimeUpdates }}
@@ -146,8 +142,8 @@
                 </td>
                 <td style="position: relative; width: 10%; border: 1px solid #000"
                 class="py-1 px-2 text-center text-no-wrap text-caption">
-                    <p>{{Number(item.liveFrom1) ? formatDateFromUnixTimestamp(item.liveFrom1).replace('*', ' ') : 'Неизвестно'}}</p>
-                    <p>{{Number(item.liveFrom1) && Number(item.liveTill1) ? formatDateFromUnixTimestamp(item.liveTill1).replace('*', ' ') : '-'}}</p>
+                    <p>{{new Date(item.game1LiveFrom).getTime() ? formatDateFromUnixTimestamp(item.game1LiveFrom).replace('*', ' ') : 'Неизвестно'}}</p>
+                    <p>{{new Date(item.game1LiveFrom).getTime() && new Date(item.game1LiveTill).getTime() ? formatDateFromUnixTimestamp(item.game1LiveTill).replace('*', ' ') : '-'}}</p>
                 </td>
                 <td rowspan="2">
                     {{ Math.floor(item.similarityNames * 100 * 100) / 100 + '%' }}
@@ -175,10 +171,7 @@
                     {{ item.decisionsCount }}
                 </td>
                 <td rowspan="2">
-                    <p v-for="time of formatDateFromUnixTimestamp(item.now).split('*')">{{ time }}</p>
-                </td>
-                <td class="align-center">
-                    <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
+                    <p v-for="time of formatDateFromUnixTimestamp(item.updatedAt).split('*')">{{ time }}</p>
                 </td>
             </tr>
             <tr>
@@ -188,61 +181,35 @@
                 </td>
                 <td style="text-align: left; position: relative; border: 1px solid #000; padding-left: 20px;">
                     <v-icon :size="15" @click="copyToClipboard(item.game2Team2Name)" class="copy-name">mdi-content-copy</v-icon>
-                    {{ item.game2Team2Name }}                
-                    <div class="gamePair__teamNamesUpdates d-flex align-center" v-if="item.game2NamesUpdates > 1">
-                        <v-icon class="copy-name" size="large" @click="openModalTeamNames(item.game2Id)">mdi-history</v-icon>
-                        {{ item.game2NamesUpdates }}
-                    </div>
-                    <div class="gamePair__copyNamesObject d-flex align-center" style="">
-                        <v-icon :size="15" @click="copyToClipboard(JSON.stringify({
-                            game1: {
-                                name1: item.game1Team1Name,
-                                name2: item.game1Team2Name,
-                                bookieKey: item.bookieKey1,
-                            },
-                            game2: {
-                                name1: item.game2Team1Name,
-                                name2: item.game2Team2Name,
-                                bookieKey: item.bookieKey2,
-                            }
-                        }))" class="copy-name">mdi-content-copy</v-icon>
-                    </div>
+                    {{ item.game2Team2Name }}
                 </td>
                 <td>
-                    <img class="bookie-icon" :src="'/bookie-icons/' + item.bookieKey2 + '.png'">
+                    <img class="bookie-icon" :src="'/bookie-icons/' + item.game2BookieKey + '.png'">
                 </td>
                 <td style="position: relative; width: 10%; border: 1px solid #000"
                 class="py-1 px-2 text-center text-no-wrap text-caption">
-                    <p v-for="time of ( Number(item.startTime2) || Number(item.liveFrom2) ? formatDateFromUnixTimestamp(Number(item.startTime2) || Number(item.liveFrom2)) : 'Неизвестно').split('*')">{{ time }}</p>
-                    <div v-if="item.game2StartTimeUpdates > 1">
-                        <v-icon class="copy-name" size="medium" @click="openModalStartTime(item.game2Id)">mdi-history</v-icon>
-                        {{ item.game2StartTimeUpdates }}
-                    </div>
+                    <p v-for="time of ( item.game2StartTime || item.game2LiveFrom ? formatDateFromUnixTimestamp(item.game2StartTime || item.game2LiveFrom) : 'Неизвестно').split('*')">{{ time }}</p>
                 </td>
                 <td style="position: relative; width: 10%; border: 1px solid #000"
                 class="py-1 px-2 text-center text-no-wrap text-caption">
-                    <p>{{Number(item.liveFrom2) ? formatDateFromUnixTimestamp(item.liveFrom2).replace('*', ' ') : 'Неизвестно'}}</p>
-                    <p>{{Number(item.liveFrom2) && Number(item.liveTill2) ? formatDateFromUnixTimestamp(item.liveTill2).replace('*', ' ') : '-'}}</p>
+                    <p>{{new Date(item.game2LiveFrom).getTime() ? formatDateFromUnixTimestamp(item.game2LiveFrom).replace('*', ' ') : 'Неизвестно'}}</p>
+                    <p>{{new Date(item.game2LiveFrom).getTime() && new Date(item.game2LiveTill).getTime() ? formatDateFromUnixTimestamp(item.game2LiveTill).replace('*', ' ') : '-'}}</p>
                     <template
                         v-if="
-                        item.liveFrom1 &&
-                        item.liveTill1 &&
-                        item.liveFrom2 &&
-                        item.liveTill2
+                        item.game1LiveFrom &&
+                        item.game1LiveTill &&
+                        item.game2LiveFrom &&
+                        item.game2LiveTill
                         ">
                         <div class="gamePair__timeFrameDifference d-flex align-center">
-                        <template v-if="timeFrameDifference(item.liveFrom1, item.liveTill1, item.liveFrom2, item.liveTill2) > 0">
+                        <template v-if="timeFrameDifference(item.game1LiveFrom, item.game1LiveTill, item.game2LiveFrom, item.game2LiveTill) > 0">
                             Пересечение:
-                            {{ Math.floor(timeFrameDifference(item.liveFrom1, item.liveTill1, item.liveFrom2, item.liveTill2) * 100) }}%
+                            {{ Math.floor(timeFrameDifference(item.game1LiveFrom, item.game1LiveTill, item.game2LiveFrom, item.game2LiveTill) * 100) }}%
                         </template>
                         <template v-else>не пересекаются</template>
                         </div>
                     </template>
                 </td>
-                <td class="align-center">
-                    <p v-for="time of ( Number(item.lastUpdate1) ? formatDateFromUnixTimestamp(Number(item.lastUpdate1)) : 'Неизвестно').split('*')">{{ time }}</p>
-                </td>
-                
             </tr>
             <tr class="none-tr"></tr>
         </tbody>
@@ -315,7 +282,7 @@
             this.modalStartTime.isOpen = false;
         },
         formatDateFromUnixTimestamp(unixTimestamp) {
-            return moment(new Date(Number(unixTimestamp))).format(`DD.MM.YYYY*HH:mm:ss`);
+            return moment(new Date(unixTimestamp)).format(`DD.MM.YYYY*HH:mm:ss`);
         },
         formatDateFromUnixTimestampStr(unixTimestamp) {
             if (unixTimestamp) return moment(new Date(unixTimestamp)).format(`DD.MM.YYYY*HH:mm:ss`);
@@ -353,12 +320,14 @@
             document.body.removeChild(textArea);
         },
 
-        timeFrameDifference(liveFrom1, liveTill1, liveFrom2, liveTill2){
-            return (Math.min(liveTill1, liveTill2) -
-              Math.max(liveFrom1, liveFrom2)) /
+        timeFrameDifference(game1LiveFrom, game1LiveTill, game2LiveFrom, game2LiveTill){
+            [game1LiveFrom, game1LiveTill, game2LiveFrom, game2LiveTill] = 
+            [game1LiveFrom, game1LiveTill, game2LiveFrom, game2LiveTill].map(time => new Date(time).getTime());
+            return (Math.min(game1LiveTill, game2LiveTill) -
+              Math.max(game1LiveFrom, game2LiveFrom)) /
             Math.max(
-              liveTill1 - liveFrom1,
-              liveTill2 - liveFrom2
+              game1LiveTill - game1LiveFrom,
+              game2LiveTill - game2LiveFrom
             );
         },
 

@@ -149,7 +149,7 @@ export default {
                 "WATER_POLO",
                 ],
 
-            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
+            apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
             pairs: [],
             currentPage: 1,
             pageCount: 1000,

@@ -1,22 +1,19 @@
-require('dotenv').config();
+import config from './config.js';
 
+export default {
+    client: 'pg',
+	connection: config.database.url,
+	searchPath: [config.database.schema],
 
-module.exports = {
-    development: {
-        client: 'pg',
-        connection: {
-            host: process.env.POSTGRES_HOST,
-            port: process.env.POSTGRES_PORT,
-            user: process.env.POSTGRES_USER,
-            password: process.env.POSTGRES_PASSWORD,
-            database: process.env.POSTGRES_DB
-        },
-        migrations: {
-            directory: './migrations'
-        },
-        
-        pool: { min: 0, max: 5 }
+	pool: {
+		afterCreate(connection, done) {
+			connection.query('SET timezone="UTC";', (error) => {
+				done(error, connection);
+			});
+		},
+		min: config.database.pool.min,
+		max: config.database.pool.max,
+	},
 
-    }
-    };
-  
+	useNullAsDefault: true,
+};

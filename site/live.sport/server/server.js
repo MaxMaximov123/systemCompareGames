@@ -1,16 +1,18 @@
-const express = require('express');
-const path = require('path');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const knex = require('knex');
-const config = require('./knexfile');
 
 const isLiveValOnType = {
   outcomesPre: false,
   outcomesLive: true,
 };
 
-const db = knex(config.development);
+import { db } from './database.js';
 
 const app = express();
 
@@ -67,68 +69,31 @@ app.post('/api/pairs', async (req, res) => {
     try{
       var pairs = {};
       const result = {};
-      pairs = await db('pairs')
-      // .join('games as games1', 'pairs.id1', 'games1.id')
-      // .join('games as games2', 'pairs.id2', 'games2.id')
 
-      .where('pairs.similarityNames', '>=', requestData.filters.simNames.min)
-      .where('pairs.similarityNames', '<=', requestData.filters.simNames.max)
-      .where('pairs.timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
-      .where('pairs.timeDiscrepancy', '<=', requestData.filters.timeDiscrepancy.max)
-      .where('pairs.similarityOutcomesPre', '>=', requestData.filters.simOutcomesPre.min)
-      .where('pairs.similarityOutcomesPre', '<=', requestData.filters.simOutcomesPre.max)
-      .where('pairs.similarityOutcomesLive', '>=', requestData.filters.simOutcomesLive.min)
-      .where('pairs.similarityOutcomesLive', '<=', requestData.filters.simOutcomesLive.max)
-      .where('pairs.similarityScores', '>=', requestData.filters.simScores.min)
-      .where('pairs.similarityScores', '<=', requestData.filters.simScores.max)
-      .whereIn('pairs.needGroup', groupedNewSystem)
-      .whereIn('pairs.grouped', groupedOldSystem)
-      // .whereIn('games1.sportKey', sportKey)
+      pairs = await db('pairs')
+      .where('similarityNames', '>=', requestData.filters.simNames.min)
+      .where('similarityNames', '<=', requestData.filters.simNames.max)
+      .where('timeDiscrepancy', '>=', requestData.filters.timeDiscrepancy.min)
+      .where('timeDiscrepancy', '<=', requestData.filters.timeDiscrepancy.max)
+      .where('similarityOutcomesPre', '>=', requestData.filters.simOutcomesPre.min)
+      .where('similarityOutcomesPre', '<=', requestData.filters.simOutcomesPre.max)
+      .where('similarityOutcomesLive', '>=', requestData.filters.simOutcomesLive.min)
+      .where('similarityOutcomesLive', '<=', requestData.filters.simOutcomesLive.max)
+      .where('similarityScores', '>=', requestData.filters.simScores.min)
+      .where('similarityScores', '<=', requestData.filters.simScores.max)
+      .whereIn('needGroup', groupedNewSystem)
+      .whereIn('grouped', groupedOldSystem)
+      .whereIn('sportKey', sportKey)
       .where(function() {
         this.where('game1Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game2Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game2Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
       })
-      .orderBy('pairs.id', 'asc')
+      .orderBy('id', 'asc')
       .offset((requestData.page - 1) * 10).limit(10)
-      .select(
-        // db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id1 LIMIT 1) as hasHistory1', []),
-        // db.raw('(SELECT id FROM outcomes WHERE outcomes.id = pairs.id2 LIMIT 1) as hasHistory2', []),
-        // db.raw('(SELECT COUNT(id) FROM "decisions" WHERE "decisions"."pairId" = pairs.id LIMIT 1) as "decisionsCount"', []),
-        // db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id1 LIMIT 1) as "game1StartTimeUpdates"', []),
-        // db.raw('(SELECT COUNT(id) FROM "startTimeUpdates" WHERE "startTimeUpdates"."gameId" = pairs.id2 LIMIT 1) as "game2StartTimeUpdates"', []),
-        'pairs.id as id',
-        'pairs.id1 as game1Id',
-        'pairs.id2 as game2Id',
-        'pairs.now as now',
-        'pairs.isLive as isLive',
-        'pairs.game1Team1Name as game1Team1Name',
-        'pairs.game2Team1Name as game2Team1Name',
-        'pairs.game1Team2Name as game1Team2Name',
-        'pairs.game2Team2Name as game2Team2Name',
-        'pairs.similarityNames as similarityNames',
-        'pairs.similarityOutcomesPre as similarityOutcomesPre',
-        'pairs.similarityOutcomesLive as similarityOutcomesLive',
-        'pairs.similarityScores as similarityScores',
-        'pairs.totalSimilarity as totalSimilarity',
-        'pairs.timeDiscrepancy as timeDiscrepancy',
-        'pairs.needGroup as needGroup',
-        'pairs.grouped as grouped',
-        // 'games1.lastUpdate as lastUpdate1',
-        // 'games2.lastUpdate as lastUpdate2',
-        // 'games1.bookieKey as bookieKey1',
-        // 'games1.liveFrom as liveFrom1',
-        // 'games2.liveFrom as liveFrom2',
-        // 'games1.liveTill as liveTill1',
-        // 'games2.liveTill as liveTill2',
-        // 'games1.startTime as startTime1',
-        // 'games1.sportKey as sportKey',
-        // 'games2.bookieKey as bookieKey2',
-        // 'games2.startTime as startTime2',
-        db.raw('true as hasHistory1'),
-        db.raw('true as hasHistory2')
-        );
+      .select('*');
+      
       result.pairs = pairs;
       result.pageCount = await db('pairs')
       // .join('games as games1', 'pairs.id1', 'games1.id')
@@ -144,14 +109,14 @@ app.post('/api/pairs', async (req, res) => {
       .where('similarityScores', '<=', requestData.filters.simScores.max)
       .whereIn('needGroup', groupedNewSystem)
       .whereIn('grouped', groupedOldSystem)
-      // .whereIn('games1.sportKey', sportKey)
+      .whereIn('sportKey', sportKey)
       .where(function() {
         this.where('game1Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game1Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game2Team1Name', 'ilike', `%${requestData.filters.teamName}%`)
           .orWhere('game2Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
       })
-      .count('pairs.id');
+      .count('id');
       result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));
     } catch(e){

@@ -31,6 +31,7 @@
 
 import router from '@/router';
 import PlotlyChart from '@/components/PlotlyChart.vue';
+import Game from '../plugins/game';
 
 export default {
     components: {
@@ -52,7 +53,10 @@ export default {
 
             selectedPathOutcomesPre: '',
             selectedPathOutcomesLive: '',
-            selectedPathScores: '',          
+            selectedPathScores: '',      
+            games: {
+                
+            },   
 
             infoLabels: {
                 outcomesPre: '',
