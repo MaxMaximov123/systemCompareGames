@@ -41,7 +41,7 @@ export default {
     },
     data(){
         return {
-            apiHost: 1 ? 'localhost:8005' : '195.201.58.179:8005',
+            apiHost: 0 ? 'localhost:8005' : '195.201.58.179:8005',
             id: 1,
             activeTab: 'outcomesPre',
             TIK_STEP: 3,
