@@ -1,4 +1,3 @@
-import Websocket from 'ws';
 import EventEmitter from 'events';
 import merge from 'lodash/merge.js';
 
@@ -8,29 +7,26 @@ export default class Collector extends EventEmitter {
 	static CLIENT_KEY = 'CKPYF4Bw894hZtDBLTPB2G693uqSQTWm';
 	static SECRET_KEY = 'UCM^ZvgfCq?%cw&BPvt9+PwDn_gBn94T';
 
+	matcher = null;
 	gameList = null;
 	gameListWebSocket = {};
 	isConnected = false;
 	webSocket = null;
 
-	constructor(game1Id, game2Id, games) {
+	constructor({ frontend }) {
 		super();
-		this.game1Id = game1Id;
-		this.game2Id = game2Id;
-		this.games = games;
+		this.frontend = frontend;
 
-		this.start();
-	}
-
-	async waitForTimeout(time) {
-		await new Promise((resolve) => setTimeout(resolve, time));
+		this.start().catch((error) => {
+			console.log(error);
+		});
 	}
 
 	keepConnection() {
 		(async () => {
 			while (!this.isDestroyed) {
 				await new Promise((resolve) => {
-					let webSocket = new Websocket(`ws://'94.130.200.118:8300?clientKey=${Collector.CLIENT_KEY}`);
+					let webSocket = new WebSocket(`ws://94.130.200.118:8300?clientKey=${Collector.CLIENT_KEY}`);
 
 					webSocket.send = ((send) => {
 						return ({ type, data = null, id = null, relatedId = null, error = null }) => {
@@ -61,9 +57,10 @@ export default class Collector extends EventEmitter {
 					})(webSocket.send);
 
 
-					webSocket.on('open', () => {
+					webSocket.onopen = () => {
 						this.webSocket = webSocket;
 						this.isConnected = true;
+						console.log(`Collector connected.`);
 						this.emit('connected');
 
 						this.webSocket.send({
@@ -73,9 +70,10 @@ export default class Collector extends EventEmitter {
 							},
 							relatedId: 1,
 						});
-					});
+					};
 
-					webSocket.on('message', async (message) => {
+					webSocket.onmessage = async (message) => {
+						message = message.data;
 						message = message.toString();
 						let originalMessage = message;
 
@@ -90,10 +88,12 @@ export default class Collector extends EventEmitter {
 								}
 							})(...JSON.parse(message));
 						} catch (error) {
+							console.log(error);
 							return;
 						}
 
 						if (message.error) {
+							console.log(`Collector: ${JSON.stringify(message.error)}`);
 							return;
 						}
 
@@ -104,43 +104,53 @@ export default class Collector extends EventEmitter {
 						let messageTypeMatch = null;
 
 						if (message.type === 'authorized') {
-							// Subscribing to GameList
-
-							this.webSocket.send({
-								type: `game:${game1Id}/subscribe`,
-							});
-							this.webSocket.send({
-								type: `game:${game2Id}/subscribe`,
-							});
+							this.emit('authorized');
 							return;
 						}
 
-						// GameList
-						// ----------------------------------------------------------------------
+						if (messageTypeMatch = message.type.match(/^game:([0-9]+)\/(isUpToDate)/)) {
+							let gameId = Number(messageTypeMatch[1]);
+							this.frontend.games[gameId].isUpToDate = true;
+							let gameIds = this.frontend.gameIds;
+							if (this.frontend.games[gameIds.game1].isUpToDate && this.frontend.games[gameIds.game2].isUpToDate) {
+								this.emit('allGamesIsUpToDate');
+							}
+						}
 
 						if (messageTypeMatch = message.type.match(/^game:([0-9]+)\/(detailUpdate|deleted)/)) {
 							let gameId = Number(messageTypeMatch[1]);
-							return this.games[gameId].gotDetails(message.data, messageTypeMatch[2]);
+							return this.frontend.games[gameId].gotDetails(message.data, messageTypeMatch[2]);
 						}
-					});
+					};
 
-					webSocket.on('error', (error) => {
-					});
+					webSocket.onerror = (error) => {
+						console.log(error);
+					};
 
-					webSocket.on('close', (closeCode) => {
+					webSocket.onclose = (closeCode) => {
 						this.webSocket = null;
 						this.isConnected = false;
 						this.emit('disconnected');
 
+						console.log(
+							'closeCode:', closeCode
+						);
+
 						return resolve();
-					});
+					};
 				});
 				await this.waitForTimeout(1000);
 			}
 		})();
 	}
 
+	async waitForTimeout(time) {
+		await new Promise((resolve) => setTimeout(resolve, time));
+	}
+
 	async start() {
+		console.log(`Collector is starting...`);
 		this.keepConnection();
+		console.log(`Collector started.`);
 	}
 }

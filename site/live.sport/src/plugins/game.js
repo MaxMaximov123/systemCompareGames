@@ -13,17 +13,18 @@ export default class Game extends EventEmitter {
 	outcomePreUpdates = {};
 	scoreUpdates = {};
 	comparisonTime = 0;
+	isUpToDate = false;
 	TIK_STEP = 3;
 
-	constructor({ id, key, bookieKey, matcher }) {
+	constructor({ id, collector, frontend }) {
 		super();
 		this.id = id;
-		this.key = key;
-		this.bookieKey = bookieKey;
-		this.matcher = matcher;
-		this.matcher.provider.webSocket.send({
+		this.collector = collector;
+		this.frontend = frontend;
+		this.collector.webSocket.send({
 			type: `game:${id}/subscribe`,
 		});
+		this.startCreatingNewTiks();
 	}
 
 	// Details
@@ -165,22 +166,28 @@ export default class Game extends EventEmitter {
 		}
 	}
 
-	// async lock() {
-	// 	try {
-	// 		let redis = getBookieRedis();
+	async startCreatingNewTiks() {
+		while (!this.isDestroyed) {
+			let maxTikIndex = Math.floor(new Date().getTime() / 1000 / this.TIK_STEP) * this.TIK_STEP;
+			
+			let dataType = this.frontend.typePlotToGameUpdates[this.frontend.activeTab];
+			let path = this.frontend.data[this.frontend.activeTab].selectedPath;
 
-	// 		let gameLockResult = await redis.lockGame(
-	// 			`GAME:${this.key}:MAIN`,
-	// 			`GAME:${this.key}:HANDLER`,
-	// 			2,
-	// 			config.host.publicIp,
-	// 			config.webSocketPort,
-	// 			config.host.hostname
-	// 		);
-	// 	} catch (error) {
-	// 		logger.error(error);
-	// 	}
-	// }
+			if (dataType && path) {
+				let gameLastUpdate = this[dataType][path].updates.at(-1);
+
+				for (let tikIndex=gameLastUpdate.tikIndex+this.TIK_STEP;tikIndex<=maxTikIndex;tikIndex+=this.TIK_STEP) {
+					this[dataType][path].updates.push({
+						tikIndex: tikIndex,
+						value: gameLastUpdate.value,
+					});
+				}
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+		}
+		
+	}
 
 	destroy() {
 		this.isDestroyed = true;

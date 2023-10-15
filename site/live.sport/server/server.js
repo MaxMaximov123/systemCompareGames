@@ -181,6 +181,16 @@ app.post('/api/paths', async (req, res) => {
   }
 });
 
+app.post('/api/gameIds', async (req, res) => {
+  const stTime = new Date().getTime();
+  const requestData = req.body;
+  console.log(requestData);
+  res.send(JSON.stringify({
+    time: (new Date().getTime()) - stTime, 
+    data: await db('pairs').where('id', requestData.id).select('game1Id as game1', 'game2Id as game2')
+  }));
+});
+
 
 app.post('/api/decisions', async (req, res) => {
   const stTime = new Date().getTime();
