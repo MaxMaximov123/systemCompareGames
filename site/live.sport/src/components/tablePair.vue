@@ -216,6 +216,7 @@
     </table>
   </template>
   
+  
   <script>
   import html2canvas from 'html2canvas';
   import Modal from "@/components/Modal.vue";
