@@ -30,7 +30,7 @@
                     <td rowspan="2">{{ decision.grouped ? 'Да' : 'Нет' }}</td>
                     <td rowspan="2">
                         <!-- {{ new Date(decision.createdAt) }} -->
-                        <p v-for="time of formatDateFromUnixTimestampStr(decision.createdAt).split('*')">{{ time }}</p>
+                        <p v-for="time of formatDateFromUnixTimestampStr(decision.updatedAt).split('*')">{{ time }}</p>
                     </td>
                 </tr>
                 <tr>
@@ -167,8 +167,8 @@
                     {{ item.grouped ? 'Да' : 'Нет'}}
                 </td>
                 <td rowspan="2">
-                    <v-icon class="copy-name" @click="openModalDecisions(item.id)">mdi-history</v-icon>
-                    {{ item.decisionsCount }}
+                    <v-icon class="copy-name" @click="openModalDecisions(item.key)">mdi-history</v-icon>
+                    {{ item.countDecisions }}
                 </td>
                 <td rowspan="2">
                     <p v-for="time of formatDateFromUnixTimestamp(item.updatedAt).split('*')">{{ time }}</p>
@@ -260,10 +260,11 @@
         round (num){
             return Math.floor(num * 100 * 100) / 100;
         },
-        async openModalDecisions(pairId) {
-            this.modalDecisions.data = (await this.postRequest(`http://${this.apiHost}/api/decisions`, {pairId: pairId})).data;
+        async openModalDecisions(pairKey) {
+            console.log(pairKey);
+            this.modalDecisions.data = (await this.postRequest(`http://${this.apiHost}/api/decisions`, {pairKey: pairKey})).data;
             this.modalDecisions.isOpen = true;
-            this.modalDecisions.title = `Решения ${pairId}`
+            this.modalDecisions.title = `Решения ${pairKey}`
         },
         async openModalTeamNames(gameId) {
             this.modalTeamNames.data = (await this.postRequest(`http://${this.apiHost}/api/teamNames`, {gameId: gameId})).data;

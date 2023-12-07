@@ -92,7 +92,7 @@ app.post('/api/pairs', async (req, res) => {
       })
       .orderBy('id', 'asc')
       .offset((requestData.page - 1) * 10).limit(10)
-      .select('*');
+      .select('*', db.raw('(SELECT COUNT(id) FROM decisions WHERE pair_key = pairs.key) AS count_decisions'));
       
       result.pairs = pairs;
       result.pageCount = await db('pairs')
@@ -117,6 +117,7 @@ app.post('/api/pairs', async (req, res) => {
           .orWhere('game2Team2Name', 'ilike', `%${requestData.filters.teamName}%`)
       })
       .count('id');
+
       result.time = (new Date().getTime() - stTime) / 1000;
       res.send(JSON.stringify(result));
     } catch(e){
@@ -195,11 +196,10 @@ app.post('/api/gameIds', async (req, res) => {
 app.post('/api/decisions', async (req, res) => {
   const stTime = new Date().getTime();
   const requestData = req.body;
-  console.log(requestData);
   
   try{
     const result = {
-      data: await db('decisions').select('*').where('pairId', requestData.pairId).orderBy('id', 'asc'),
+      data: await db('decisions').select('*').where('pairKey', requestData.pairKey).orderBy('updated_at', 'asc'),
       time: (new Date().getTime()) - stTime,};
     res.send(JSON.stringify(result));
   } catch(e){
@@ -211,7 +211,6 @@ app.post('/api/decisions', async (req, res) => {
 app.post('/api/teamNames', async (req, res) => {
   const stTime = new Date().getTime();
   const requestData = req.body;
-  console.log(requestData);
   
   try{
     const result = {
