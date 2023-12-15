@@ -1,87 +1,99 @@
 <template>
     <title>Pair Games</title>
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <h3 class="title">Результаты сравнения игр</h3>
+
+    <v-tabs v-model="tab" bg-color="blue" slider-color="#000000">
+        <v-tab value="PairGames">Игровые пары</v-tab>
+        <v-tab value="Bar">Статистика трансляций</v-tab>
+    </v-tabs>
+    <v-window v-model="tab">
+        <v-window-item value="PairGames">
+            <h3 class="title">Результаты сравнения игр</h3>
     
-    <table class="filters">
-        <tr>
-            <th>Сходство названий:</th>
-            <th>Сходство начала:</th>
-            <th>Сходство пре. кэфов:</th>
-            <th>Сходство лайв кэфов:</th>
-            <th>Сходство счета:</th>
-            <th>Новой системой?</th>
-            <th>Старой системой?</th>
-            <th>Спорт</th>
+            <table class="filters">
+                <tr>
+                    <th>Сходство названий:</th>
+                    <th>Сходство начала:</th>
+                    <th>Сходство пре. кэфов:</th>
+                    <th>Сходство лайв кэфов:</th>
+                    <th>Сходство счета:</th>
+                    <th>Новой системой?</th>
+                    <th>Старой системой?</th>
+                    <th>Спорт</th>
 
-            <th rowspan="2">
-                <v-btn @click="applyFilters">Применить</v-btn>
-            </th>
-        </tr>
-        <tr>
-            <td style="width: 13%;" v-for="filter in Object.keys(filters).filter(f => filters[f].min !== undefined)" :key="filter">
-                <div class="data-frame">
-                    <v-text-field density="compact" v-model="filters[filter].min" style="margin-right: 5px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                    <v-text-field density="compact" v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
-                </div>
-            </td>
+                    <th rowspan="2">
+                        <v-btn @click="applyFilters">Применить</v-btn>
+                    </th>
+                </tr>
+                <tr>
+                    <td style="width: 13%;" v-for="filter in Object.keys(filters).filter(f => filters[f].min !== undefined)" :key="filter">
+                        <div class="data-frame">
+                            <v-text-field density="compact" v-model="filters[filter].min" style="margin-right: 5px;" variant="outlined" label="От" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                            <v-text-field density="compact" v-model="filters[filter].max" label="До" variant="outlined" type="number" step="0.01" :max="1" :min="0"></v-text-field>
+                        </div>
+                    </td>
 
-            <td style="width: 8%;">
-                <v-combobox density="compact" class="data-frame"
-                    variant="outlined"
-                    v-model="filters.groupedNewSystem"
-                    :items="['Все', 'Да', 'Нет']">
-                </v-combobox>
-            </td>
+                    <td style="width: 8%;">
+                        <v-combobox density="compact" class="data-frame"
+                            variant="outlined"
+                            v-model="filters.groupedNewSystem"
+                            :items="['Все', 'Да', 'Нет']">
+                        </v-combobox>
+                    </td>
 
-            <td style="width: 8%;">
-                <v-combobox density="compact" class="data-frame"
-                    variant="outlined"
-                    v-model="filters.groupedOldSystem"
-                    :items="['Все', 'Да', 'Нет']">
-                </v-combobox>
-            </td>
+                    <td style="width: 8%;">
+                        <v-combobox density="compact" class="data-frame"
+                            variant="outlined"
+                            v-model="filters.groupedOldSystem"
+                            :items="['Все', 'Да', 'Нет']">
+                        </v-combobox>
+                    </td>
+                    
+                    <td style="width: 12%;">
+                        <v-combobox density="compact" class="data-frame"
+                            variant="outlined"
+                            v-model="filters.sportKey"
+                            :items="sportKeys">
+                        </v-combobox>
+                    </td>
+
+                </tr>
+            </table>
+            <v-text-field
+                @keyup.enter="searchByNames"
+                v-model="filters.teamName"
+                :loading="loadingUpdate"
+                density="compact"
+                variant="solo"
+                label="Поиск по названию"
+                append-inner-icon="mdi-magnify"
+                single-line
+                hide-details
+                @click:append-inner="searchByNames"
+                style="width: 15%; margin-left: auto; margin-right: 2%;"
+            ></v-text-field>
+            <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
+            <v-btn :loading="loadingUpdate" style="margin-left: 5%;" @click="render">
+                <v-icon>mdi-refresh</v-icon>
+                Обновить
+            </v-btn>
             
-            <td style="width: 12%;">
-                <v-combobox density="compact" class="data-frame"
-                    variant="outlined"
-                    v-model="filters.sportKey"
-                    :items="sportKeys">
-                </v-combobox>
-            </td>
-
-        </tr>
-    </table>
-    <v-text-field
-        @keyup.enter="searchByNames"
-        v-model="filters.teamName"
-        :loading="loadingUpdate"
-        density="compact"
-        variant="solo"
-        label="Поиск по названию"
-        append-inner-icon="mdi-magnify"
-        single-line
-        hide-details
-        @click:append-inner="searchByNames"
-        style="width: 15%; margin-left: auto; margin-right: 2%;"
-    ></v-text-field>
-    <tablePair v-if="pairs.length > 0" :items="pairs"></tablePair>
-    <v-btn :loading="loadingUpdate" style="margin-left: 5%;" @click="render">
-        <v-icon>mdi-refresh</v-icon>
-        Обновить
-    </v-btn>
-    
-    <div style="font-size: 80%;">
-    <v-pagination
-      v-model="currentPage"
-      total-visible="11"
-      :length="pageCount"
-      :onClick="updatePage"
-      density="compact"
-      size="50"
-      class="custom-pagination"
-    ></v-pagination>
-  </div>
+            <div style="font-size: 80%;">
+                <v-pagination
+                v-model="currentPage"
+                total-visible="11"
+                :length="pageCount"
+                :onClick="updatePage"
+                density="compact"
+                size="50"
+                class="custom-pagination"
+                ></v-pagination>
+            </div>
+        </v-window-item>
+        <v-window-item value="Bar">
+            <plotly-chart :data="livestreamStatistic" :layout="layout"></plotly-chart>
+        </v-window-item>
+    </v-window>
 </template>
 <script>
 
@@ -89,12 +101,14 @@ import router from '@/router';
 import tablePair from '@/components/tablePair.vue'
 import Paginate from 'vuejs-paginate-next';
 import queryString from 'query-string';
+import PlotlyChart from '@/components/PlotlyChart.vue';
 
 
 export default {
     components: {
         tablePair,
         Paginate,
+        PlotlyChart
         
 
     },
@@ -129,6 +143,8 @@ export default {
                 teamName: '',
             },
 
+            tab: null,
+
             loadingUpdate: false,
 
             sportKeys: [
@@ -154,7 +170,10 @@ export default {
             currentPage: 1,
             pageCount: 1000,
             oneGrouped: false,
-            ipAddress: null
+            ipAddress: null,
+            layout: {
+            },
+            livestreamStatistic: {},
 
         }
     },
@@ -189,6 +208,18 @@ export default {
                 teamName: this.queryParams.teamName ? this.queryParams.teamName : '',
             },
         this.currentPage = Number(this.$route.params.page);
+        let livestreamStatistic = (await this.postRequest(`http://${this.apiHost}/api/livestreamStatistic`, {})).data;
+
+        this.livestreamStatistic = [
+                {
+                x: Object.keys(livestreamStatistic).map(time => new Date(Number(time))),
+                y: Object.values(livestreamStatistic),
+                type: 'bar',
+                // text: this.data[this.activeTab].game1.map(obj => `Время: ${this.getTimeFromTimestamp(obj.tikIndex)}`),
+                // hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
+                // textposition: 'none',
+            }
+        ];
         this.render();
     },
 
@@ -308,5 +339,11 @@ export default {
 
     .data-frame {
         display: flex;
+    }
+
+    .chart {
+      width: 100vw; /* Измените значение для изменения ширины */
+      height: 100%; /* Измените значение для изменения высоты */
+      font-size: 18px; /* Измените значение для изменения размера шрифта */
     }
 </style>

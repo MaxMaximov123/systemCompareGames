@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import redis from './redis.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -206,6 +207,30 @@ app.post('/api/decisions', async (req, res) => {
     console.log(e);
     res.send(JSON.stringify({time: (new Date().getTime()) - stTime, data: []}));
   }
+});
+
+app.post('/api/livestreamStatistic', async (req, res) => {
+  const stTime = new Date().getTime();
+  const requestData = req.body;
+  
+  let redisResults = (await redis.zrange('LIVESTREAM_STATISTICS', 0, -1, 'WITHSCORES'));
+  let timestamps = [];
+  for (let i = 1; i < redisResults.length; i += 2) {
+    timestamps.push(redisResults[i]);
+  }
+
+  let counts = {};
+  for (const timestamp of timestamps) {
+    let hourKey = new Date(Number(timestamp));
+    hourKey.setMinutes(0);
+    hourKey.setSeconds(0);
+    hourKey.setMilliseconds(0);
+    hourKey = hourKey.getTime();
+    counts[hourKey] = (counts[hourKey] || 0) + 1;
+  }
+
+  res.send(JSON.stringify({time: (new Date().getTime()) - stTime, data: counts}));
+
 });
 
 app.post('/api/teamNames', async (req, res) => {
