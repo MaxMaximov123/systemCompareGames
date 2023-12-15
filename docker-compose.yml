@@ -179,6 +179,13 @@ services:
       DATABASE_POOL_MIN: 5
       DATABASE_SCHEMA: public
       DATABASE_URL: postgres://game-matcher:Ato8ov1shooNoco@142.132.242.33:8789/game-matcher
+
+      REDIS_URL:
+      REDIS_SENTINEL_HOSTS: 144.76.235.43,144.76.235.251,167.235.102.100,167.235.114.48
+      REDIS_SENTINEL_PASSWORD: Shoono8anga5doo2aeK6
+      REDIS_SENTINEL_PORT: 25400
+      REDIS_MASTER_NAME: redis-global
+      REDIS_MASTER_PASSWORD: Shoono8anga5doo2aeK6
     
     ports:
       - 8005:8005
