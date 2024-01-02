@@ -208,18 +208,24 @@ export default {
                 teamName: this.queryParams.teamName ? this.queryParams.teamName : '',
             },
         this.currentPage = Number(this.$route.params.page);
-        let livestreamStatistic = (await this.postRequest(`http://${this.apiHost}/api/livestreamStatistic`, {})).data;
 
-        this.livestreamStatistic = [
-                {
-                x: Object.keys(livestreamStatistic).map(time => new Date(Number(time))),
-                y: Object.values(livestreamStatistic),
-                type: 'bar',
-                // text: this.data[this.activeTab].game1.map(obj => `Время: ${this.getTimeFromTimestamp(obj.tikIndex)}`),
-                // hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
-                // textposition: 'none',
-            }
-        ];
+        try {
+            let livestreamStatistic = (await this.postRequest(`http://${this.apiHost}/api/livestreamStatistic`, {})).data;
+
+            this.livestreamStatistic = [
+                    {
+                    x: Object.keys(livestreamStatistic).map(time => new Date(Number(time))),
+                    y: Object.values(livestreamStatistic),
+                    type: 'bar',
+                    // text: this.data[this.activeTab].game1.map(obj => `Время: ${this.getTimeFromTimestamp(obj.tikIndex)}`),
+                    // hovertemplate: '%{text} ' + 'Счет: %{y:.2f}',
+                    // textposition: 'none',
+                }
+            ];
+        } catch(e) {
+            console.error(e);
+        }
+        
         this.render();
     },
 
